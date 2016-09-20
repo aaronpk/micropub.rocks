@@ -8,7 +8,5 @@
   <div class="ui success message">
     <div class="header">Great!</div>
     <p>Check your email for a login link!</p>
-
-    <p><a href="<?= $login_url ?>" class="ui primary button">Continue</a></p>
   </div>
 </div>

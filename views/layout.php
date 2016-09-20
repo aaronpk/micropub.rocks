@@ -23,7 +23,7 @@
   <a class="item" href="/"><img src="/assets/webmention-rocks-icon.png"></a>
   <a class="item" href="/">Home</a>
   <div class="right menu">
-    <span class="item"><?= display_url($_SESSION['me']) ?></span>
+    <span class="item"><?= display_url($_SESSION['email']) ?></span>
     <a class="item" href="/auth/signout">Sign Out</a>
   </div>
 </div>

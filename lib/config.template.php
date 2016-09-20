@@ -9,6 +9,11 @@ class Config {
   public static $dbuser = 'micropubrocks';
   public static $dbpass = 'micropubrocks';
 
+  // When set to true, authentication is bypassed, and you can log in by 
+  // entering any email you want in the login form. This is useful when developing
+  // this or running it locally.
+  public static $skipauth = false;
+
   // Used when an encryption key is needed. Set to something random.
   public static $secret = 'xxxx';
 }

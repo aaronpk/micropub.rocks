@@ -22,11 +22,15 @@ class Auth extends Controller {
     $user->auth_code_exp = date('Y-m-d H:i:s', time()+300);
     $user->save();
 
-    $login_url = Config::$base . 'auth/code?code=' . $code;
+    if(Config::$skipauth) {
+      $login_url = Config::$base . 'auth/code?code=' . $code;
+      return $response->withHeader('Location', $login_url)->withStatus(302);
+    }
+
+    // TODO: Email the login URL to the user
 
     $response->getBody()->write(view('auth-start', [
       'title' => 'Sign In - Webmention Rocks!',
-      'login_url' => $login_url
     ]));
     return $response;
   }
@@ -54,13 +58,15 @@ class Auth extends Controller {
 
     session_setup(true);
     $_SESSION['user_id'] = $user->id;
+    $_SESSION['email'] = $user->email;
     $_SESSION['login'] = 'success';
-    return $response->withHeader('Location', '/dashboard')->withStatus(302);
+    return $response->withHeader('Location', '/tests')->withStatus(302);
   }
 
   public function signout(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup(true);
     unset($_SESSION['user_id']);
+    unset($_SESSION['email']);
     $_SESSION = [];
     session_destroy();
     return $response->withHeader('Location', '/')->withStatus(302);
