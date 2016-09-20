@@ -74,3 +74,17 @@ function display_url($url) {
   $url = preg_replace('/^([^\/]+)\/$/', '$1', $url);
   return $url;
 }
+
+function result_icon($passed) {
+  if($passed == 1) {
+    return '<span class="ui green circular label">&#x2714;</span>';
+  } elseif($passed == -1) {
+    return '<span class="ui red circular label">&#x2716;</span>';
+  } else {
+    return '';
+  }
+}
+
+function test_url($test_num, $endpoint_id) {
+  return '/server-tests/' . $test_num . '?endpoint=' . $endpoint_id;
+}

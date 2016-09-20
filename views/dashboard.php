@@ -20,7 +20,7 @@
       <table class="ui table">
         <? foreach($endpoints as $endpoint): ?>
         <tr>
-          <td><a href="/tests?endpoint=<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a></td>
+          <td><a href="/server-tests?endpoint=<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a></td>
         </tr>
         <? endforeach; ?>
       </table>
