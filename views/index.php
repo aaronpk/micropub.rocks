@@ -27,7 +27,7 @@
   <? else: ?>
     <h3>Welcome!</h3>
     <p>You are already signed in.</p>
-    <p><a href="/tests">Continue to Tests</a></p>
+    <p><a href="/dashboard" class="ui button">Continue</a></p>
   <? endif; ?>
   </section>
 

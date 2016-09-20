@@ -60,7 +60,7 @@ class Auth extends Controller {
     $_SESSION['user_id'] = $user->id;
     $_SESSION['email'] = $user->email;
     $_SESSION['login'] = 'success';
-    return $response->withHeader('Location', '/tests')->withStatus(302);
+    return $response->withHeader('Location', '/dashboard')->withStatus(302);
   }
 
   public function signout(ServerRequestInterface $request, ResponseInterface $response) {

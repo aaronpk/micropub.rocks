@@ -16,7 +16,7 @@ class Controller {
     return $response;
   }
 
-  public function tests(ServerRequestInterface $request, ResponseInterface $response) {
+  public function dashboard(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup();
 
     if(!is_logged_in()) {
@@ -27,7 +27,7 @@ class Controller {
 
     $endpoints = ORM::for_table('micropub_endpoints')->where('user_id', $user->id)->find_many();
 
-    $response->getBody()->write(view('tests', [
+    $response->getBody()->write(view('dashboard', [
       'title' => 'Micropub Rocks!',
       'endpoints' => $endpoints,
     ]));
@@ -64,7 +64,7 @@ class Controller {
       $endpoint->access_token = $params['access_token'];
       $endpoint->save();
 
-      return $response->withHeader('Location', '/tests')->withStatus(302);
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
     }
   }
 

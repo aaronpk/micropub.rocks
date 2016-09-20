@@ -22,7 +22,7 @@ $route->map('POST', '/auth/start', 'App\\Auth::start');
 $route->map('GET', '/auth/code', 'App\\Auth::code');
 $route->map('GET', '/auth/signout', 'App\\Auth::signout');
 
-$route->map('GET', '/tests', 'App\\Controller::tests');
+$route->map('GET', '/dashboard', 'App\\Controller::dashboard');
 $route->map('POST', '/endpoints/new', 'App\\Controller::new_endpoint');
 $route->map('GET', '/endpoint/{id}', 'App\\Controller::endpoint');
 
