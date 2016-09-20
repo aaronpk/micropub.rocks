@@ -25,12 +25,11 @@
       <b>Why email sign-in?</b> Many of the tests here require different levels of authorization against your Micropub endpoint. Rather than complicating the test flow with authenticating against this site as well, authenticating with your email address simplifies the way we are able to handle the various tests against your Micropub endpoint.
     </div>
   <? else: ?>
-    <h3>Continue</h3>
+    <h3>Welcome!</h3>
+    <p>You are already signed in.</p>
     <p><a href="/tests">Continue to Tests</a></p>
   <? endif; ?>
   </section>
-
-
 
   <section class="content small">
     <p>This code is <a href="https://github.com/aaronpk/micropub.rocks">open source</a>. Feel free to <a href="https://github.com/aaronpk/micropub.rocks/issues">file an issue</a> if you notice any errors.</p>

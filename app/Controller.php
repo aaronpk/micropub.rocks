@@ -20,16 +20,52 @@ class Controller {
     session_setup();
 
     if(!is_logged_in()) {
-      return $response->withHeader('Location', '/?login_required')->withStatus(302);
+      return login_required($response);
     }
     
-    $user = ORM::for_table('users')->where('id', $_SESSION['user_id'])->find_one();
+    $user = logged_in_user();
+
+    $endpoints = ORM::for_table('micropub_endpoints')->where('user_id', $user->id)->find_many();
 
     $response->getBody()->write(view('tests', [
       'title' => 'Micropub Rocks!',
-      'email' => $user->email
+      'endpoints' => $endpoints,
     ]));
     return $response;
+  }
+
+  public function new_endpoint(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    // If they entered an IndieAuth URL, start logging them in
+    // TODO
+    if(isset($params['me'])) {
+
+    } else {
+      // Check if the endpoint already exists and update if so
+      $endpoint = ORM::for_table('micropub_endpoints')
+        ->where('user_id', $user->id)
+        ->where('micropub_endpoint', $params['micropub_endpoint'])
+        ->find_one();
+      if(!$endpoint) {
+        $endpoint = ORM::for_table('micropub_endpoints')->create();
+        $endpoint->user_id = $user->id;
+        $endpoint->micropub_endpoint = $params['micropub_endpoint'];
+      }
+
+      $endpoint->access_token = $params['access_token'];
+      $endpoint->save();
+
+      return $response->withHeader('Location', '/tests')->withStatus(302);
+    }
   }
 
 }

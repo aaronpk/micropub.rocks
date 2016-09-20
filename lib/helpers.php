@@ -55,6 +55,14 @@ function is_logged_in() {
   return isset($_SESSION) && array_key_exists('user_id', $_SESSION);
 }
 
+function login_required(&$response) {
+  return $response->withHeader('Location', '/?login_required')->withStatus(302);
+}
+
+function logged_in_user() {
+  return ORM::for_table('users')->where('id', $_SESSION['user_id'])->find_one();
+}
+
 function domains_are_equal($a, $b) {
   return parse_url($a, PHP_URL_HOST) == parse_url($b, PHP_URL_HOST);
 }
