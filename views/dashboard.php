@@ -15,13 +15,15 @@
     <section class="content">
       <h3>Your Micropub Endpoints</h3>
 
-      <ul>
+      <p>Select one of your Micropub endpoints to begin the tests</p>
+
+      <table class="ui table">
         <? foreach($endpoints as $endpoint): ?>
-        <li>
-          <a href="/endpoint/<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a>
-        </li>
+        <tr>
+          <td><a href="/tests?endpoint=<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a></td>
+        </tr>
         <? endforeach; ?>
-      </ul>
+      </table>
     </section>
   <? endif ?>
 

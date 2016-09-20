@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use ORM;
 use Config;
 
-class Auth extends Controller {
+class Auth {
 
   public function start(ServerRequestInterface $request, ResponseInterface $response) {
     $params = $request->getParsedBody();
