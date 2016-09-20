@@ -16,7 +16,7 @@ class Controller {
     return $response;
   }
 
-  public function dashboard(ServerRequestInterface $request, ResponseInterface $response) {
+  public function tests(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup();
 
     if(!is_logged_in()) {
@@ -25,7 +25,7 @@ class Controller {
     
     $user = ORM::for_table('users')->where('id', $_SESSION['user_id'])->find_one();
 
-    $response->getBody()->write(view('dashboard', [
+    $response->getBody()->write(view('tests', [
       'title' => 'Micropub Rocks!',
       'email' => $user->email
     ]));

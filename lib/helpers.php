@@ -23,6 +23,14 @@ function redis() {
   return $client;
 }
 
+function flash($key) {
+  if(isset($_SESSION) && isset($_SESSION[$key])) {
+    $value = $_SESSION[$key];
+    unset($_SESSION[$key]);
+    return $value;
+  }
+}
+
 function random_string($len) {
   $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   $str = '';

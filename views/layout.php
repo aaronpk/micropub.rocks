@@ -22,6 +22,7 @@
 <div class="ui top fixed menu">
   <a class="item" href="/"><img src="/assets/webmention-rocks-icon.png"></a>
   <a class="item" href="/">Home</a>
+  <a class="item" href="/tests">Tests</a>
   <div class="right menu">
     <span class="item"><?= display_url($_SESSION['email']) ?></span>
     <a class="item" href="/auth/signout">Sign Out</a>

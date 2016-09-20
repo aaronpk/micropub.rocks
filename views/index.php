@@ -26,7 +26,7 @@
     </div>
   <? else: ?>
     <h3>Continue</h3>
-    <p><a href="/dashboard">Continue to Tests</a></p>
+    <p><a href="/tests">Continue to Tests</a></p>
   <? endif; ?>
   </section>
 
