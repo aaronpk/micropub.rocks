@@ -20,7 +20,7 @@
 
 <?php if(is_logged_in()): ?>
 <div class="ui top fixed menu">
-  <a class="item" href="/"><img src="/assets/webmention-rocks-icon.png"></a>
+  <a class="item" href="/"><img src="/assets/micropub-rocks-icon.png"></a>
   <a class="item" href="/">Home</a>
   <a class="item" href="/dashboard">Dashboard</a>
   <div class="right menu">
