@@ -58,7 +58,6 @@ class ServerTests {
       'title' => 'Micropub Rocks!',
       'endpoint' => $this->endpoint,
       'tests' => $tests,
-      'results' => $results
     ]));
     return $response;
   }
