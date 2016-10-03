@@ -189,6 +189,7 @@ class ServerTests {
     }
     $last->passed = 0;
     $last->response = $debug;
+    $last->location = $location;
     $last->last_result_at = date('Y-m-d H:i:s');
     $last->save();
 

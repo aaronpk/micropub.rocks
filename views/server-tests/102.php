@@ -17,7 +17,7 @@ Authorization: Bearer <?= $endpoint->access_token."\n" ?>
 Content-type: application/x-www-form-urlencoded; charset=utf-8
 
 <span id="postbody">h=entry&amp;
-content=Micropub+test+of+creating+an+h-entry+with+categories&amp;
+content=Micropub+test+of+creating+an+h-entry+with+categories.+This+post+should+have+two+categories,+test1+and+test2&amp;
 category[0]=test1&amp;category[1]=test2</span></pre>
   </section>
 

@@ -7,19 +7,22 @@
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
-    <p>This is a test of creating an h-entry post in form-encoded format including a <code>photo</code> property, as well as alt text for the image.</p>
+    <p>This is a test of creating an h-entry post in JSON format including a <code>photo</code> property that references a URL. Your endpoint should recognize the photo property, and either download it to your own server, or render the post with the hotlinked URL.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
   </section>
 
   <section class="content code">
     <pre>POST <?= $endpoint->micropub_endpoint ?> HTTP/1.1
 Authorization: Bearer <?= $endpoint->access_token."\n" ?>
-Content-type: application/x-www-form-urlencoded; charset=utf-8
+Content-type: application/json
 
-<span id="postbody">h=entry&amp;
-content=Micropub+test+of+creating+a+photo+referenced+by+URL&amp;
-photo[value]=<?= Config::$base ?>media/sunset.jpg&amp;
-photo[alt]=Photo+of+a+sunset</span></pre>
+<span id="postbody">{
+  "type": ["h-entry"],
+  "properties": {
+    "content": ["Micropub test of creating a photo referenced by URL. This post should include a photo of a sunset."],
+    "photo": ["<?= Config::$base ?>media/sunset.jpg"]
+  }
+}</span></pre>
   </section>
 
   <section class="content">
@@ -44,7 +47,7 @@ photo[alt]=Photo+of+a+sunset</span></pre>
 var test = <?= $test->id ?>;
 var endpoint = <?= $endpoint->id ?>;
 
-set_up_form_test(test, endpoint, function(data){
+set_up_json_test(test, endpoint, function(data){
   var passed_code = false;
   var passed_location = false;
   if(data.code == 201 || data.code == 202) {

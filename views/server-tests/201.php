@@ -7,19 +7,25 @@
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
-    <p>This is a test of creating an h-entry post in form-encoded format including a <code>photo</code> property, as well as alt text for the image.</p>
+    <p>This is a test of creating an h-entry post in JSON format including two categories. The categories are sent in an array.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
   </section>
 
   <section class="content code">
     <pre>POST <?= $endpoint->micropub_endpoint ?> HTTP/1.1
 Authorization: Bearer <?= $endpoint->access_token."\n" ?>
-Content-type: application/x-www-form-urlencoded; charset=utf-8
+Content-type: application/json
 
-<span id="postbody">h=entry&amp;
-content=Micropub+test+of+creating+a+photo+referenced+by+URL&amp;
-photo[value]=<?= Config::$base ?>media/sunset.jpg&amp;
-photo[alt]=Photo+of+a+sunset</span></pre>
+<span id="postbody">{
+  "type": ["h-entry"],
+  "properties": {
+    "content": ["Micropub test of creating an h-entry with a JSON request containing multiple categories. This post should have two categories, test1 and test2."],
+    "category": [
+      "test1",
+      "test2"
+    ]
+  }
+}</span></pre>
   </section>
 
   <section class="content">
@@ -28,8 +34,8 @@ photo[alt]=Photo+of+a+sunset</span></pre>
       <li><?= result_icon(0, 'passed_code') ?> Returned HTTP <code>201</code> or <code>202</code></li>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
-        <div><span id="passed_photo" class="ui circular label">&nbsp;</span> The photo appears in the post</div>
-        <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if the post shows the photo.</div>
+        <div><span id="passed_categories" class="ui circular label">&nbsp;</span> Post has both categories</div>
+        <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if it has both the "test1" and "test2" categories</div>
       </li>
     </ul>
   </section>
@@ -44,7 +50,7 @@ photo[alt]=Photo+of+a+sunset</span></pre>
 var test = <?= $test->id ?>;
 var endpoint = <?= $endpoint->id ?>;
 
-set_up_form_test(test, endpoint, function(data){
+set_up_json_test(test, endpoint, function(data){
   var passed_code = false;
   var passed_location = false;
   if(data.code == 201 || data.code == 202) {
@@ -60,11 +66,11 @@ set_up_form_test(test, endpoint, function(data){
     store_result(test, endpoint, -1);
   }
   set_result_icon("#passed_location", passed_location ? 1 : -1);
-  $("#passed_photo").addClass("prompt");
+  $("#passed_categories").addClass("prompt");
   $(".step_instructions").removeClass("hidden");
   $(".step_instructions a").attr('href', data.location);
-  $("#passed_photo").click(function(){
-    set_result_icon("#passed_photo", 1);
+  $("#passed_categories").click(function(){
+    set_result_icon("#passed_categories", 1);
     $(".step_instructions").addClass("hidden");
     store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
   });

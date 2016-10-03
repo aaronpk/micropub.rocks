@@ -17,6 +17,25 @@ function set_up_form_test(test, endpoint, callback) {
   });
 }
 
+function set_up_json_test(test, endpoint, callback) {
+  $(function(){
+    $("#run").click(function(){
+      $("#run").removeClass('green').addClass('disabled');
+      $.post('/server-tests/micropub', {
+        test: test,
+        endpoint: endpoint,
+        method: 'postjson',
+        body: $('#postbody').text().replace(/\n/g,'')
+      }, function(data) {
+        $("#response").text(data.debug);
+        $("#response-section").removeClass('hidden');
+        $("#run").addClass('green').removeClass('disabled');
+        callback(data);
+      })
+    });
+  });
+}
+
 function store_result(test, endpoint, passed) {
   $.post('/server-tests/store-result', {
     endpoint: endpoint,
