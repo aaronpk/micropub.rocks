@@ -16,4 +16,10 @@ class Config {
 
   // Used when an encryption key is needed. Set to something random.
   public static $secret = 'xxxx';
+
+  public static $mailgun = [
+    'key' => '',
+    'domain' => '',
+    'from' => '"micropub.rocks" <login@micropub.rocks>'
+  ];
 }

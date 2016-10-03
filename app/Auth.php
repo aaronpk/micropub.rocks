@@ -5,6 +5,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ORM;
 use Config;
+use Mailgun\Mailgun;
 
 class Auth {
 
@@ -22,12 +23,20 @@ class Auth {
     $user->auth_code_exp = date('Y-m-d H:i:s', time()+300);
     $user->save();
 
+    $login_url = Config::$base . 'auth/code?code=' . $code;
+
     if(Config::$skipauth) {
-      $login_url = Config::$base . 'auth/code?code=' . $code;
       return $response->withHeader('Location', $login_url)->withStatus(302);
     }
 
-    // TODO: Email the login URL to the user
+    // Email the login URL to the user
+    $mg = new Mailgun(Config::$mailgun['key']);
+    $mg->sendMessage(Config::$mailgun['domain'], [
+      'from'     => Config::$mailgun['from'],
+      'to'       => $user->email, 
+      'subject'  => 'Your micropub.rocks Login URL',
+      'text'     => "Click on the link below to sign in to micropub.rocks\n\n$login_url\n"
+    ]);
 
     $response->getBody()->write(view('auth-start', [
       'title' => 'Sign In - Webmention Rocks!',
