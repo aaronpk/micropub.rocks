@@ -30,6 +30,7 @@
   <section class="content">
     <h3>Add New Endpoint</h3>
 
+    <!--
     <p>Enter an <a href="https://indieweb.org/IndieAuth">IndieAuth URL</a> below. Your Micropub endpoint will be discovered from that URL and you will be asked to authenticate against your own authorization server.</p>
     <form action="/endpoints/new" method="POST">
       <div class="ui fluid action input">
@@ -39,6 +40,7 @@
     </form>
 
     <br>
+    -->
 
     <p>Enter a Micropub endpoint and access token below to add an endpoint manually.</p>
     <form action="/endpoints/new" method="POST">
