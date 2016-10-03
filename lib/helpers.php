@@ -79,11 +79,13 @@ function display_url($url) {
   return $url;
 }
 
-function result_icon($passed) {
+function result_icon($passed, $id=false) {
   if($passed == 1) {
-    return '<span class="ui green circular label">&#x2714;</span>';
+    return '<span id="'.$id.'" class="ui green circular label">&#x2714;</span>';
   } elseif($passed == -1) {
-    return '<span class="ui red circular label">&#x2716;</span>';
+    return '<span id="'.$id.'" class="ui red circular label">&#x2716;</span>';
+  } elseif($passed == 0) {
+    return '<span id="'.$id.'" class="ui circular label">&nbsp;</span>';
   } else {
     return '';
   }

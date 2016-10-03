@@ -84,4 +84,11 @@ section.content textarea {
   padding: 0;
 }
 
+.ui.circular.label.prompt {
+  box-shadow: inset 0 0 10px #aaa;
+  cursor: pointer;
+}
 
+.step_instructions {
+  padding-left: 28px;
+}

@@ -6,7 +6,7 @@ function set_up_form_test(test, endpoint, callback) {
         test: test,
         endpoint: endpoint,
         method: 'post',
-        body: $('#postbody').text().replace("\n",'')
+        body: $('#postbody').text().replace(/\n/g,'')
       }, function(data) {
         $("#response").text(data.debug);
         $("#response-section").removeClass('hidden');
