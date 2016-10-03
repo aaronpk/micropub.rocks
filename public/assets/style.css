@@ -91,6 +91,7 @@ section.content textarea {
 
 .step_instructions {
   padding-left: 28px;
+  font-size: 0.8em;
 }
 
 .endpoint-details a {

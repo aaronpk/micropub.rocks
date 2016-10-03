@@ -18,7 +18,7 @@ Content-type: application/x-www-form-urlencoded; charset=utf-8
 
 <span id="postbody">h=entry&amp;
 content=Micropub+test+of+creating+a+photo+referenced+by+URL&amp;
-photo=<?= Config::$base ?>media/sunset.jpg</span></pre>
+photo=<?= urlencode(Config::$base . 'media/sunset.jpg') ?></span></pre>
   </section>
 
   <section class="content">
