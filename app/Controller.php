@@ -59,6 +59,7 @@ class Controller {
         $endpoint = ORM::for_table('micropub_endpoints')->create();
         $endpoint->user_id = $user->id;
         $endpoint->micropub_endpoint = $params['micropub_endpoint'];
+        $endpoint->created_at = date('Y-m-d H:i:s');
       }
 
       $endpoint->access_token = $params['access_token'];

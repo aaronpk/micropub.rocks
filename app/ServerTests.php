@@ -193,6 +193,9 @@ class ServerTests {
     $last->last_result_at = date('Y-m-d H:i:s');
     $last->save();
 
+    $endpoint->last_test_at = date('Y-m-d H:i:s');
+    $endpoint->save();
+
     return new JsonResponse([
       'code' => $code,
       'location' => $location,
