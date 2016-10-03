@@ -65,6 +65,11 @@ class Auth {
       return $response;
     }
 
+    $user->auth_code = '';
+    $user->auth_code_exp = null;
+    $user->last_login = date('Y-m-d H:i:s');
+    $user->save();
+
     session_setup(true);
     $_SESSION['user_id'] = $user->id;
     $_SESSION['email'] = $user->email;
