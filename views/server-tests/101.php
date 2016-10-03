@@ -27,7 +27,7 @@ category[]=test1&amp;category[]=test2</span></pre>
       <li><?= result_icon(0, 'passed_code') ?> Returned HTTP <code>201</code> or <code>202</code></li>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
-        <div><span id="passed_categories" class="ui circular label">&nbsp;</span> Post has both categories</div>
+        <div><span id="passed_categories" class="ui circular label">&nbsp;</span> Check that the post has both categories</div>
         <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if it has both the "test1" and "test2" categories</div>
       </li>
     </ul>

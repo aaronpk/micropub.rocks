@@ -31,7 +31,7 @@ Content-type: application/json
       <li><?= result_icon(0, 'passed_code') ?> Returned HTTP <code>201</code> or <code>202</code></li>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
-        <div><span id="passed_photo" class="ui circular label">&nbsp;</span> The photo appears in the post</div>
+        <div><span id="passed_photo" class="ui circular label">&nbsp;</span> Check that the photo appears in the post</div>
         <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if the post shows the photo.</div>
       </li>
     </ul>

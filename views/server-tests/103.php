@@ -26,7 +26,7 @@ content[html]=<?= htmlspecialchars('<p>This+post+has+<b>bold</b>+and+<i>italic</
       <li><?= result_icon(0, 'passed_code') ?> Returned HTTP <code>201</code> or <code>202</code></li>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
-        <div><span id="passed_html" class="ui circular label">&nbsp;</span> The HTML is rendered rather than escaped</div>
+        <div><span id="passed_html" class="ui circular label">&nbsp;</span> Check that the HTML is rendered rather than escaped</div>
         <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if the post appears with bold and italic formatting.</div>
       </li>
     </ul>

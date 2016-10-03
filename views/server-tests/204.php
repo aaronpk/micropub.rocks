@@ -39,7 +39,7 @@ Content-type: application/json
       <li><?= result_icon(0, 'passed_code') ?> Returned HTTP <code>201</code> or <code>202</code></li>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
-        <div><span id="passed_object" class="ui circular label">&nbsp;</span> The nested object was stored</div>
+        <div><span id="passed_object" class="ui circular label">&nbsp;</span> Check that the nested object was stored</div>
         <div class="step_instructions hidden">Look at how your post is stored, and check the box if the nested object appears in the storage.</div>
       </li>
     </ul>
