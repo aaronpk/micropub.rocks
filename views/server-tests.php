@@ -30,8 +30,6 @@
       ?>
     </table>
 
-    <p>More tests <a href="https://github.com/aaronpk/micropub.rocks/issues?q=is%3Aissue+is%3Aopen+label%3Aserver-test">coming soon</a>.</p>
-
     <? /* ?>
     <h4>Creating Posts (Multipart)</h4>
     <table class="ui compact table">
@@ -41,6 +39,7 @@
         }
       ?>
     </table>
+    <? */ ?>
 
     <h4>Updates</h4>
     <table class="ui compact table">
@@ -50,6 +49,9 @@
         }
       ?>
     </table>
+
+    <p>More tests <a href="https://github.com/aaronpk/micropub.rocks/issues?q=is%3Aissue+is%3Aopen+label%3Aserver-test">coming soon</a>.</p>
+    <? /* ?>
 
     <h4>Deletes</h4>
     <table class="ui compact table">

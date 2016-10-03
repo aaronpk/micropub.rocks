@@ -36,6 +36,23 @@ function set_up_json_test(test, endpoint, callback) {
   });
 }
 
+function set_up_update_test(test, endpoint, callback) {
+  $("#run-update").click(function(){
+    $("#run-update").removeClass('green').addClass('disabled');
+    $.post('/server-tests/micropub', {
+      test: test,
+      endpoint: endpoint,
+      method: 'postjson',
+      body: $('#updatebody').text().replace(/\n/g,'')
+    }, function(data) {
+      $("#update-response").text(data.debug);
+      $("#update-response-section").removeClass('hidden');
+      $("#run-update").addClass('green').removeClass('disabled');
+      callback(data);
+    });
+  });
+}
+
 function store_result(test, endpoint, passed) {
   $.post('/server-tests/store-result', {
     endpoint: endpoint,
