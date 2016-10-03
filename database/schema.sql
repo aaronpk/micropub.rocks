@@ -20,6 +20,7 @@ CREATE TABLE `test_results` (
   `endpoint_id` int(11) DEFAULT NULL,
   `test_id` int(11) DEFAULT NULL,
   `passed` tinyint(4) DEFAULT NULL,
+  `response` text,
   `created_at` datetime DEFAULT NULL,
   `last_result_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -37,4 +38,3 @@ CREATE TABLE `micropub_endpoints` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-

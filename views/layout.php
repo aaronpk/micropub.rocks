@@ -8,10 +8,10 @@
   <title><?= $this->e($title) ?></title>
   <link href="/assets/semantic.min.css" rel="stylesheet">
   <link href="/assets/style.css" rel="stylesheet">
-  <link href="/assets/test.css" rel="stylesheet">
 
   <script src="/assets/jquery-1.11.3.min.js"></script>
   <script src="/assets/semantic.min.js"></script>
+  <script src="/assets/common.js"></script>
 
   <?= isset($link_tag) ? $link_tag : '' ?>
 
@@ -23,6 +23,7 @@
   <a class="item" href="/"><img src="/assets/micropub-rocks-icon.png"></a>
   <a class="item" href="/">Home</a>
   <a class="item" href="/dashboard">Dashboard</a>
+  <?= $_GET['endpoint'] ? '<a class="item" href="/server-tests?endpoint='.$_GET['endpoint'].'">Server Tests</a>' : '' ?>
   <div class="right menu">
     <span class="item"><?= display_url($_SESSION['email']) ?></span>
     <a class="item" href="/auth/signout">Sign Out</a>

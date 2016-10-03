@@ -12,8 +12,17 @@ body.logged-in {
   border-radius: 4px;
 }
 
+.hidden {
+  display: none;
+}
+
 .small {
   font-size: 14px;
+}
+
+pre.small {
+  font-size: 14px;
+  line-height: 16px;  
 }
 
 #header-graphic {
@@ -41,6 +50,12 @@ section.content {
   margin-bottom: 12px;
 }
 
+section.content.code {
+  background: #eee;
+  font-size: 14px;
+  line-height: 16px;
+}
+
 section.content h4 {
   margin: 0;
   margin-top: 1em;
@@ -61,4 +76,12 @@ section.content textarea {
   -moz-box-shadow: inset 0px 0px 6px 2px #e0edf9;
   box-shadow: inset 0px 0px 6px 2px #e0edf9;
 }
+
+.result-list {
+  list-style-type: none;
+  margin: 0;
+  margin-top: 1em;
+  padding: 0;
+}
+
 

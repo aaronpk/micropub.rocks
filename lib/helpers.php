@@ -31,6 +31,10 @@ function flash($key) {
   }
 }
 
+function e($text) {
+  return htmlspecialchars($text);
+}
+
 function random_string($len) {
   $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   $str = '';
