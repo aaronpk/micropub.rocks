@@ -21,6 +21,7 @@ CREATE TABLE `test_results` (
   `test_id` int(11) DEFAULT NULL,
   `passed` tinyint(4) DEFAULT NULL,
   `response` text,
+  `location` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `last_result_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
