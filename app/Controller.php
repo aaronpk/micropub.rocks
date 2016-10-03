@@ -69,4 +69,56 @@ class Controller {
     }
   }
 
+  public function edit_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $endpoint = ORM::for_table('micropub_endpoints')
+      ->where('user_id', $user->id)
+      ->where('id', $args['id'])
+      ->find_one();
+
+    if(!$endpoint)
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
+
+    $response->getBody()->write(view('edit-endpoint', [
+      'title' => 'Edit Micropub Endpoint - Micropub Rocks!',
+      'endpoint' => $endpoint,
+    ]));
+    return $response;
+  }
+
+  public function save_endpoint(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $endpoint = ORM::for_table('micropub_endpoints')
+      ->where('user_id', $user->id)
+      ->where('id', $params['id'])
+      ->find_one();
+
+    if(!$endpoint)
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
+
+    $endpoint->micropub_endpoint = $params['micropub_endpoint'];
+    $endpoint->access_token = $params['access_token'];
+    $endpoint->save();
+
+    return $response->withHeader('Location', '/server-tests?endpoint='.$endpoint->id)->withStatus(302);
+  }
+
 }

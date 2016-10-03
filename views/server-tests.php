@@ -7,7 +7,10 @@
   <section class="content">
     <h3>Server Tests</h3>
 
-    <p><?= $endpoint->micropub_endpoint ?></p>
+    <div class="endpoint-details">
+      <?= $endpoint->micropub_endpoint ?>
+      <a href="/endpoints/<?= $endpoint->id ?>"><i class="setting icon"></i></a>
+    </div>
 
     <h4>Creating Posts (Form-Encoded)</h4>
     <table class="ui compact table">

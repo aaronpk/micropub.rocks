@@ -92,3 +92,11 @@ section.content textarea {
 .step_instructions {
   padding-left: 28px;
 }
+
+.endpoint-details a {
+  display: none;
+}
+.endpoint-details:hover a {
+  display: inline-block;
+}
+

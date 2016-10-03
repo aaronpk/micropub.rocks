@@ -24,6 +24,8 @@ $route->map('GET', '/auth/signout', 'App\\Auth::signout');
 
 $route->map('GET', '/dashboard', 'App\\Controller::dashboard');
 $route->map('POST', '/endpoints/new', 'App\\Controller::new_endpoint');
+$route->map('GET', '/endpoints/{id}', 'App\\Controller::edit_endpoint');
+$route->map('POST', '/endpoints/save', 'App\\Controller::save_endpoint');
 $route->map('GET', '/server-tests', 'App\\ServerTests::index');
 $route->map('POST', '/server-tests/micropub', 'App\\ServerTests::micropub_request');
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
