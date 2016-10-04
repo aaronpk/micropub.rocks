@@ -50,6 +50,10 @@ class Controller {
     if(isset($params['me'])) {
 
     } else {
+      if(!$params['micropub_endpoint'] || !$params['access_token']) {
+        return $response->withHeader('Location', '/dashboard')->withStatus(302);
+      }
+
       // Check if the endpoint already exists and update if so
       $endpoint = ORM::for_table('micropub_endpoints')
         ->where('user_id', $user->id)

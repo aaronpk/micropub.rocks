@@ -45,8 +45,8 @@
     <p>Enter a Micropub endpoint and access token below to add an endpoint manually.</p>
     <form action="/endpoints/new" method="POST">
       <div class="ui fluid action input">
-        <input type="url" name="micropub_endpoint" placeholder="https://me.example.com/micropub">
-        <input type="password" name="access_token" placeholder="access token" style="border-top-left-radius:0; border-bottom-left-radius:0;">
+        <input type="url" name="micropub_endpoint" placeholder="https://me.example.com/micropub" required="required">
+        <input type="password" name="access_token" placeholder="access token" style="border-top-left-radius:0; border-bottom-left-radius:0;" required="required">
         <button class="ui button">Add Endpoint</button>
       </div>
     </form>
