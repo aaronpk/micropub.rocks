@@ -20,7 +20,7 @@ class Auth {
     }
 
     $user->auth_code = $code = random_string(64);
-    $user->auth_code_exp = date('Y-m-d H:i:s', time()+300);
+    $user->auth_code_exp = date('Y-m-d H:i:s', time()+60*30);
     $user->save();
 
     $login_url = Config::$base . 'auth/code?code=' . $code;
