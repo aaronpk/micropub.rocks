@@ -14,17 +14,16 @@
 
     <h4>Creating Posts (Form-Encoded)</h4>
     <table class="ui compact table">
-      <? 
-        for($i=100; $i<=106; $i++) {
-          $this->insert('partials/server-test-row', ['num'=>$i, 'tests'=>$tests, 'endpoint'=>$endpoint]); 
-        }
-      ?>
+      <? $this->insert('partials/server-test-row', ['num'=>100, 'tests'=>$tests, 'endpoint'=>$endpoint]); ?>
+      <? $this->insert('partials/server-test-row', ['num'=>101, 'tests'=>$tests, 'endpoint'=>$endpoint]); ?>
+      <? $this->insert('partials/server-test-row', ['num'=>104, 'tests'=>$tests, 'endpoint'=>$endpoint]); ?>
+      <? $this->insert('partials/server-test-row', ['num'=>107, 'tests'=>$tests, 'endpoint'=>$endpoint]); ?>
     </table>
 
     <h4>Creating Posts (JSON)</h4>
     <table class="ui compact table">
       <? 
-        for($i=200; $i<=204; $i++) {
+        for($i=200; $i<=205; $i++) {
           $this->insert('partials/server-test-row', ['num'=>$i, 'tests'=>$tests, 'endpoint'=>$endpoint]); 
         }
       ?>
