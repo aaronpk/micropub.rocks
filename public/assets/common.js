@@ -53,6 +53,23 @@ function set_up_update_test(test, endpoint, callback) {
   });
 }
 
+function set_up_delete_test(test, method, endpoint, callback) {
+  $("#run-delete").click(function(){
+    $("#run-delete").removeClass('green').addClass('disabled');
+    $.post('/server-tests/micropub', {
+      test: test,
+      endpoint: endpoint,
+      method: method,
+      body: $('#deletebody').text().replace(/\n/g,'')
+    }, function(data) {
+      $("#delete-response").text(data.debug);
+      $("#delete-response-section").removeClass('hidden');
+      $("#run-delete").addClass('green').removeClass('disabled');
+      callback(data);
+    });
+  });
+}
+
 function store_result(test, endpoint, passed) {
   $.post('/server-tests/store-result', {
     endpoint: endpoint,
