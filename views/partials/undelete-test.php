@@ -4,7 +4,7 @@
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
     <p><?= htmlspecialchars($description) ?></p>
-    <p>Clicking "Run" will first create a post, and after you've confirmed it's been created, you can click "Continue" to delete the post.</p>
+    <p>Clicking "Run" will first create a post, and after you've confirmed it's been created, you can click "Continue" to delete the post, then "Continue" to undelete it.</p>
   </section>
 
   <section class="content code">
@@ -49,7 +49,7 @@ Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-
       <ul class="result-list">
         <li><span id="delete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
         <li>
-          <div><span id="passed_delete" class="ui circular label">&nbsp;</span> Check that the post was deleted <a id="deleted_post_link"></a></div>
+          <div><span id="passed_delete" class="ui circular label">&nbsp;</span> Confirm that the post was deleted <a id="deleted_post_link"></a></div>
         </li>
       </ul>
     </section>
@@ -57,6 +57,39 @@ Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-
     <section class="content hidden" id="delete-response-section">
       <h3>Response</h3>
       <pre id="delete-response" class="small"></pre>
+    </section>
+  </div>
+
+
+  <div id="continue2" class="hidden">
+    <section class="content">
+      <h3>Great!</h3>
+
+      <p>Now that you've deleted the post, click "continue" below to undelete it.</p>
+    </section>
+
+    <section class="content code">
+      <pre>POST <?= $endpoint->micropub_endpoint ?> HTTP/1.1
+Authorization: Bearer <?= $endpoint->access_token."\n" ?>
+Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-www-form-urlencoded; charset=utf-8' ?>
+
+
+<span id="undeletebody"><?= $undeletebody ?></span></pre>
+    </section>
+
+    <section class="content">
+      <button class="ui green button" id="run-undelete">Continue</button>
+      <ul class="result-list">
+        <li><span id="undelete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
+        <li>
+          <div><span id="passed_undelete" class="ui circular label">&nbsp;</span> Confirm that the post was restored <a id="undeleted_post_link"></a></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="content hidden" id="undelete-response-section">
+      <h3>Response</h3>
+      <pre id="undelete-response" class="small"></pre>
     </section>
   </div>
 
@@ -89,13 +122,29 @@ set_up_<?= $content_type == 'json' ? 'json' : 'form' ?>_test(test, endpoint, fun
         passed_code = true;
       }
       set_result_icon("#delete_passed_code", passed_code ? 1 : -1);
-      store_result(test, endpoint, (passed_code ? 0 : -1));
       if(passed_code) {
         $("#passed_delete").addClass("prompt");
         $("#deleted_post_link").attr("href", data.location).text(data.location);
         $("#passed_delete").click(function(){
           set_result_icon("#passed_delete", 1);
-          store_result(test, endpoint, (passed_code ? 1 : -1));
+          store_result(test, endpoint, (passed_code ? 0 : -1));
+          $("#continue2").removeClass("hidden");
+          set_up_undelete_test(test, '<?= ($content_type == 'json' ? 'postjson' : 'post') ?>', endpoint, function(data3) {
+            var passed_code2 = false;
+            if(data3.code == 200 || data3.code == 201 || data3.code == 204) {
+              passed_code2 = true;
+            }
+            set_result_icon("#undelete_passed_code", passed_code2 ? 1 : -1);
+            store_result(test, endpoint, passed_code2 ? 0 : -1);
+            if(passed_code2) {
+              $("#passed_undelete").addClass("prompt");
+              $("#undeleted_post_link").attr("href", data.location).text(data.location);
+              $("#passed_undelete").click(function(){
+                set_result_icon("#passed_undelete", 1);
+                store_result(test, endpoint, passed_code2 ? 1 : -1);
+              });
+            }
+          });
         });
       }
     })

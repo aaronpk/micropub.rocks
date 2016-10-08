@@ -70,6 +70,23 @@ function set_up_delete_test(test, method, endpoint, callback) {
   });
 }
 
+function set_up_undelete_test(test, method, endpoint, callback) {
+  $("#run-undelete").click(function(){
+    $("#run-undelete").removeClass('green').addClass('disabled');
+    $.post('/server-tests/micropub', {
+      test: test,
+      endpoint: endpoint,
+      method: method,
+      body: $('#undeletebody').text().replace(/\n/g,'')
+    }, function(data) {
+      $("#undelete-response").text(data.debug);
+      $("#undelete-response-section").removeClass('hidden');
+      $("#run-undelete").addClass('green').removeClass('disabled');
+      callback(data);
+    });
+  });
+}
+
 function store_result(test, endpoint, passed) {
   $.post('/server-tests/store-result', {
     endpoint: endpoint,
