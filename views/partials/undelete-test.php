@@ -129,6 +129,7 @@ set_up_<?= $content_type == 'json' ? 'json' : 'form' ?>_test(test, endpoint, fun
           set_result_icon("#passed_delete", 1);
           store_result(test, endpoint, (passed_code ? 0 : -1));
           $("#continue2").removeClass("hidden");
+          $("#undeletebody").text($("#undeletebody").text().replace("%%%", data.location));
           set_up_undelete_test(test, '<?= ($content_type == 'json' ? 'postjson' : 'post') ?>', endpoint, function(data3) {
             var passed_code2 = false;
             if(data3.code == 200 || data3.code == 201 || data3.code == 204) {
