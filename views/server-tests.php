@@ -23,7 +23,7 @@
     <h4>Creating Posts (JSON)</h4>
     <table class="ui compact table">
       <? 
-        for($i=200; $i<=205; $i++) {
+        for($i=200; $i<=206; $i++) {
           $this->insert('partials/server-test-row', ['num'=>$i, 'tests'=>$tests, 'endpoint'=>$endpoint]); 
         }
       ?>
