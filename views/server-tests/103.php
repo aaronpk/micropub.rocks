@@ -27,7 +27,7 @@ content[html]=<?= htmlspecialchars('<p>This+post+has+<b>bold</b>+and+<i>italic</
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
         <div><span id="passed_html" class="ui circular label">&nbsp;</span> Check that the HTML is rendered rather than escaped</div>
-        <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if the post appears with bold and italic formatting.</div>
+        <div class="step_instructions hidden">Look at <a href="" target="_blank">your post</a> and check this box if the post appears with bold and italic formatting.</div>
       </li>
     </ul>
   </section>
@@ -51,7 +51,7 @@ set_up_form_test(test, endpoint, function(data){
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.location) {
     passed_location = true;
-    $("#location_header_value").html('<a href="'+data.location+'">view post</a>');
+    $("#location_header_value").html('<a href="'+data.location+'" target="_blank">view post</a>');
   }
   // Store the test as failing if either code or location was not returned
   if(!(passed_location && passed_code)) {

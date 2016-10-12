@@ -49,7 +49,7 @@ Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-
       <ul class="result-list">
         <li><span id="delete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
         <li>
-          <div><span id="passed_delete" class="ui circular label">&nbsp;</span> Check that the post was deleted <a id="deleted_post_link"></a></div>
+          <div><span id="passed_delete" class="ui circular label">&nbsp;</span> Check that the post was deleted <a id="deleted_post_link" target="_blank"></a></div>
         </li>
       </ul>
     </section>
@@ -75,7 +75,7 @@ set_up_<?= $content_type == 'json' ? 'json' : 'form' ?>_test(test, endpoint, fun
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.location) {
     passed_location = true;
-    $("#location_header_value").html('<a href="'+data.location+'">view post</a>');
+    $("#location_header_value").html('<a href="'+data.location+'" target="_blank">view post</a>');
   }
   set_result_icon("#passed_location", passed_location ? 1 : -1);
   store_result(test, endpoint, (passed_code && passed_location ? 0 : -1));

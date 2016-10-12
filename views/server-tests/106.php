@@ -54,7 +54,7 @@ set_up_form_test(test, endpoint, function(data){
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.location) {
     passed_location = true;
-    $("#location_header_value").html('<a href="'+data.location+'">view post</a>');
+    $("#location_header_value").html('<a href="'+data.location+'" target="_blank">view post</a>');
   }
   // Store the test as failing if either code or location was not returned
   if(!(passed_location && passed_code)) {

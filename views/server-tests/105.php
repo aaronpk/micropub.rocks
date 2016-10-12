@@ -29,7 +29,7 @@ photo[alt]=Photo+of+a+sunset</span></pre>
       <li><?= result_icon(0, 'passed_location') ?> Returned a <code>Location</code> header <span id="location_header_value"></span></li>
       <li>
         <div><span id="passed_photo" class="ui circular label">&nbsp;</span> Check that the photo appears in the post</div>
-        <div class="step_instructions hidden">Look at <a href="">your post</a> and check this box if the post shows the photo.</div>
+        <div class="step_instructions hidden">Look at <a href="" target="_blank">your post</a> and check this box if the post shows the photo.</div>
       </li>
     </ul>
   </section>
@@ -53,7 +53,7 @@ set_up_form_test(test, endpoint, function(data){
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.location) {
     passed_location = true;
-    $("#location_header_value").html('<a href="'+data.location+'">view post</a>');
+    $("#location_header_value").html('<a href="'+data.location+'" target="_blank">view post</a>');
   }
   // Store the test as failing if either code or location was not returned
   if(!(passed_location && passed_code)) {
