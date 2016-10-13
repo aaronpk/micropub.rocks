@@ -79,6 +79,21 @@ function display_url($url) {
   return $url;
 }
 
+if(!function_exists('http_build_url')) {
+  function http_build_url($parsed_url) {
+    $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+    $host     = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+    $port     = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+    $user     = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+    $pass     = isset($parsed_url['pass']) ? ':' . $parsed_url['pass']  : '';
+    $pass     = ($user || $pass) ? "$pass@" : '';
+    $path     = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+    $query    = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+    $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+    return "$scheme$user$pass$host$port$path$query$fragment";
+  }
+}
+
 function result_icon($passed, $id=false) {
   if($passed == 1) {
     return '<span id="'.$id.'" class="ui green circular label">&#x2714;</span>';
@@ -94,3 +109,14 @@ function result_icon($passed, $id=false) {
 function test_url($test_num, $endpoint_id) {
   return '/server-tests/' . $test_num . '?endpoint=' . $endpoint_id;
 }
+
+function build_micropub_query_url($endpoint, $params) {
+  $url = parse_url($endpoint);
+  if(!array_key_exists('query', $url))
+    $url['query'] = http_build_query($params);
+  else
+    $url['query'] .= '&' . http_build_query($params);
+  $url = http_build_url($url);
+  return preg_replace('/%5B[0-9]+%5D=/simU', '%5B%5D=', $url);
+}
+

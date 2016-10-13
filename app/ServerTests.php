@@ -110,9 +110,12 @@ class ServerTests {
       ]
     ];
 
+    $endpoint_url = $endpoint->micropub_endpoint;
     switch($params['method']) {
       case 'get':
         $method = 'GET';
+        $endpoint_url = $params['url'];
+        $options['headers']['Accept'] = 'application/json';
         break;
       case 'post':
         $method = 'POST';
@@ -138,7 +141,7 @@ class ServerTests {
     }
 
     try {
-      $res = $client->request($method, $endpoint->micropub_endpoint, $options);
+      $res = $client->request($method, $endpoint_url, $options);
     } catch(RequestException $e) {
       $res = $e->getResponse();
     }
@@ -167,6 +170,7 @@ class ServerTests {
     }
     $debug .= "\n";
 
+    $json = null;
     if($body[0] == '{' && $content_type == 'application/json') {
       if($json = @json_decode($body))
         $debug .= json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
@@ -202,6 +206,7 @@ class ServerTests {
       'content_type' => $content_type,
       'headers' => $headers,
       'body' => $body,
+      'json' => $json,
       'debug' => $debug
     ], 200);
   }
