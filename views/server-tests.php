@@ -29,7 +29,6 @@
       ?>
     </table>
 
-    <? /* ?>
     <h4>Creating Posts (Multipart)</h4>
     <table class="ui compact table">
       <? 
@@ -38,7 +37,6 @@
         }
       ?>
     </table>
-    <? */ ?>
 
     <h4>Updates</h4>
     <table class="ui compact table">

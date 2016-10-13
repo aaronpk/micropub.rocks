@@ -131,11 +131,23 @@ class ServerTests {
       case 'multipart':
         $method = 'POST';
         $options['multipart'] = [];
-        foreach($params['file'] as $file) {
+        foreach($params['params'] as $prop=>$val) {
           $options['multipart'][] = [
-            'name' => $file['name'],
-            'contents' => $file['contents'],
+            'name' => $prop,
+            'contents' => $val
           ];
+        }
+        foreach($params['files'] as $prop=>$files) {
+          if(!is_array($files)) $files = [$files];
+          foreach($files as $file) {
+            if(strpos($file,'/') === false) {
+              $options['multipart'][] = [
+                'name' => (count($files) == 1 ? $prop : $prop.'[]'),
+                'contents' => fopen('public/media/'.$file, 'r'),
+                'filename' => $file
+              ];
+            }
+          }
         }
         break;
     }
