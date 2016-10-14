@@ -80,7 +80,7 @@ set_up_json_test(test, endpoint, function(data){
 
 set_up_query_test(test, endpoint, function(data){
   var passed_code = false;
-  var passed_location = false;
+  var passed_body = false;
   if(data.code == 200) {
     passed_code = true;
   }
