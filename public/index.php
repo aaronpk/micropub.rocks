@@ -24,6 +24,7 @@ $route->map('GET', '/auth/signout', 'App\\Auth::signout');
 
 $route->map('GET', '/dashboard', 'App\\Controller::dashboard');
 $route->map('POST', '/endpoints/new', 'App\\Controller::new_endpoint');
+$route->map('GET', '/endpoints/callback', 'App\\Controller::endpoint_callback');
 $route->map('GET', '/endpoints/{id}', 'App\\Controller::edit_endpoint');
 $route->map('POST', '/endpoints/save', 'App\\Controller::save_endpoint');
 $route->map('GET', '/server-tests', 'App\\ServerTests::index');

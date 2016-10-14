@@ -6,6 +6,7 @@
     "guzzlehttp/guzzle": "^6.2",
     "ezyang/htmlpurifier": "^4.8",
     "mf2/mf2": "^0.3.0",
+    "indieauth/client": ">=0.1.11",
     "j4mie/idiorm": "^1.5",
     "zendframework/zend-diactoros": "^1.3",
     "mailgun/mailgun-php": "^2.1",

@@ -8,7 +8,10 @@
   <div class="ui error message">
     <div class="header"><?= $this->e($error) ?></div>
     <p><?= $this->e($error_description) ?></p>
-    <a href="/">Start Over</a>
+    <? if(isset($error_debug)): ?>
+      <pre class="small"><?= $error_debug ?></pre>
+    <? endif; ?>
+    <a href="<?= is_logged_in() ? '/dashboard' : '/' ?>">Start Over</a>
   </div>
 
   <?php 

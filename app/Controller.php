@@ -4,8 +4,14 @@ namespace App;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ORM;
+use IndieAuth;
+use Config;
 
 class Controller {
+
+  private function _redirectURI() {
+    return Config::$base.'endpoints/callback';
+  }
 
   public function index(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup();
@@ -46,8 +52,48 @@ class Controller {
     $user = logged_in_user();
 
     // If they entered an IndieAuth URL, start logging them in
-    // TODO
-    if(isset($params['me'])) {
+    if(isset($params['me']) && $params['me']) {
+      $url = parse_url($params['me']);
+
+      // Do some basic checks to make sure this is a URL
+      if(!($url && isset($url['scheme']) 
+           && in_array($url['scheme'], ['http','https']) 
+           && isset($url['host']))) {
+        return $response->withHeader('Location', '/dashboard')->withStatus(302);
+      }
+
+      $me = $params['me'];
+
+      $authorizationEndpoint = IndieAuth\Client::discoverAuthorizationEndpoint($me);
+      $tokenEndpoint = IndieAuth\Client::discoverTokenEndpoint($me);
+      $micropubEndpoint = IndieAuth\Client::discoverMicropubEndpoint($me);
+
+      if($tokenEndpoint && $micropubEndpoint && $authorizationEndpoint) {
+        // Generate a "state" parameter for the request
+        $state = IndieAuth\Client::generateStateParameter();
+        $_SESSION['auth'] = [
+          'state' => $state,
+          'me' => $me,
+          'token_endpoint' => $tokenEndpoint,
+          'micropub_endpoint' => $micropubEndpoint
+        ];
+
+        $scope = 'create update delete undelete';
+        $authorizationURL = IndieAuth\Client::buildAuthorizationURL($authorizationEndpoint, $me, self::_redirectURI(), Config::$base, $state, $scope);
+      } else {
+        $authorizationURL = false;
+      }
+
+      $response->getBody()->write(view('auth-start', [
+        'title' => 'Begin Micropub Authorization',
+        'tokenEndpoint' => $tokenEndpoint,
+        'authorizationEndpoint' => $authorizationEndpoint,
+        'micropubEndpoint' => $micropubEndpoint,
+        'me' => $me,
+        'meParts' => $url,
+        'authorizationURL' => $authorizationURL
+      ]));
+      return $response;
 
     } else {
       if(!$params['micropub_endpoint'] || !$params['access_token']) {
@@ -71,6 +117,101 @@ class Controller {
 
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
     }
+  }
+
+  public function endpoint_callback(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+    $user = logged_in_user();
+
+    $params = $request->getQueryParams();
+
+    if(!array_key_exists('state', $params)) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Missing State',
+        'error_description' => 'The authorization server did not include the "state" parameter. Ensure that the authorization server passes the state parameter back in the redirect.',
+      ]));
+      return $response;
+    }
+
+    if(!isset($_SESSION['auth']['state']) || $_SESSION['auth']['state'] != $params['state']) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Invalid State',
+        'error_description' => 'The "state" parameter provided in the redirect did not match the one that this server created when it started the flow.',
+      ]));
+      return $response;
+    }
+
+    $tokenEndpoint = $_SESSION['auth']['token_endpoint'];
+    $micropubEndpoint = $_SESSION['auth']['micropub_endpoint'];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $tokenEndpoint);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_POST, TRUE);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+      'me' => $params['me'],
+      'code' => $params['code'],
+      'redirect_uri' => self::_redirectURI(),
+      'state' => $params['state'],
+      'client_id' => Config::$base
+    )));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      'Accept: application/x-www-form-urlencoded'
+    ]);
+    $tokenResponse = curl_exec($ch);
+
+    $data = @json_decode($tokenResponse, true);
+    if(!$data) {
+      $data = [];
+      parse_str($tokenResponse, $data);
+    }
+
+    if(!$data) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Error Requesting Access Token',
+        'error_description' => 'The token endpoint sent back an invalid response.',
+        'error_debug' => $tokenResponse
+      ]));
+      return $response;
+    }
+
+    if(!isset($data['access_token'])) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Error Requesting Access Token',
+        'error_description' => 'The token endpoint response did not include an access token. Below is the response the endpoint returned. Ensure the endpoint returns a property called "access_token".',
+        'error_debug' => $tokenResponse
+      ]));
+      return $response;
+    }
+
+    // Got everything we need, so store the endpoint now
+
+    // Check if the endpoint already exists and update if so
+    $endpoint = ORM::for_table('micropub_endpoints')
+      ->where('user_id', $user->id)
+      ->where('micropub_endpoint', $micropubEndpoint)
+      ->find_one();
+    if(!$endpoint) {
+      $endpoint = ORM::for_table('micropub_endpoints')->create();
+      $endpoint->user_id = $user->id;
+      $endpoint->micropub_endpoint = $micropubEndpoint;
+      $endpoint->created_at = date('Y-m-d H:i:s');
+    }
+
+    $endpoint->scope = isset($data['scope']) ? $data['scope'] : '';
+    $endpoint->me = isset($data['me']) ? $data['me'] : '';
+    $endpoint->access_token = $data['access_token'];
+    $endpoint->save();
+
+    return $response->withHeader('Location', '/server-tests?endpoint='.$endpoint->id)->withStatus(302);
   }
 
   public function edit_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {

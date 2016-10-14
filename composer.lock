@@ -4,9 +4,49 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "357a66ca073292b6a826886d66b5adfe",
-    "content-hash": "e6958c8576bf62ab8ab19d0a21be4f8b",
+    "hash": "cfc7ffaff0d04422a05439d89845e4c0",
+    "content-hash": "2574a4cfd9c9a4ce02c8f17974a3e3ed",
     "packages": [
+        {
+            "name": "barnabywalters/mf-cleaner",
+            "version": "v0.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/barnabywalters/php-mf-cleaner.git",
+                "reference": "ef6a16628db6e8aee2b4f8bb8093d18c24b74cd4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/barnabywalters/php-mf-cleaner/zipball/ef6a16628db6e8aee2b4f8bb8093d18c24b74cd4",
+                "reference": "ef6a16628db6e8aee2b4f8bb8093d18c24b74cd4",
+                "shasum": ""
+            },
+            "require-dev": {
+                "php": ">=5.3",
+                "phpunit/phpunit": "*"
+            },
+            "suggest": {
+                "mf2/mf2": "To parse microformats2 structures from (X)HTML"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/BarnabyWalters/Mf2/Functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Barnaby Walters",
+                    "email": "barnaby@waterpigs.co.uk"
+                }
+            ],
+            "description": "Cleans up microformats2 array structures",
+            "time": "2014-10-06 23:11:15"
+        },
         {
             "name": "clue/stream-filter",
             "version": "v1.3.0",
@@ -129,16 +169,16 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.2.1",
+            "version": "6.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "3f808fba627f2c5b69e2501217bf31af349c1427"
+                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/3f808fba627f2c5b69e2501217bf31af349c1427",
-                "reference": "3f808fba627f2c5b69e2501217bf31af349c1427",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
+                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
                 "shasum": ""
             },
             "require": {
@@ -187,7 +227,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-07-15 17:22:37"
+            "time": "2016-10-08 15:01:37"
         },
         {
             "name": "guzzlehttp/promises",
@@ -297,6 +337,91 @@
                 "uri"
             ],
             "time": "2016-06-24 23:00:38"
+        },
+        {
+            "name": "indieauth/client",
+            "version": "0.1.16",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indieweb/indieauth-client-php.git",
+                "reference": "81e425892c00afef1b6bf9fe16e771b4503bbb8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indieweb/indieauth-client-php/zipball/81e425892c00afef1b6bf9fe16e771b4503bbb8a",
+                "reference": "81e425892c00afef1b6bf9fe16e771b4503bbb8a",
+                "shasum": ""
+            },
+            "require": {
+                "barnabywalters/mf-cleaner": "0.*",
+                "indieweb/link-rel-parser": "0.1.*",
+                "mf2/mf2": "~0.3",
+                "php": ">5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "IndieAuth": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache 2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Parecki",
+                    "homepage": "http://aaronparecki.com"
+                }
+            ],
+            "description": "IndieAuth Client Library",
+            "time": "2016-05-21 16:43:04"
+        },
+        {
+            "name": "indieweb/link-rel-parser",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indieweb/link-rel-parser-php.git",
+                "reference": "7127a92f32cecbf8166fb3b34130a59ea63e2041"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indieweb/link-rel-parser-php/zipball/7127a92f32cecbf8166fb3b34130a59ea63e2041",
+                "reference": "7127a92f32cecbf8166fb3b34130a59ea63e2041",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/IndieWeb/link_rel_parser.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Parecki",
+                    "homepage": "http://aaronparecki.com"
+                },
+                {
+                    "name": "Tantek Çelik",
+                    "homepage": "http://tantek.com"
+                }
+            ],
+            "description": "Parse rel values from HTTP headers",
+            "homepage": "https://github.com/indieweb/link-rel-parser-php",
+            "keywords": [
+                "http",
+                "indieweb",
+                "microformats2"
+            ],
+            "time": "2016-04-13 17:48:59"
         },
         {
             "name": "j4mie/idiorm",
@@ -1176,16 +1301,16 @@
         },
         {
             "name": "zendframework/zend-diactoros",
-            "version": "1.3.6",
+            "version": "1.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "a60da179c37f2c4e44ef734d0b92824a58943f7f"
+                "reference": "969ff423d3f201da3ff718a5831bb999bb0669b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/a60da179c37f2c4e44ef734d0b92824a58943f7f",
-                "reference": "a60da179c37f2c4e44ef734d0b92824a58943f7f",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/969ff423d3f201da3ff718a5831bb999bb0669b0",
+                "reference": "969ff423d3f201da3ff718a5831bb999bb0669b0",
                 "shasum": ""
             },
             "require": {
@@ -1222,7 +1347,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2016-09-07 17:57:29"
+            "time": "2016-10-11 13:25:21"
         }
     ],
     "packages-dev": [],

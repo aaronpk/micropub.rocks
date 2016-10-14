@@ -30,26 +30,34 @@
   <section class="content">
     <h3>Add New Endpoint</h3>
 
-    <!--
-    <p>Enter an <a href="https://indieweb.org/IndieAuth">IndieAuth URL</a> below. Your Micropub endpoint will be discovered from that URL and you will be asked to authenticate against your own authorization server.</p>
-    <form action="/endpoints/new" method="POST">
-      <div class="ui fluid action input">
-        <input type="url" name="me" placeholder="https://me.example.com">
-        <button class="ui button">Sign In</button>
-      </div>
-    </form>
-
-    <br>
-    -->
-
-    <p>Enter a Micropub endpoint and access token below to add an endpoint manually.</p>
-    <form action="/endpoints/new" method="POST">
-      <div class="ui fluid action input">
-        <input type="url" name="micropub_endpoint" placeholder="https://me.example.com/micropub" required="required">
-        <input type="password" name="access_token" placeholder="access token" style="border-top-left-radius:0; border-bottom-left-radius:0;" required="required">
-        <button class="ui button">Add Endpoint</button>
-      </div>
-    </form>
+    <div class="ui top attached tabular menu">
+      <a class="active item" data-tab="first">Sign In</a>
+      <a class="item" data-tab="second">Manual</a>
+    </div>
+    <div class="ui bottom attached active tab segment" data-tab="first">
+      <p>Enter a profile URL below that advertises its Micropub endpoint. The Micropub endpoint will be discovered from that URL and you will be asked to authenticate against the authorization server specified.</p>
+      <form action="/endpoints/new" method="POST">
+        <div class="ui fluid action input">
+          <input type="url" name="me" placeholder="https://me.example.com">
+          <button class="ui button">Sign In</button>
+        </div>
+      </form>
+    </div>
+    <div class="ui bottom attached tab segment" data-tab="second">
+      <p>Enter a Micropub endpoint and access token below to add an endpoint manually.</p>
+      <form action="/endpoints/new" method="POST">
+        <div class="ui fluid action input">
+          <input type="url" name="micropub_endpoint" placeholder="https://me.example.com/micropub" required="required">
+          <input type="password" name="access_token" placeholder="access token" style="border-top-left-radius:0; border-bottom-left-radius:0;" required="required">
+          <button class="ui button">Add Endpoint</button>
+        </div>
+      </form>
+    </div>
   </section>
 
 </div>
+<script>
+$(function(){
+  $('.menu .item').tab();
+});
+</script>
