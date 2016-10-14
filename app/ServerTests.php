@@ -154,10 +154,38 @@ class ServerTests {
         break;
     }
 
+    if(!preg_match('/^https?:\/\//', $endpoint_url)) {
+      return new JsonResponse([
+        'code' => '',
+        'location' => null,
+        'content_type' => null,
+        'headers' => [],
+        'body' => '',
+        'json' => [],
+        'debug' => 'Invalid endpoint URL: '.$endpoint_url
+      ], 200);      
+    }
+
     try {
       $res = $client->request($method, $endpoint_url, $options);
     } catch(RequestException $e) {
       $res = $e->getResponse();
+      $debug = $e->getMessage();
+    } catch(\Exception $e) {
+      $res = null;
+      $debug = $e->getMessage();
+    }
+
+    if(!$res) {
+      return new JsonResponse([
+        'code' => '',
+        'location' => null,
+        'content_type' => null,
+        'headers' => [],
+        'body' => '',
+        'json' => [],
+        'debug' => (isset($debug) ? $debug : 'Unknown error making request to the Micropub endpoint')
+      ], 200);      
     }
 
     $code = $res->getStatusCode();
@@ -189,7 +217,7 @@ class ServerTests {
     $debug .= "\n";
 
     $json = null;
-    if($body[0] == '{' && $content_type == 'application/json') {
+    if($body && $body[0] == '{' && $content_type == 'application/json') {
       if($json = @json_decode($body))
         $debug .= json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
       else

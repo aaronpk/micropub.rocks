@@ -23,7 +23,7 @@
   <a class="item" href="/"><img src="/assets/micropub-rocks-icon.png"></a>
   <a class="item" href="/">Home</a>
   <a class="item" href="/dashboard">Dashboard</a>
-  <?= $_GET['endpoint'] ? '<a class="item" href="/server-tests?endpoint='.$_GET['endpoint'].'">Server Tests</a>' : '' ?>
+  <?= isset($_GET['endpoint']) ? '<a class="item" href="/server-tests?endpoint='.$_GET['endpoint'].'">Server Tests</a>' : '' ?>
   <div class="right menu">
     <span class="item"><?= display_url($_SESSION['email']) ?></span>
     <a class="item" href="/auth/signout">Sign Out</a>
