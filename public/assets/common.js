@@ -17,13 +17,14 @@ function set_up_form_test(test, endpoint, callback) {
   });
 }
 
-function set_up_multipart_test(test, endpoint, params, files, callback) {
+function set_up_multipart_test(test, endpoint, media_endpoint, params, files, callback) {
   $(function(){
     $("#run").click(function(){
       $("#run").removeClass('green').addClass('disabled');
       $.post('/server-tests/micropub', {
         test: test,
         endpoint: endpoint,
+        url: media_endpoint,
         method: 'multipart',
         params: params,
         files: files

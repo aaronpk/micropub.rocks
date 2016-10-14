@@ -149,6 +149,8 @@ class ServerTests {
             }
           }
         }
+        if(array_key_exists('url', $params))
+          $endpoint_url = $params['url'];
         break;
     }
 
@@ -220,6 +222,38 @@ class ServerTests {
       'body' => $body,
       'json' => $json,
       'debug' => $debug
+    ], 200);
+  }
+
+  public function media_check(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return new JsonResponse(['error'=>'unauthorized'], 401);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $client = new GuzzleHttp\Client();
+
+    try {
+      $res = $client->request('GET', $params['url'], []);
+    } catch(RequestException $e) {
+      $res = $e->getResponse();
+    }
+
+    $code = $res->getStatusCode();
+    $content_type = $res->getHeader('Content-Type');
+    if($content_type) {
+      $content_type = $content_type[0];
+    }
+
+    return new JsonResponse([
+      'code' => $code,
+      'http' => 'HTTP/1.1 '.$code.' '.$res->getReasonPhrase(),
+      'content_type' => $content_type,
     ], 200);
   }
 

@@ -28,6 +28,7 @@ $route->map('GET', '/endpoints/{id}', 'App\\Controller::edit_endpoint');
 $route->map('POST', '/endpoints/save', 'App\\Controller::save_endpoint');
 $route->map('GET', '/server-tests', 'App\\ServerTests::index');
 $route->map('POST', '/server-tests/micropub', 'App\\ServerTests::micropub_request');
+$route->map('POST', '/server-tests/media-check', 'App\\ServerTests::media_check');
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
 $route->map('GET', '/server-tests/{num}', 'App\\ServerTests::get_test');
 
