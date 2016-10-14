@@ -171,10 +171,14 @@ class ServerTests {
     else
       $location = false;
 
-    if($content_type && array_key_exists(0, $content_type))
+    if($content_type && array_key_exists(0, $content_type)) {
       $content_type = $content_type[0];
-    else
+      if(preg_match('/application\/json/', $content_type)) {
+        $content_type = 'application/json';
+      }
+    } else {
       $content_type = false;
+    }
 
     $debug = 'HTTP/1.1 '.$code.' '.$res->getReasonPhrase()."\n";
     foreach($headers as $k=>$vs) {
