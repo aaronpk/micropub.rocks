@@ -104,10 +104,11 @@ class ServerTests {
     }
 
     $client = new GuzzleHttp\Client();
+
     if(!(array_key_exists('skipauth', $params) && $params['skipauth'] == 1)) {
       $options = [
         'headers' => [
-          'Authorization' => 'Bearer ' . $endpoint->access_token
+          'Authorization' => 'Bearer ' . (isset($params['access_token']) ? $params['access_token'] : $endpoint->access_token)
         ]
       ];
     }

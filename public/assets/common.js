@@ -6,6 +6,7 @@ function set_up_form_test(test, endpoint, callback, skipauth=false) {
         test: test,
         endpoint: endpoint,
         skipauth: skipauth ? 1 : 0,
+        access_token: $("#access-token-input").val(),
         method: 'post',
         body: $('#postbody').text().replace(/\n/g,'')
       }, function(data) {

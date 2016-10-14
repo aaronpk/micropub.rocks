@@ -77,7 +77,7 @@
     <h4>Authentication</h4>
     <table class="ui compact table">
       <? 
-        for($i=800; $i<=802; $i++) {
+        for($i=800; $i<=804; $i++) {
           $this->insert('partials/server-test-row', ['num'=>$i, 'tests'=>$tests, 'endpoint'=>$endpoint]); 
         }
       ?>
