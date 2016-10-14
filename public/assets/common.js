@@ -1,10 +1,11 @@
-function set_up_form_test(test, endpoint, callback) {
+function set_up_form_test(test, endpoint, callback, skipauth=false) {
   $(function(){
     $("#run").click(function(){
       $("#run").removeClass('green').addClass('disabled');
       $.post('/server-tests/micropub', {
         test: test,
         endpoint: endpoint,
+        skipauth: skipauth ? 1 : 0,
         method: 'post',
         body: $('#postbody').text().replace(/\n/g,'')
       }, function(data) {

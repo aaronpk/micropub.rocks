@@ -104,11 +104,13 @@ class ServerTests {
     }
 
     $client = new GuzzleHttp\Client();
-    $options = [
-      'headers' => [
-        'Authorization' => 'Bearer ' . $endpoint->access_token
-      ]
-    ];
+    if(!(array_key_exists('skipauth', $params) && $params['skipauth'] == 1)) {
+      $options = [
+        'headers' => [
+          'Authorization' => 'Bearer ' . $endpoint->access_token
+        ]
+      ];
+    }
 
     $endpoint_url = $endpoint->micropub_endpoint;
     switch($params['method']) {
