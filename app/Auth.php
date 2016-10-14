@@ -38,7 +38,7 @@ class Auth {
       'text'     => "Click on the link below to sign in to micropub.rocks\n\n$login_url\n"
     ]);
 
-    $response->getBody()->write(view('auth-start', [
+    $response->getBody()->write(view('auth-email', [
       'title' => 'Sign In - Webmention Rocks!',
     ]));
     return $response;
