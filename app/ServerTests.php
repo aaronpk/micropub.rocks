@@ -152,7 +152,7 @@ class ServerTests {
             }
           }
         }
-        if(array_key_exists('url', $params))
+        if(array_key_exists('url', $params) && $params['url'])
           $endpoint_url = $params['url'];
         break;
     }

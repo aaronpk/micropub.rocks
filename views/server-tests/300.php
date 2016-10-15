@@ -49,7 +49,7 @@ var files = {
   photo: 'sunset.jpg'
 };
 
-set_up_multipart_test(test, endpoint, false, params, files, function(data){
+set_up_multipart_test(test, endpoint, null, params, files, function(data){
   var passed_code = false;
   var passed_location = false;
   if(data.code == 201 || data.code == 202) {
