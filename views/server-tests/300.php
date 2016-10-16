@@ -8,7 +8,7 @@
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
     <p>This is a basic test of posting a photo to the Micropub endpoint.</p>
-    <p>Clicking "Run" will make a mnultipart request to your endpoint containing one photo.</p>
+    <p>Clicking "Run" will make a multipart request to your endpoint containing one photo.</p>
   </section>
 
   <section class="content code">
