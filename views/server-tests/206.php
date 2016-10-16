@@ -19,7 +19,7 @@ Content-type: application/json
 <span id="postbody">{
   "type": ["h-entry"],
   "properties": {
-    "content": ["Micropub test of creating a photo referenced by URL. This post should include a photo of a sunset."],
+    "content": ["Micropub test of creating multiple photos referenced by URL. This post should include a photo of a sunset and a photo of a city at night."],
     "photo": [
       "<?= Config::$base ?>media/sunset.jpg",
       "<?= Config::$base ?>media/city-at-night.jpg"

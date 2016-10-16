@@ -6,7 +6,7 @@ $this->layout('layout', [
 $this->insert('partials/update-test-basic', [
   'test' => $test,
   'endpoint' => $endpoint,
-  'description' => 'This test will create a post with two categories, then attempt to remove a one of the categories.',
+  'description' => 'This test will create a post with two categories, then attempt to remove one of the categories.',
   'postbody' => '{
   "type": ["h-entry"],
   "properties": {
