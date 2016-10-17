@@ -12,6 +12,10 @@
       <a href="/endpoints/<?= $endpoint->id ?>"><i class="setting icon"></i></a>
     </div>
 
+    <div style="margin: 20px 0;">
+      <a href="/implementation-report/server/<?= $endpoint->id ?>">Implementation Report</a>
+    </div>
+
     <h4>Creating Posts (Form-Encoded)</h4>
     <table class="ui compact table">
       <? $this->insert('partials/server-test-row', ['num'=>100, 'tests'=>$tests, 'endpoint'=>$endpoint]); ?>

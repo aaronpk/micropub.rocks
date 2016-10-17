@@ -33,7 +33,12 @@ $route->map('POST', '/server-tests/media-check', 'App\\ServerTests::media_check'
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
 $route->map('GET', '/server-tests/{num}', 'App\\ServerTests::get_test');
 
+$route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::get_server_report');
+$route->map('GET', '/implementation-report/server/{id}/{token}', 
+  'App\\ImplementationReport::view_server_report');
 $route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
+$route->map('POST', '/implementation-report/save', 'App\\ImplementationReport::save_report');
+$route->map('POST', '/implementation-report/publish', 'App\\ImplementationReport::publish_report');
 
 
 $route->map('GET', '/image', 'ImageProxy::image');

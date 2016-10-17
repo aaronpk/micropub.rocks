@@ -101,3 +101,19 @@ section.content textarea {
   display: inline-block;
 }
 
+.implementation-features {
+  margin: 1em 0;
+}
+.implementation-features td {
+  padding: 2px 4px;
+}
+.implementation-features .num {
+  text-align: right;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #999;
+}
+
+#report-details td {
+  padding: 2px;
+}
