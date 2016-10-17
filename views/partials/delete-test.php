@@ -96,6 +96,7 @@ set_up_<?= $content_type == 'json' ? 'json' : 'form' ?>_test(test, endpoint, fun
         $("#passed_delete").click(function(){
           set_result_icon("#passed_delete", 1);
           store_result(test, endpoint, (passed_code ? 1 : -1));
+          store_server_feature(endpoint, <?= $feature_num ?>, (passed_code ? 1 : -1), test);
         });
       }
     })

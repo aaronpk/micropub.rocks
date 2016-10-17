@@ -50,7 +50,16 @@ set_up_form_test(test, endpoint, function(data){
     $("#location_header_value").html('<a href="'+data.location+'" target="_blank">view post</a>');
   }
   set_result_icon("#passed_location", passed_location ? 1 : -1);
-  store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+  var passed = (passed_code && passed_location ? 1 : -1);
+  store_result(test, endpoint, passed);
+
+  // Created a post
+  store_server_feature(endpoint, 5, passed, test);
+  if(passed_code && passed_location) {
+    // Returned HTTP 201 or 202
+    store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);
+  }
+
 });
 
 </script>

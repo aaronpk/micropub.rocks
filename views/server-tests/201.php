@@ -73,6 +73,15 @@ set_up_json_test(test, endpoint, function(data){
     set_result_icon("#passed_categories", 1);
     $(".step_instructions").addClass("hidden");
     store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+
+    // Created a post in JSON syntax with multiple categories
+    store_server_feature(endpoint, 8, (passed_code && passed_location ? 1 : -1), test);
+    if(passed_code && passed_location) {
+      // Returned HTTP 201 or 202
+      store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);
+      store_server_feature(endpoint, 6, 1, test);
+    }
+
   });
 });
 

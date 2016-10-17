@@ -55,6 +55,14 @@ set_up_json_test(test, endpoint, function(data){
   }
   set_result_icon("#passed_location", passed_location ? 1 : -1);
   store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+
+  // Created a post in JSON syntax
+  store_server_feature(endpoint, 6, (passed_code && passed_location ? 1 : -1), test);
+  if(passed_code && passed_location) {
+    // Returned HTTP 201 or 202
+    store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);
+  }
+
 });
 
 </script>

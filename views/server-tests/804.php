@@ -66,6 +66,8 @@ set_up_form_test(test, endpoint, function(data){
   }
   set_result_icon("#passed_error_body", passed_error_body ? 1 : -1);
   store_result(test, endpoint, (passed_code && passed_error_body ? 1 : -1));
+
+  store_server_feature(endpoint, 4, (passed_code && passed_error_body ? 1 : -1), test);
 });
 
 </script>

@@ -119,6 +119,11 @@ set_up_query_test(test, endpoint, function(data){
 
           set_result_icon("#passed_upload", passed_upload ? 1 : -1);
           store_result(test, endpoint, (passed_upload ? 1 : -1));
+
+          store_server_feature(endpoint, 10, (passed_upload ? 1 : -1), test);
+          if(passed_upload) {
+            store_server_feature(endpoint, 27, 1, test);
+          }
         });
       }
     });

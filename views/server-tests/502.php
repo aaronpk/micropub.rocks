@@ -11,4 +11,5 @@ $this->insert('partials/undelete-test', [
   'content_type' => 'form',
   'deletebody' => 'action=delete&amp;url=%%%',
   'undeletebody' => 'action=undelete&amp;url=%%%',
+  'feature_num' => 25,
 ]);

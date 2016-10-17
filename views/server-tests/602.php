@@ -14,5 +14,6 @@ $this->insert('partials/query-source-test', [
   'test' => $test,
   'endpoint' => $endpoint,
   'description' => $description,
-  'query_url' => $query_url
+  'query_url' => $query_url,
+  'feature_num' => 30
 ]);

@@ -69,6 +69,12 @@ set_up_multipart_test(test, endpoint, null, params, files, function(data){
     set_result_icon("#passed_photo", 1);
     $(".step_instructions").addClass("hidden");
     store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+
+    if(passed_code && passed_location) {
+      store_server_feature(endpoint, 11, 1, test);
+      // Returned HTTP 201 or 202
+      store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);
+    }
   });
 });
 

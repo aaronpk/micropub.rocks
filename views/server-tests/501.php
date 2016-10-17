@@ -10,4 +10,5 @@ $this->insert('partials/delete-test', [
   'postbody' => '{"type":["h-entry"],"properties":{"content":["This post will be deleted when the test succeeds."]}}',
   'content_type' => 'json',
   'deletebody' => '{"action":"delete","url":"%%%"}',
+  'feature_num' => 24,
 ]);

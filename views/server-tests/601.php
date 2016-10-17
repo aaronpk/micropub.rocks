@@ -55,6 +55,8 @@ set_up_query_test(test, endpoint, function(data){
   }
   set_result_icon("#passed_body", passed_body ? 1 : -1);
   store_result(test, endpoint, (passed_code && passed_body ? 1 : -1));
+
+  store_server_feature(endpoint, 29, (passed_code && passed_body ? 1 : -1), test);
 });
 
 </script>

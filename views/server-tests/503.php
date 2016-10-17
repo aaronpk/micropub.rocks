@@ -11,4 +11,5 @@ $this->insert('partials/undelete-test', [
   'content_type' => 'json',
   'deletebody' => '{"action":"delete","url":"%%%"}',
   'undeletebody' => '{"action":"undelete","url":"%%%"}',
+  'feature_num' => 26,
 ]);

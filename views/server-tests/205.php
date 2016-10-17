@@ -75,6 +75,15 @@ set_up_json_test(test, endpoint, function(data){
     set_result_icon("#passed_object", 1);
     $(".step_instructions").addClass("hidden");
     store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+
+    // image with alt text
+    store_server_feature(endpoint, 13, (passed_code && passed_location ? 1 : -1), test);
+    if(passed_code && passed_location) {
+      // Returned HTTP 201 or 202
+      store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);
+      store_server_feature(endpoint, 6, 1, test);
+    }
+
   });
 });
 

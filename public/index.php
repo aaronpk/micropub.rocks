@@ -33,6 +33,7 @@ $route->map('POST', '/server-tests/media-check', 'App\\ServerTests::media_check'
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
 $route->map('GET', '/server-tests/{num}', 'App\\ServerTests::get_test');
 
+$route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
 
 
 $route->map('GET', '/image', 'ImageProxy::image');

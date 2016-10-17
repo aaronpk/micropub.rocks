@@ -137,6 +137,16 @@ function store_result(test, endpoint, passed) {
   });
 }
 
+function store_server_feature(endpoint_id, feature_num, implements, test) {
+  $.post('/implementation-report/store-result', {
+    type: 'server',
+    id: endpoint_id,
+    feature_num: feature_num,
+    implements: implements,
+    source_test: test
+  });
+}
+
 function set_result_icon(sel, passed) {
   switch(passed) {
     case 1:

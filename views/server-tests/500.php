@@ -10,4 +10,5 @@ $this->insert('partials/delete-test', [
   'postbody' => 'h=entry&amp;content=This+post+will+be+deleted+when+the+test+succeeds.',
   'content_type' => 'form',
   'deletebody' => 'action=delete&amp;url=%%%',
+  'feature_num' => 23,
 ]);

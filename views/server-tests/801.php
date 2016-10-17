@@ -51,6 +51,8 @@ set_up_form_test(test, endpoint, function(data){
   }
   set_result_icon("#passed_location", passed_location ? 1 : -1);
   store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
+
+  store_server_feature(endpoint, 3, (passed_code && passed_location ? 1 : -1), test);
 }, false);
 
 </script>
