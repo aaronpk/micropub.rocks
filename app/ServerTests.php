@@ -134,7 +134,7 @@ class ServerTests {
       case 'multipart':
         $method = 'POST';
         $options['multipart'] = [];
-        if(isset($params['params']) {
+        if(isset($params['params'])) {
           foreach($params['params'] as $prop=>$val) {
             $options['multipart'][] = [
               'name' => $prop,
