@@ -114,6 +114,19 @@ section.content textarea {
   color: #999;
 }
 
+.implementation-features .even-row {
+  background-color: #eee;
+}
+.implementation-features .even-row .ui.label {
+  background-color: #dbdbdb;
+}
+
+.implementation-features .small {
+  font-size: 12px;
+  line-height: 1.3em;
+}
+
+
 #report-details td {
   padding: 2px;
 }

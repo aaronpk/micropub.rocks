@@ -224,6 +224,7 @@ class ImplementationReport {
 
     $endpoints = [];
     $results = [];
+    $features = [];
 
     $query = ORM::for_table('micropub_endpoints')
       ->where_not_null('share_token')
@@ -245,10 +246,18 @@ class ImplementationReport {
       }
     }
 
+    $query = ORM::for_table('features')
+      ->order_by_asc('number')
+      ->find_many();
+    foreach($query as $q) {
+      $features[$q->number] = $q->description;
+    }
+
     $response->getBody()->write(view('show-reports', [
       'title' => 'Micropub Rocks!',
       'endpoints' => $endpoints,
-      'results' => $results
+      'results' => $results,
+      'features' => $features
     ]));
     return $response;
   }
