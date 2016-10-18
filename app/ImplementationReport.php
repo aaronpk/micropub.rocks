@@ -19,15 +19,6 @@ class ImplementationReport {
     if($check = $this->_server_report($request, $response, $args))
       return $check;
 
-    // $query = ORM::for_table('feature_results')
-    //   ->where('endpoint_id', $this->endpoint->id)
-    //   ->order_by('feature_num')
-    //   ->find_many();
-    // $results = [];
-    // foreach($query as $q) {
-    //   $results[$q->feature_num] = $q;
-    // }
-
     $results = ORM::for_table('tests')
       ->raw_query('SELECT features.*, feature_results.implements FROM features
         LEFT JOIN feature_results ON features.number = feature_results.feature_num
@@ -226,6 +217,40 @@ class ImplementationReport {
     return new JsonResponse([
       'result' => 'ok'
     ], 200);
+  }
+
+  public function show_reports(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    $endpoints = [];
+    $results = [];
+
+    $query = ORM::for_table('micropub_endpoints')
+      ->where_not_null('share_token')
+      ->find_many();
+    foreach($query as $q) {
+      $endpoints[] = $q;
+
+      $endpoint_results = ORM::for_table('tests')
+        ->raw_query('SELECT features.*, feature_results.implements FROM features
+          LEFT JOIN feature_results ON features.number = feature_results.feature_num
+            AND feature_results.endpoint_id = :endpoint_id
+          ORDER BY features.number', ['endpoint_id'=>$q->id])
+        ->find_many();
+
+      foreach($endpoint_results as $endpoint_result) {
+        if(!array_key_exists($endpoint_result->number, $results))
+          $results[$endpoint_result->number] = [];
+        $results[$endpoint_result->number][$q->id] = $endpoint_result->implements;
+      }
+    }
+
+    $response->getBody()->write(view('show-reports', [
+      'title' => 'Micropub Rocks!',
+      'endpoints' => $endpoints,
+      'results' => $results
+    ]));
+    return $response;
   }
 
 }
