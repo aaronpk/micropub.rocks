@@ -23,15 +23,19 @@ $route->map('GET', '/auth/code', 'App\\Auth::code');
 $route->map('GET', '/auth/signout', 'App\\Auth::signout');
 
 $route->map('GET', '/dashboard', 'App\\Controller::dashboard');
+
 $route->map('POST', '/endpoints/new', 'App\\Controller::new_endpoint');
 $route->map('GET', '/endpoints/callback', 'App\\Controller::endpoint_callback');
 $route->map('GET', '/endpoints/{id}', 'App\\Controller::edit_endpoint');
 $route->map('POST', '/endpoints/save', 'App\\Controller::save_endpoint');
+
 $route->map('GET', '/server-tests', 'App\\ServerTests::index');
 $route->map('POST', '/server-tests/micropub', 'App\\ServerTests::micropub_request');
 $route->map('POST', '/server-tests/media-check', 'App\\ServerTests::media_check');
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
 $route->map('GET', '/server-tests/{num}', 'App\\ServerTests::get_test');
+
+$route->map('GET', '/reports', 'App\\ImplementationReport::show_reports');
 
 $route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::get_server_report');
 $route->map('GET', '/implementation-report/server/{id}/{token}', 
@@ -39,6 +43,7 @@ $route->map('GET', '/implementation-report/server/{id}/{token}',
 $route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
 $route->map('POST', '/implementation-report/save', 'App\\ImplementationReport::save_report');
 $route->map('POST', '/implementation-report/publish', 'App\\ImplementationReport::publish_report');
+
 
 
 $route->map('GET', '/image', 'ImageProxy::image');
