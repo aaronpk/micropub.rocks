@@ -49,7 +49,17 @@ set_up_query_test(test, endpoint, function(data){
   if(data.json && data.json['syndicate-to']) {
     if(typeof data.json['syndicate-to'] == "object") {
       if(typeof data.json['syndicate-to'].length == "number") {
-        passed_body = true;
+        if(data.json['syndicate-to'].length > 0) {
+          // check for "name" and "uid" properties
+          var obj = data.json['syndicate-to'][0];
+          if(typeof obj == "object") {
+            if(obj.name && obj.uid) {
+              passed_body = true;
+            }
+          }
+        } else {
+          passed_body = true;
+        }
       }
     }
   }
