@@ -21,7 +21,7 @@ CREATE TABLE `test_results` (
   `endpoint_id` int(11) DEFAULT NULL,
   `test_id` int(11) DEFAULT NULL,
   `passed` tinyint(4) DEFAULT NULL,
-  `response` text,
+  `response` blob,
   `location` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `last_result_at` datetime DEFAULT NULL,
@@ -35,8 +35,33 @@ CREATE TABLE `micropub_endpoints` (
   `me` varchar(255) DEFAULT NULL,
   `micropub_endpoint` varchar(255) DEFAULT NULL,
   `access_token` text,
+  `scope` varchar(255) DEFAULT '',
   `created_at` datetime DEFAULT NULL,
   `last_test_at` datetime DEFAULT NULL,
+  `share_token` varchar(255) DEFAULT NULL,
+  `implementation_name` varchar(255) DEFAULT NULL,
+  `implementation_url` varchar(255) DEFAULT NULL,
+  `programming_language` varchar(255) DEFAULT NULL,
+  `developer_name` varchar(255) DEFAULT NULL,
+  `developer_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `features` (
+  `number` int(11) unsigned NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `feature_results` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `feature_num` int(11) NOT NULL,
+  `endpoint_id` int(11) DEFAULT NULL,
+  `client_id` int(11) DEFAULT NULL,
+  `source_test_id` int(11) DEFAULT NULL,
+  `implements` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
