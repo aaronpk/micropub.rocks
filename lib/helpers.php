@@ -120,3 +120,10 @@ function build_micropub_query_url($endpoint, $params) {
   return preg_replace('/%5B[0-9]+%5D=/simU', '%5B%5D=', $url);
 }
 
+function streaming_publish($channel, $data) {
+  $ch = curl_init(Config::$base . 'streaming/pub?id='.$channel);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  curl_exec($ch);
+}
+
