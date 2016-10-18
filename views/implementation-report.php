@@ -71,9 +71,9 @@
 
     <table class="implementation-features">
       <? foreach($results as $result): ?>
-        <tr>
+        <tr id="feature-<?= $result->number ?>">
           <td class="num"><?= $result->number ?></td>
-          <td><?= result_icon($result->implements) ?></td>
+          <td class="result"><?= result_icon($result->implements) ?></td>
           <td><?= $result->description ?></td>
         </tr>
       <? endforeach; ?>
@@ -103,6 +103,12 @@ function hide_editing() {
 }
 
 var endpoint_id = <?= $endpoint->id ?>;
+
+var icons = {
+  "1": '<?= result_icon(1) ?>',
+  "0": '<?= result_icon(0) ?>',
+  "-1": '<?= result_icon(-1) ?>',
+};
 
 $(function(){
   if($("#implementation_name").val() == "") {
@@ -140,5 +146,16 @@ $(function(){
   $("#edit").click(function(){
     show_editing();
   });
+
+  // Streaming API
+  if(window.EventSource) {
+    // Subscribe to the streaming channel and insert responses as they come in
+    var socket = new EventSource('/streaming/sub?id=endpoint-'+endpoint_id);
+    socket.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      console.log(data.text);
+      $("#feature-"+data.text.feature+" .result").html(icons[data.text.implements]);
+    }
+  }
 });
 </script>

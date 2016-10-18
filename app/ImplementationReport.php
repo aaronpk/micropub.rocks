@@ -94,7 +94,7 @@ class ImplementationReport {
 
     if($this->endpoint) {
       if($this->endpoint->share_token == '') {
-        $this->endpoint->share_token = random_string(40);
+        $this->endpoint->share_token = random_string(20);
         $this->endpoint->save();
       }
       $token = $this->endpoint->share_token;
@@ -204,6 +204,12 @@ class ImplementationReport {
     $result->source_test_id = $test_id;
     $result->updated_at = date('Y-m-d H:i:s');
     $result->save();
+
+    // Publish this result on the streaming API
+    streaming_publish('endpoint-'.$endpoint_id, [
+      'feature' => $feature_num,
+      'implements' => $implements
+    ]);
   }
 
   public function store_result(ServerRequestInterface $request, ResponseInterface $response) {
