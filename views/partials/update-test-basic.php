@@ -85,7 +85,9 @@ set_up_json_test(test, endpoint, function(data){
     $("#updatebody").text($("#updatebody").text().replace("%%%", data.location));
     set_up_update_test(test, endpoint, function(data2) {
       var passed_code = false;
-      if(data2.code == 200 || data2.code == 201 || data2.code == 204) {
+      if(data2.code == 200 || data2.code == 204) {
+        passed_code = true;
+      } else if(data2.code == 201 && data2.location) {
         passed_code = true;
       }
       set_result_icon("#update_passed_code", passed_code ? 1 : -1);
@@ -99,6 +101,18 @@ set_up_json_test(test, endpoint, function(data){
       $("#passed_update").click(function(){
         set_result_icon("#passed_update", 1);
         store_result(test, endpoint, (passed_code ? 1 : -1));
+        store_server_feature(endpoint, <?= $feature_num ?>, (passed_code ? 1 : -1), test);
+        var response_feature = false;
+        if(data2.code == 200) {
+          response_feature = 20;
+        } else if(data2.code == 201) {
+          response_feature = 21;
+        } else if(data2.code == 204) {
+          response_feature = 22;
+        }
+        if(response_feature) {
+          store_server_feature(endpoint, response_feature, (passed_code ? 1 : -1), test);
+        }
       });
     })
   }

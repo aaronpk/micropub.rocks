@@ -7,6 +7,7 @@ $this->insert('partials/update-test-basic', [
   'test' => $test,
   'endpoint' => $endpoint,
   'description' => 'This test will create a post, then attempt to add a value to an existing property in the post.',
+  'feature_num' => 17,
   'postbody' => '{
   "type": ["h-entry"],
   "properties": {

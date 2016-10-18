@@ -7,6 +7,7 @@ $this->insert('partials/update-test-basic', [
   'test' => $test,
   'endpoint' => $endpoint,
   'description' => 'This test will create a post with two categories, then attempt to delete one of the categories.',
+  'feature_num' => 18,
   'postbody' => '{
   "type": ["h-entry"],
   "properties": {
