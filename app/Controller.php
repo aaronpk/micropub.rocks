@@ -211,6 +211,9 @@ class Controller {
     $endpoint->access_token = $data['access_token'];
     $endpoint->save();
 
+    // Record that discovery worked
+    ImplementationReport::store_server_feature($endpoint->id, 1, 1, 0);
+
     return $response->withHeader('Location', '/server-tests?endpoint='.$endpoint->id)->withStatus(302);
   }
 
