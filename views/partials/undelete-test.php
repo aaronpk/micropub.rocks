@@ -47,7 +47,7 @@ Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-
     <section class="content">
       <button class="ui green button" id="run-delete">Continue</button>
       <ul class="result-list">
-        <li><span id="delete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
+        <li><span id="delete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>200</code>, <code>201</code> or <code>204</code></li>
         <li>
           <div><span id="passed_delete" class="ui circular label">&nbsp;</span> Confirm that the post was deleted <a id="deleted_post_link" target="_blank"></a></div>
         </li>
@@ -80,7 +80,7 @@ Content-type: <?= $content_type == 'json' ? 'application/json' : 'application/x-
     <section class="content">
       <button class="ui green button" id="run-undelete">Continue</button>
       <ul class="result-list">
-        <li><span id="undelete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
+        <li><span id="undelete_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>200</code>, <code>201</code> or <code>204</code></li>
         <li>
           <div><span id="passed_undelete" class="ui circular label">&nbsp;</span> Confirm that the post was restored <a id="undeleted_post_link" target="_blank"></a></div>
         </li>
