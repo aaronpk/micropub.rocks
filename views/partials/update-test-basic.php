@@ -46,7 +46,7 @@ Content-type: application/json
     <section class="content">
       <button class="ui green button" id="run-update">Continue</button>
       <ul class="result-list">
-        <li><span id="update_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>201</code>, <code>202</code> or <code>204</code></li>
+        <li><span id="update_passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>200</code>, <code>201</code> or <code>204</code></li>
         <li id="update_location_row" class="hidden"><a href="" id="update_location">View Post</a></li>
         <li>
           <div><span id="passed_update" class="ui circular label">&nbsp;</span> Check that the post reflects the updated content</div>
