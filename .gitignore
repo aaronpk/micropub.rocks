@@ -2,3 +2,4 @@
 lib/config.php
 vendor/
 issues-micropub.rocks.html
+composer.lock
