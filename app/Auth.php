@@ -39,7 +39,7 @@ class Auth {
     ]);
 
     $response->getBody()->write(view('auth-email', [
-      'title' => 'Sign In - Webmention Rocks!',
+      'title' => 'Sign In - Micropub Rocks!',
     ]));
     return $response;
   }
