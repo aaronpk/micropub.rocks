@@ -3,6 +3,7 @@ namespace App;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response\JsonResponse;
 use ORM;
 use IndieAuth;
 use Config;
@@ -32,12 +33,121 @@ class Controller {
     $user = logged_in_user();
 
     $endpoints = ORM::for_table('micropub_endpoints')->where('user_id', $user->id)->find_many();
+    $clients = ORM::for_table('micropub_clients')->where('user_id', $user->id)->find_many();
 
     $response->getBody()->write(view('dashboard', [
       'title' => 'Micropub Rocks!',
       'endpoints' => $endpoints,
+      'clients' => $clients
     ]));
     return $response;
+  }
+
+  public function new_client(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $client = ORM::for_table('micropub_clients')
+      ->where('user_id', $user->id)
+      ->where('name', $params['name'])
+      ->find_one();
+    if(!$client) {
+      $client = ORM::for_table('micropub_clients')->create();
+      $client->user_id = $user->id;
+      $client->name = $params['name'];
+      $client->token = random_string(16);
+      $client->created_at = date('Y-m-d H:i:s');
+    }
+
+    $client->save();
+
+    return $response->withHeader('Location', '/client/'.$client->token)->withStatus(302);
+  }
+
+  public function edit_client(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $client = ORM::for_table('micropub_clients')
+      ->where('user_id', $user->id)
+      ->where('id', $args['id'])
+      ->find_one();
+
+    if(!$client)
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
+
+    $response->getBody()->write(view('edit-client', [
+      'title' => 'Edit Micropub Client - Micropub Rocks!',
+      'client' => $client,
+    ]));
+    return $response;
+  }
+
+  public function save_client(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $params = $request->getParsedBody();
+
+    $user = logged_in_user();
+
+    $client = ORM::for_table('micropub_clients')
+      ->where('user_id', $user->id)
+      ->where('id', $params['id'])
+      ->find_one();
+
+    if(!$client)
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
+
+    $client->name = $params['name'];
+    $client->save();
+
+    return $response->withHeader('Location', '/client/'.$client->token)->withStatus(302);
+  }
+
+  public function create_client_access_token(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    session_setup();
+
+    if(!is_logged_in()) {
+      return login_required($response);
+    }
+
+    $user = logged_in_user();
+
+    $client = ORM::for_table('micropub_clients')
+      ->where('user_id', $user->id)
+      ->where('id', $args['id'])
+      ->find_one();
+
+    if(!$client)
+      return $response->withHeader('Location', '/dashboard')->withStatus(302);
+
+    $token = ORM::for_table('client_access_tokens')->create();
+    $token->client_id = $client->id;
+    $token->created_at = date('Y-m-d H:i:s');
+    $token->token = random_string(128);
+    $token->save();
+
+    return new JsonResponse([
+      'token' => $token->token
+    ]);
   }
 
   public function new_endpoint(ServerRequestInterface $request, ResponseInterface $response) {

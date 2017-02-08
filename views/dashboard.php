@@ -9,7 +9,7 @@
       <div class="header">Welcome!</div>
       <p>You are logged in as <?= $_SESSION['email'] ?>!</p>
     </div>
-  <? endif; ?>
+  <? endif ?>
 
   <? if(count($endpoints)): ?>
     <section class="content">
@@ -22,12 +22,30 @@
         <tr>
           <td><a href="/server-tests?endpoint=<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a></td>
         </tr>
-        <? endforeach; ?>
+        <? endforeach ?>
       </table>
+      <a href="javascript:$('#add-new-endpoint').removeClass('hidden');" class="small">Add New Endpoint</a>
     </section>
   <? endif ?>
 
-  <section class="content">
+  <? if(count($clients)): ?>
+    <section class="content">
+      <h3>Your Micropub Clients</h3>
+
+      <p>Select one of your Micropub clients to begin the tests</p>
+
+      <table class="ui table">
+        <? foreach($clients as $client): ?>
+        <tr>
+          <td><a href="/client/<?= $client->token ?>"><?= $client->name ?></a></td>
+        </tr>
+        <? endforeach ?>
+      </table>
+      <a href="javascript:$('#add-new-client').removeClass('hidden');" class="small">Add New Client</a>
+    </section>
+  <? endif ?>
+
+  <section class="content <?= count($endpoints) ? 'hidden' : '' ?>" id="add-new-endpoint">
     <h3>Add New Endpoint</h3>
 
     <div class="ui top attached tabular menu">
@@ -53,6 +71,18 @@
         </div>
       </form>
     </div>
+  </section>
+
+  <section class="content <?= count($clients) ? 'hidden' : '' ?>" id="add-new-client">
+    <h3>Add New Client</h3>
+
+    <form action="/clients/new" method="POST">
+      <div class="ui fluid action input">
+        <input type="text" name="name" placeholder="Client Name">
+        <button class="ui button">Create</button>
+      </div>
+    </form>
+
   </section>
 
 </div>

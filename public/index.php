@@ -16,6 +16,7 @@ $container->share('emitter', Zend\Diactoros\Response\SapiEmitter::class);
 
 $route = new League\Route\RouteCollection($container);
 
+
 $route->map('GET', '/', 'App\\Controller::index');
 
 $route->map('POST', '/auth/start', 'App\\Auth::start');
@@ -23,18 +24,43 @@ $route->map('GET', '/auth/code', 'App\\Auth::code');
 $route->map('GET', '/auth/signout', 'App\\Auth::signout');
 
 $route->map('GET', '/dashboard', 'App\\Controller::dashboard');
+$route->map('GET', '/image', 'ImageProxy::image');
 
+
+//////////////////////////////////////////////////////////////////////////
+// Server Management
 $route->map('POST', '/endpoints/new', 'App\\Controller::new_endpoint');
 $route->map('GET', '/endpoints/callback', 'App\\Controller::endpoint_callback');
 $route->map('GET', '/endpoints/{id}', 'App\\Controller::edit_endpoint');
 $route->map('POST', '/endpoints/save', 'App\\Controller::save_endpoint');
 
+// Server Tests
 $route->map('GET', '/server-tests', 'App\\ServerTests::index');
 $route->map('POST', '/server-tests/micropub', 'App\\ServerTests::micropub_request');
 $route->map('POST', '/server-tests/media-check', 'App\\ServerTests::media_check');
 $route->map('POST', '/server-tests/store-result', 'App\\ServerTests::store_result');
 $route->map('GET', '/server-tests/{num}', 'App\\ServerTests::get_test');
+//////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////
+// Client Management
+$route->map('POST', '/clients/new', 'App\\Controller::new_client');
+$route->map('GET', '/clients/{id}', 'App\\Controller::edit_client');
+$route->map('POST', '/clients/save', 'App\\Controller::save_client');
+$route->map('POST', '/clients/{id}/new_access_token', 'App\\Controller::create_client_access_token');
+
+// Client Tests
+$route->map('GET', '/client/{token}', 'App\\ClientTests::index');
+$route->map('GET', '/client/{token}/auth', 'App\\ClientTests::auth');
+$route->map('POST', '/client/{token}/token', 'App\\ClientTests::token');
+$route->map('GET', '/client/{token}/micropub', 'App\\ClientTests::micropub');
+$route->map('POST', '/client/{token}/micropub', 'App\\ClientTests::micropub');
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+// Reports
 $route->map('GET', '/reports', 'App\\ImplementationReport::show_reports');
 
 $route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::get_server_report');
@@ -43,10 +69,8 @@ $route->map('GET', '/implementation-report/server/{id}/{token}',
 $route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
 $route->map('POST', '/implementation-report/save', 'App\\ImplementationReport::save_report');
 $route->map('POST', '/implementation-report/publish', 'App\\ImplementationReport::publish_report');
+//////////////////////////////////////////////////////////////////////////
 
-
-
-$route->map('GET', '/image', 'ImageProxy::image');
 
 $templates = new League\Plates\Engine(dirname(__FILE__).'/../views');
 
