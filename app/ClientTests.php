@@ -8,6 +8,7 @@ use ORM;
 use GuzzleHttp;
 use GuzzleHttp\Exception\RequestException;
 use Config;
+use Firebase\JWT\JWT;
 
 class ClientTests {
 
@@ -60,10 +61,259 @@ class ClientTests {
   }
 
   public function auth(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Require the user is already logged in. A real OAuth server would probably not do this, but it makes 
+    // our lives easier for this code.
+    // First check that this client exists and belongs to the logged-in user
+    $check = $this->_check_permissions($request, $response, $args['token']);
+    if(!$this->client) 
+      return $response->withStatus(404);
 
+    if($check)
+      return $check;
 
+    // Validate the input parameters, providing documentation on any problems
+    $params = $request->getQueryParams();
+
+    $errors = [];
+    $scope = false;
+    $me = false;
+    $client_id = false;
+    $redirect_uri = false;
+    $state = false;
+
+    if(!array_key_exists('response_type', $params)) {
+       $errors[] = [
+        'title' => 'missing <code>response_type</code>',
+        'description' => 'The "response_type" parameter was missing. You must set the <code>response_type</code> parameter to <code>code</code>'
+      ];
+    } elseif($params['response_type'] != 'code') {
+       $errors[] = [
+        'title' => 'invalid <code>response_type</code>',
+        'description' => 'The "response_type" parameter must be set to <code>code</code>. This indicates to the authorization server that your application is requesting an authorization code.'
+      ];
+    }
+
+    if(!array_key_exists('scope', $params)) {
+      $errors[] = [
+        'title' => 'missing <code>scope</code>',
+        'description' => 'Your client should request at least the "create" scope. The supported scope values will be dependent on the particular implementation, but the list of "create", "update" and "delete" should be supported by most servers.'
+      ];
+    } elseif(strpos($params['scope'], 'create') === false) {
+      $errors[] = [
+        'title' => 'missing "create" <code>scope</code>',
+        'description' => 'Your client should request at least the "create" scope. The supported scope values will be dependent on the particular implementation, but the list of "create", "update" and "delete" should be supported by most servers.'
+      ];
+    } else {
+      $scope = $params['scope'];
+    }
+
+    if(!array_key_exists('me', $params)) {
+      $errors[] = [
+        'title' => 'missing <code>me</code>',
+        'description' => 'The "me" parameter was missing. You need to provide a parameter "me" with the URL of the user who is signing in.'
+      ];
+    } elseif(!is_url($params['me'])) {
+      $errors[] = [
+        'title' => 'invalid <code>me</code>',
+        'description' => 'The "me" value provided was not a valid URL. Only http and https schemes are supported.'
+      ];
+    } else {
+      $me = $params['me'];
+    }
+
+    if(!array_key_exists('client_id', $params)) {
+      $errors[] = [
+        'title' => 'missing <code>client_id</code>',
+        'description' => 'A "client_id" parameter is required, and must be a full URL that represents your client. Typically this is the home page or other informative page describing the client.'
+      ];
+    } elseif(!is_url($params['client_id'])) {
+      $errors[] = [
+        'title' => 'invalid <code>client_id</code>',
+        'description' => 'The "client_id" value provided was not a valid URL. Only http and https schemes are supported.'
+      ];
+    } else {
+      $client_id = $params['client_id'];
+    }
+
+    if(!array_key_exists('redirect_uri', $params)) {
+      $errors[] = [
+        'title' => 'missing <code>redirect_uri</code>',
+        'description' => 'A "redirect_uri" parameter is required, and must be a full URL that you\'ll be sent to after approving this application.'
+      ];
+    } elseif(!is_url($params['redirect_uri'])) {
+      $errors[] = [
+        'title' => 'invalid <code>redirect_uri</code>',
+        'description' => 'The "redirect_uri" value provided was not a valid URL. Only http and https schemes are supported.'
+      ];
+    } else {
+      $redirect_uri = $params['redirect_uri'];
+    }
+
+    if(!array_key_exists('state', $params)) {
+      $errors[] = [
+        'title' => 'missing <code>state</code>',
+        'description' => 'A "state" parameter is required. Your client should generate a unique state value and provide it in this request, then check that the state matches after the user is redirected back to your application. This helps prevent against attacks.'
+      ];
+    } else {
+      $state = $params['state'];
+    }
+
+    // Generate a JWT with all of this data so that we can avoid re-checking it when the ALLOW button is pressed
+    if(count($errors) == 0) {
+      $jwt = JWT::encode([
+        'type' => 'confirm',
+        'scope' => $scope,
+        'me' => $me,
+        'client_id' => $client_id,
+        'redirect_uri' => $redirect_uri,
+        'state' => $state,
+        'created_at' => time(),
+        'exp' => time()+300
+      ], Config::$secret);
+    } else {
+      $jwt = false;
+    }
+
+    $response->getBody()->write(view('client-auth', [
+      'title' => 'Authorize Application - Micropub Rocks!',
+      'errors' => $errors,
+      'jwt' => $jwt,
+      'client_id' => $client_id,
+      'token' => $args['token']
+    ]));
+    return $response;
   }
 
+  // The "ALLOW" button posts here with a JWT containing all the authorized data
+  public function auth_confirm(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Restrict access to the signed-in user that created this app
+    $check = $this->_check_permissions($request, $response, $args['token']);
+    if(!$this->client) 
+      return $response->withStatus(404);
+
+    if($check)
+      return $check;
+
+    $params = $request->getParsedBody();
+
+    if(!isset($params['authorization']))
+      return $response->withStatus(400);
+
+    try {
+      $data = JWT::decode($params['authorization'], Config::$secret, ['HS256']);
+      if($data->type != 'confirm') {
+        throw new \Exception();
+      }
+    } catch(\Exception $e) {
+      return $response->withStatus(400);
+    }
+
+    // Generate the authorization code
+    $data->type = 'authorization_code';
+    $data->created_at = time();
+    $data->exp = time()+60;
+    $data->nonce = random_string(10);
+    $code = JWT::encode($data, Config::$secret);
+
+    // Build the redirect URI
+    $redirect = add_parameters_to_url($data->redirect_uri, [
+      'code' => $code,
+      'state' => $data->state,
+      'me' => $data->me
+    ]);
+
+    return $response->withHeader('Location', $redirect)->withStatus(302);
+  }
+
+  public function token(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Allow un-cookied requests, but do check if this token endpoint exists
+    if($check = $this->_check_permissions($request, $response, $args['token'])) {
+      if(!$this->client) 
+        return $response->withStatus(404);
+    }
+
+    $params = $request->getParsedBody();
+
+    // Require grant_type=authorization_code
+
+    if(!isset($params['grant_type'])) {
+      return (new JsonResponse([
+        'error' => 'invalid_request',
+        'error_description' => 'This request must be made with a grant_type parameter set to authorization_code'
+      ]))->withStatus(400);
+    }
+
+    if($params['grant_type'] != 'authorization_code') {
+      return (new JsonResponse([
+        'error' => 'unsupported_grant_type',
+        'error_description' => 'Only the authorization_code grant is supported'
+      ]))->withStatus(400);
+    }
+
+    // First parse the authorization code and check if it's expired
+    try {
+      $data = JWT::decode($params['code'], Config::$secret, ['HS256']);
+      if($data->type != 'authorization_code') {
+        throw new \Exception();
+      }
+    } catch(\Firebase\JWT\ExpiredException $e) {
+      $response = new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'The authorization code you provided has expired'
+      ]);
+      return $response->withStatus(400);
+    } catch(\Exception $e) {
+      $response = new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'The authorization code you provided is not valid',
+      ]);
+      return $response->withStatus(400);
+    }
+
+    // Check that the client ID in the request matches the one in the code
+
+    if(!isset($params['client_id'])) {
+      return (new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'You must provide the client_id that was used to generate this authorization code in the request'
+      ]))->withStatus(400);
+    }
+
+    if($params['client_id'] != $data->client_id) {
+      return (new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'The client_id in this request did not match the client_id that was used to generate this authorization code'
+      ]))->withStatus(400);
+    }
+
+    // Check that the redirect URI in the request matches the one in the code
+
+    if(!isset($params['redirect_uri'])) {
+      return (new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'You must provide the redirect_uri that was used to generate this authorization code in the request'
+      ]))->withStatus(400);
+    }
+
+    if($params['redirect_uri'] != $data->redirect_uri) {
+      return (new JsonResponse([
+        'error' => 'invalid_grant',
+        'error_description' => 'The redirect_uri in this request did not match the redirect_uri that was used to generate this authorization code'
+      ]))->withStatus(400);
+    }
+
+    $token = ORM::for_table('client_access_tokens')->create();
+    $token->client_id = $this->client->id;
+    $token->created_at = date('Y-m-d H:i:s');
+    $token->token = random_string(128);
+    $token->save();
+
+    return (new JsonResponse([
+      'access_token' => $token->token,
+      'scope' => 'create',
+      'me' => $data->me
+    ]))->withStatus(200);
+  }
 
 
 }

@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cfc7ffaff0d04422a05439d89845e4c0",
-    "content-hash": "2574a4cfd9c9a4ce02c8f17974a3e3ed",
+    "content-hash": "12b691327133dd09dc78bce3145ac944",
     "packages": [
         {
             "name": "barnabywalters/mf-cleaner",
@@ -45,7 +44,7 @@
                 }
             ],
             "description": "Cleans up microformats2 array structures",
-            "time": "2014-10-06 23:11:15"
+            "time": "2014-10-06T23:11:15+00:00"
         },
         {
             "name": "clue/stream-filter",
@@ -94,7 +93,7 @@
                 "stream_filter_append",
                 "stream_filter_register"
             ],
-            "time": "2015-11-08 23:41:30"
+            "time": "2015-11-08T23:41:30+00:00"
         },
         {
             "name": "container-interop/container-interop",
@@ -121,7 +120,7 @@
                 "MIT"
             ],
             "description": "Promoting the interoperability of container objects (DIC, SL, etc.)",
-            "time": "2014-12-30 15:22:37"
+            "time": "2014-12-30T15:22:37+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -165,7 +164,50 @@
             "keywords": [
                 "html"
             ],
-            "time": "2016-07-16 12:58:58"
+            "time": "2016-07-16T12:58:58+00:00"
+        },
+        {
+            "name": "firebase/php-jwt",
+            "version": "v4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/firebase/php-jwt.git",
+                "reference": "dccf163dc8ed7ed6a00afc06c51ee5186a428d35"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/dccf163dc8ed7ed6a00afc06c51ee5186a428d35",
+                "reference": "dccf163dc8ed7ed6a00afc06c51ee5186a428d35",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Firebase\\JWT\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Neuman Vong",
+                    "email": "neuman+pear@twilio.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Anant Narayanan",
+                    "email": "anant@php.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
+            "homepage": "https://github.com/firebase/php-jwt",
+            "time": "2016-07-18T04:51:16+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -227,7 +269,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-10-08 15:01:37"
+            "time": "2016-10-08T15:01:37+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -278,7 +320,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2016-05-18 16:56:05"
+            "time": "2016-05-18T16:56:05+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -336,7 +378,7 @@
                 "stream",
                 "uri"
             ],
-            "time": "2016-06-24 23:00:38"
+            "time": "2016-06-24T23:00:38+00:00"
         },
         {
             "name": "indieauth/client",
@@ -375,7 +417,7 @@
                 }
             ],
             "description": "IndieAuth Client Library",
-            "time": "2016-05-21 16:43:04"
+            "time": "2016-05-21T16:43:04+00:00"
         },
         {
             "name": "indieweb/link-rel-parser",
@@ -421,7 +463,7 @@
                 "indieweb",
                 "microformats2"
             ],
-            "time": "2016-04-13 17:48:59"
+            "time": "2016-04-13T17:48:59+00:00"
         },
         {
             "name": "j4mie/idiorm",
@@ -479,7 +521,7 @@
                 "orm",
                 "query builder"
             ],
-            "time": "2014-06-23 13:08:57"
+            "time": "2014-06-23T13:08:57+00:00"
         },
         {
             "name": "league/container",
@@ -543,7 +585,7 @@
                 "provider",
                 "service"
             ],
-            "time": "2016-03-17 11:07:59"
+            "time": "2016-03-17T11:07:59+00:00"
         },
         {
             "name": "league/plates",
@@ -595,7 +637,7 @@
                 "templating",
                 "views"
             ],
-            "time": "2015-07-09 02:14:40"
+            "time": "2015-07-09T02:14:40+00:00"
         },
         {
             "name": "league/route",
@@ -657,7 +699,7 @@
                 "psr7",
                 "route"
             ],
-            "time": "2016-03-11 13:53:55"
+            "time": "2016-03-11T13:53:55+00:00"
         },
         {
             "name": "mailgun/mailgun-php",
@@ -701,7 +743,7 @@
                 }
             ],
             "description": "The Mailgun SDK provides methods for all API functions.",
-            "time": "2016-08-10 16:58:18"
+            "time": "2016-08-10T16:58:18+00:00"
         },
         {
             "name": "mf2/mf2",
@@ -754,7 +796,7 @@
                 "parser",
                 "semantic"
             ],
-            "time": "2016-03-14 12:13:34"
+            "time": "2016-03-14T12:13:34+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -797,7 +839,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2015-12-20 19:50:12"
+            "time": "2015-12-20T19:50:12+00:00"
         },
         {
             "name": "php-http/discovery",
@@ -859,7 +901,7 @@
                 "message",
                 "psr7"
             ],
-            "time": "2016-07-18 09:37:58"
+            "time": "2016-07-18T09:37:58+00:00"
         },
         {
             "name": "php-http/guzzle6-adapter",
@@ -919,7 +961,7 @@
                 "Guzzle",
                 "http"
             ],
-            "time": "2016-05-10 06:13:32"
+            "time": "2016-05-10T06:13:32+00:00"
         },
         {
             "name": "php-http/httplug",
@@ -975,7 +1017,7 @@
                 "client",
                 "http"
             ],
-            "time": "2016-08-31 08:30:17"
+            "time": "2016-08-31T08:30:17+00:00"
         },
         {
             "name": "php-http/message",
@@ -1041,7 +1083,7 @@
                 "message",
                 "psr-7"
             ],
-            "time": "2016-07-15 14:48:03"
+            "time": "2016-07-15T14:48:03+00:00"
         },
         {
             "name": "php-http/message-factory",
@@ -1091,7 +1133,7 @@
                 "stream",
                 "uri"
             ],
-            "time": "2015-12-19 14:08:53"
+            "time": "2015-12-19T14:08:53+00:00"
         },
         {
             "name": "php-http/multipart-stream-builder",
@@ -1147,7 +1189,7 @@
                 "message",
                 "stream"
             ],
-            "time": "2016-08-31 10:13:17"
+            "time": "2016-08-31T10:13:17+00:00"
         },
         {
             "name": "php-http/promise",
@@ -1197,7 +1239,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2016-01-26 13:27:02"
+            "time": "2016-01-26T13:27:02+00:00"
         },
         {
             "name": "predis/predis",
@@ -1247,7 +1289,7 @@
                 "predis",
                 "redis"
             ],
-            "time": "2016-06-16 16:22:20"
+            "time": "2016-06-16T16:22:20+00:00"
         },
         {
             "name": "psr/http-message",
@@ -1297,7 +1339,7 @@
                 "request",
                 "response"
             ],
-            "time": "2016-08-06 14:39:51"
+            "time": "2016-08-06T14:39:51+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1347,7 +1389,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2016-10-11 13:25:21"
+            "time": "2016-10-11T13:25:21+00:00"
         }
     ],
     "packages-dev": [],

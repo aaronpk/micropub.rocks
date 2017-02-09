@@ -79,6 +79,27 @@ function display_url($url) {
   return $url;
 }
 
+function is_url($url) {
+  return preg_match('/^https?:\/\/[a-z0-9\.\-]\/?/', $url);
+}
+
+function add_parameters_to_url($url, $add_params) {
+  $parts = parse_url($url);
+  if(array_key_exists('query', $parts) && $parts['query']) {
+    parse_str($parts['query'], $params);
+  } else {
+    $params = [];
+  }
+
+  foreach($add_params as $k=>$v) {
+    $params[$k] = $v;
+  }
+
+  $parts['query'] = http_build_query($params);
+
+  return http_build_url($parts);
+}
+
 if(!function_exists('http_build_url')) {
   function http_build_url($parsed_url) {
     $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
