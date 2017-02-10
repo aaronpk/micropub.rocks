@@ -265,6 +265,7 @@ class Controller {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+      'grant_type' => 'authorization_code',
       'me' => $params['me'],
       'code' => $params['code'],
       'redirect_uri' => self::_redirectURI(),
