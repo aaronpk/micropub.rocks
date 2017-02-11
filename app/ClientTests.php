@@ -51,11 +51,25 @@ class ClientTests {
       return $response;
     }
 
+    $data = ORM::for_table('tests')
+      ->raw_query('SELECT tests.*, test_results.passed FROM tests
+        LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.client_id = :client_id
+        WHERE tests.group = :group 
+        ORDER BY tests.number', ['client_id'=>$this->client->id, 'group'=>'client'])
+      ->find_many();
 
+    $tests = [];
+    foreach($data as $test) {
+      $tests[$test->number] = [
+        'name' => $test->name,
+        'passed' => $test->passed
+      ];
+    }
 
     $response->getBody()->write(view('client-tests', [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
+      'tests' => $tests
     ]));
     return $response;
   }
@@ -308,6 +322,12 @@ class ClientTests {
     $token->token = random_string(128);
     $token->save();
 
+    // Publish to streaming clients that the login was successful
+    streaming_publish('client-'.$this->client->token, [
+      'action' => 'authorization-complete',
+      'client_id' => $data->client_id
+    ]);
+
     return (new JsonResponse([
       'access_token' => $token->token,
       'scope' => 'create',
@@ -315,5 +335,91 @@ class ClientTests {
     ]))->withStatus(200);
   }
 
+  public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Require the user is already logged in. A real OAuth server would probably not do this, but it makes 
+    // our lives easier for this code.
+    // First check that this client exists and belongs to the logged-in user
+    $check = $this->_check_permissions($request, $response, $args['token']);
+    if(!$this->client) 
+      return $response->withStatus(404);
 
+    if($check)
+      return $check;
+
+    $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
+
+    if(!$test)
+      return $response->withHeader('Location', '/client/'.$this->client->token)->withStatus(302);
+
+    $this->client->last_viewed_test = $args['num'];
+    $this->client->save();
+
+    $response->getBody()->write(view('client-tests/'.$args['num'], [
+      'title' => 'Micropub Rocks!',
+      'client' => $this->client,
+      'test' => $test,
+    ]));
+    return $response;
+  }
+
+  public function micropub(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Allow un-cookied requests, but do check if this token endpoint exists
+    if($check = $this->_check_permissions($request, $response, $args['token'])) {
+      if(!$this->client) 
+        return $response->withStatus(404);
+    }
+
+    $params = $request->getParsedBody();
+
+    // Check what test was last viewed
+    $num = $this->client->last_viewed_test;
+
+    switch($num) {
+      case 100:
+        // Check for required parameters
+        $errors = [];
+        if(!isset($params['h']))
+          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
+
+        if(count($errors)) {
+          $html = implode('<br>', $errors);
+          $status = 400;
+        } else {
+          $html = view('client-tests/entry', $params);
+          $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num);
+          $status = 201;
+        }
+
+        streaming_publish('client-'.$this->client->token, [
+          'action' => 'client-result',
+          'html' => $html
+        ]);
+        break;
+
+      default:
+        $status = 400;
+        break;
+    }
+
+    return $response->withStatus($status);
+  }
+
+  public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Allow un-cookied requests, but do check if this token endpoint exists
+    if($check = $this->_check_permissions($request, $response, $args['token'])) {
+      if(!$this->client) 
+        return $response->withStatus(404);
+    }
+
+    $params = $request->getQueryParams();
+
+    // Check what test was last viewed
+    $num = $this->client->last_viewed_test;
+
+
+    
+    
+    
+    return $response;
+  }
 }

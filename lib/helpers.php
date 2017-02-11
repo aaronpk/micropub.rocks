@@ -131,6 +131,10 @@ function test_url($test_num, $endpoint_id) {
   return '/server-tests/' . $test_num . '?endpoint=' . $endpoint_id;
 }
 
+function client_test_url($test_num, $token) {
+  return '/client/' . $token . '/' . $test_num;
+}
+
 function build_micropub_query_url($endpoint, $params) {
   $url = parse_url($endpoint);
   if(!array_key_exists('query', $url))

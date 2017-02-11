@@ -8,6 +8,7 @@
   <title><?= $this->e($title) ?></title>
   <link href="/assets/semantic.min.css" rel="stylesheet">
   <link href="/assets/style.css" rel="stylesheet">
+  <link href="/assets/entry.css" rel="stylesheet">
 
   <script src="/assets/jquery-1.11.3.min.js"></script>
   <script src="/assets/semantic.min.js"></script>

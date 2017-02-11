@@ -12,6 +12,10 @@
       </h3>
     </div>
 
+    <div class="ui success message hidden" id="sign-in-success">
+      You successfully signed in to <span class="client_id"></span>
+    </div>
+
     <div id="sign-in-options" style="padding-top: 1em;">
       <div class="ui top attached tabular menu">
         <a class="active item" data-tab="first">Sign In</a>
@@ -42,6 +46,28 @@
       </div>
     </div>
 
+    <br>
+    <p>Note: Your client does not need to pass every test. It's okay to pass only the tests you're interested in if your client is intentionally supporting a subset of features.</p>
+
+    <h4>Creating Posts (Form-Encoded)</h4>
+    <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>100, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>101, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>104, 'tests'=>$tests, 'client'=>$client]); ?>
+    </table>
+
+    <h4>Creating Posts (JSON)</h4>
+    <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>200, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>201, 'tests'=>$tests, 'client'=>$client]); ?>
+    </table>
+
+    <h4>Editing Posts</h4>
+    <table class="ui compact table">
+
+    </table>
+
+
     <div class="ui warning message">Note: The client tests for Micropub.rocks are still in progress. Please check back later, or follow the <a href="https://github.com/aaronpk/micropub.rocks/issues">issues</a> for progress updates.</div>
 
   </section>
@@ -59,5 +85,19 @@ $(function(){
       $(this).select();
     }
   });
+
+  // Streaming updates
+  if(window.EventSource) {
+    var socket = new EventSource('/streaming/sub?id=client-<?= $client->token ?>');
+
+    socket.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      if(data.text.action == 'authorization-complete') {
+        $("#sign-in-options").addClass("hidden");
+        $("#sign-in-success .client_id").text(data.text.client_id);
+        $("#sign-in-success").removeClass("hidden");
+      }
+    }    
+  }
 });
 </script>
