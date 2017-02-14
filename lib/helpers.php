@@ -115,6 +115,13 @@ if(!function_exists('http_build_url')) {
   }
 }
 
+function http_header_case($str) {
+  $str = str_replace('-', ' ', $str);
+  $str = ucwords($str);
+  $str = str_replace(' ', '-', $str);
+  return $str;
+}
+
 function result_icon($passed, $id=false) {
   if($passed == 1) {
     return '<span id="'.$id.'" class="ui green circular label">&#x2714;</span>';

@@ -61,6 +61,13 @@ section.content h4 {
   margin-top: 1em;
 }
 
+section.content#debug {
+  font-size: 14px;
+}
+section.content#debug pre {
+  margin: 0;
+}
+
 @media(max-width: 616px) {
   section.content {
     margin-left: 8px;

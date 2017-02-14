@@ -7,6 +7,8 @@
 
   background: #fff;
   padding: 12px;
+
+  margin-bottom: 12px;
 }
 .post-container .post-main .meta {
   font-size: 10pt;
@@ -16,6 +18,13 @@
 }
 .post-container .post-main .meta a:hover {
   color: #999;
+}
+
+@media(max-width: 616px) {
+  .post-container {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
 }
 
 @media(max-width: 400px) {

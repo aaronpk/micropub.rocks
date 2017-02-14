@@ -374,6 +374,21 @@ class ClientTests {
     // Check what test was last viewed
     $num = $this->client->last_viewed_test;
 
+    // Include the original info from the request
+    // Method
+    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    // Headers
+    $request_headers = "";
+    foreach($request->getHeaders() as $k=>$vs) {
+      foreach($vs as $v) {
+        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
+      }
+    }
+    // Body
+    $request_body = (string)$request->getBody();
+    $request_body = str_replace('&', "&\n", $request_body);
+    $debug = $request_method . "\n" . $request_headers . "\n" . $request_body;
+
     switch($num) {
       case 100:
         // Check for required parameters
@@ -392,7 +407,8 @@ class ClientTests {
 
         streaming_publish('client-'.$this->client->token, [
           'action' => 'client-result',
-          'html' => $html
+          'html' => $html,
+          'debug' => $debug
         ]);
         break;
 

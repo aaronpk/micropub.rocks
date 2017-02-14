@@ -14,6 +14,10 @@
   <section class="hidden" id="result">
 
   </section>
+  <section class="content hidden" id="debug">
+    <h4>Raw Request</h4>
+    <pre></pre>
+  </section>
 
 </div>
 <script>
@@ -25,6 +29,8 @@ $(function(){
       var data = JSON.parse(event.data);
       if(data.text.action == 'client-result') {
         $("#result").removeClass("hidden").html(data.text.html);
+        $("#debug").removeClass("hidden");
+        $("#debug pre").text(data.text.debug);
       }
     }    
   } else {
