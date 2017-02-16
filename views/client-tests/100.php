@@ -1,5 +1,7 @@
 <?php $this->layout('layout', [
                       'title' => $test->name,
+                      'client' => $client,
+                      'test' => $test
                     ]); ?>
 <div class="single-column">
 

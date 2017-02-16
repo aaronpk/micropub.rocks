@@ -25,6 +25,7 @@
   <a class="item" href="/">Home</a>
   <a class="item" href="/dashboard">Dashboard</a>
   <?= isset($_GET['endpoint']) ? '<a class="item" href="/server-tests?endpoint='.$_GET['endpoint'].'">Server Tests</a>' : '' ?>
+  <?= isset($client) ? '<a class="item" href="/client/'.$client->token.'">Client Tests</a>' : '' ?>
   <div class="right menu">
     <span class="item"><?= display_url($_SESSION['email']) ?></span>
     <a class="item" href="/auth/signout">Sign Out</a>
