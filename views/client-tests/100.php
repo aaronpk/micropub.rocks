@@ -5,18 +5,19 @@
 
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
-
-    <p>This is a basic test of creating an h-entry post from your client in form-encoded format.</p>
-    <p>To pass this test, use your client to create an h-entry post with plain text content. It doesn't matter what text you send.</p>
-    <p>Keep this page open and post from your client. Your post will appear here.</p>
+    <?php if(!$post_html): ?>
+      <p>This is a basic test of creating an h-entry post from your client in form-encoded format.</p>
+      <p>To pass this test, use your client to create an h-entry post with plain text content. It doesn't matter what text you send.</p>
+      <p>Keep this page open and post from your client. Your post will appear here.</p>
+    <?php endif ?>
   </section>
 
   <section class="hidden" id="result">
-
+    <?= $post_html ?>
   </section>
   <section class="content hidden" id="debug">
     <h4>Raw Request</h4>
-    <pre></pre>
+    <pre><?= $post_debug ?></pre>
   </section>
 
 </div>
@@ -36,5 +37,9 @@ $(function(){
   } else {
     $("#result").removeClass("hidden").html('<div class="ui error message">Error: Your browser does not support <a href="http://caniuse.com/eventsource">EventSource</a> so the test results will not appear.</div>');
   }
+  <?php if($post_html): ?>
+    $("#result").removeClass("hidden");
+    $("#debug").removeClass("hidden");
+  <?php endif ?>
 });
 </script>

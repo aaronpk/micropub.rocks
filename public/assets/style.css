@@ -50,6 +50,11 @@ section.content {
   margin-bottom: 12px;
 }
 
+section.content.errors {
+  background-color: #fdd;
+  border-color: #daa;
+}
+
 section.content.code {
   background: #eee;
   font-size: 14px;

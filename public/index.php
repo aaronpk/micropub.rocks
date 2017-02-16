@@ -54,6 +54,7 @@ $route->map('POST', '/clients/{id}/new_access_token', 'App\\Controller::create_c
 $route->map('GET', '/client/{token}', 'App\\ClientTests::index');
 $route->map('GET', '/client/{token}/auth', 'App\\ClientTests::auth');
 $route->map('GET', '/client/{token}/{num}', 'App\\ClientTests::get_test');
+$route->map('GET', '/client/{token}/{num}/{key}', 'App\\ClientTests::get_test');
 $route->map('POST', '/client/{token}/auth', 'App\\ClientTests::auth_confirm');
 $route->map('POST', '/client/{token}/token', 'App\\ClientTests::token');
 $route->map('GET', '/client/{token}/micropub', 'App\\ClientTests::micropub_get');

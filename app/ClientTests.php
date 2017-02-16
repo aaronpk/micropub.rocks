@@ -9,6 +9,7 @@ use GuzzleHttp;
 use GuzzleHttp\Exception\RequestException;
 use Config;
 use Firebase\JWT\JWT;
+use Rocks\Redis;
 
 class ClientTests {
 
@@ -336,8 +337,6 @@ class ClientTests {
   }
 
   public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    // Require the user is already logged in. A real OAuth server would probably not do this, but it makes 
-    // our lives easier for this code.
     // First check that this client exists and belongs to the logged-in user
     $check = $this->_check_permissions($request, $response, $args['token']);
     if(!$this->client) 
@@ -354,10 +353,19 @@ class ClientTests {
     $this->client->last_viewed_test = $args['num'];
     $this->client->save();
 
+    if(array_key_exists('key', $args)) {
+      list($post_html, $post_debug) = Redis::getPostHTML($this->client->token, $args['num'], $args['key']);
+    } else {
+      $post_html = '';
+      $post_debug = '';
+    }
+
     $response->getBody()->write(view('client-tests/'.$args['num'], [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
       'test' => $test,
+      'post_html' => $post_html,
+      'post_debug' => $post_debug,
     ]));
     return $response;
   }
@@ -396,12 +404,22 @@ class ClientTests {
         if(!isset($params['h']))
           $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
 
+        if(!isset($params['content']))
+          $errors[] = 'The request did not include a "content" parameter.';
+        elseif(!$params['content'])
+          $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
+
         if(count($errors)) {
-          $html = implode('<br>', $errors);
+          $html = view('client-tests/errors', ['errors'=>$errors]);
           $status = 400;
         } else {
           $html = view('client-tests/entry', $params);
-          $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num);
+
+          // Cache the HTML so that it can be rendered in a permalink
+          $key = random_string(8);
+          Redis::storePostHTML($this->client->token, $num, $key, $html, $debug);
+
+          $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key);
           $status = 201;
         }
 
