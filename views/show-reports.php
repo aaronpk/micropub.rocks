@@ -11,7 +11,7 @@
       <? foreach($endpoints as $i=>$endpoint): ?>
         <td>
           <a href="/implementation-report/server/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
-            <?= $endpoint->implementation_name ?: $endpoint->micropub_endpoint ?>
+            <?= $i+1 ?>
           </a>
         </td>
       <? endforeach; ?>
@@ -30,6 +30,17 @@
       </tr>
     <? endforeach; ?>
   </table>
+
+  <ul>
+    <? foreach($endpoints as $i=>$endpoint): ?>
+      <li>
+        <?= $i+1 ?>: 
+        <a href="/implementation-report/server/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
+          <?= $endpoint->implementation_name ?: $endpoint->micropub_endpoint ?>
+        </a>
+      </li>
+    <? endforeach; ?>
+  </ul>
 </section>
 
 </div>
