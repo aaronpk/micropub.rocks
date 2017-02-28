@@ -408,6 +408,8 @@ class ClientTests {
           $errors[] = 'The request did not include a "content" parameter.';
         elseif(!$params['content'])
           $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
+        elseif(!is_string($params['content']))
+          $errors[] = 'To pass this test you must provide content as a string';
 
         if(count($errors)) {
           $html = view('client-tests/errors', ['errors'=>$errors]);
