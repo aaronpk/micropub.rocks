@@ -367,6 +367,7 @@ class ClientTests {
       case 200:
       case 201:
       case 203:
+      case 204:
         $template = 'basic'; break;
       default:
         $template = 'not-found'; break;
@@ -455,73 +456,110 @@ class ClientTests {
 
     switch($num) {
       case 100:
-      case 200:
-
-        if($num == 100 && $format != 'form') {
-          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
-        } elseif($num == 200 && $format != 'json') {
-          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        if($this->_requireFormEncoded($format, $errors)) {
+          if($this->_requireFormHEntry($params, $errors)) {
+            if(!isset($params['content']))
+              $errors[] = 'The request did not include a "content" parameter.';
+            elseif(!$params['content'])
+              $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
+            elseif(!is_string($params['content']))
+              $errors[] = 'To pass this test you must provide content as a string';
+          }
         }
 
-        // Check for required parameters
-        if(!isset($params['h']))
-          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
+        break;
 
-        if(!isset($params['content']))
-          $errors[] = 'The request did not include a "content" parameter.';
-        elseif(!$params['content'])
-          $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
-        elseif(!is_string($params['content']))
-          $errors[] = 'To pass this test you must provide content as a string';
+      case 200:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              if(!isset($properties['content']))
+                $errors[] = 'The request did not include a "content" parameter.';
+              elseif(!$properties['content'])
+                $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
+              elseif(!is_string($properties['content'][0]))
+                $errors[] = 'To pass this test you must provide content as a string';
+            }
+          }
+        }
 
         break;
 
       case 101:
-      case 201:
-
-        if($num == 101 && $format != 'form') {
-          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
-        } elseif($num == 201 && $format != 'json') {
-          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        if($this->_requireFormEncoded($format, $errors)) {
+          if($this->_requireFormHEntry($params, $errors)) {
+            if(!isset($params['category']))
+              $errors[] = 'The request did not include a "category" parameter.';
+            elseif(!$params['category'])
+              $errors[] = 'The request provided a "category" parameter that was empty. Make sure you include two or more categories.';
+            elseif(!is_array($params['category']))
+              $errors[] = 'The "category" parameter in the request was sent as a string. Ensure you are using the form-encoded square bracket notation to specify multiple values.';
+            elseif(count($params['category']) < 2)
+              $errors[] = 'The request provided the "category" parameter as an array, but only had one value. Ensure your request contains multiple values for this parameter.';
+          }
         }
 
-        if(!isset($params['h']))
-          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
+        break;
 
-        if(!isset($params['category']))
-          $errors[] = 'The request did not include a "category" parameter.';
-        elseif(!$params['category'])
-          $errors[] = 'The request provided a "category" parameter that was empty. Make sure you include two or more categories.';
-        elseif(!is_array($params['category']))
-          $errors[] = 'The "category" parameter in the request was sent as a string. Ensure you are using the form-encoded square bracket notation to specify multiple values.';
-        elseif(count($params['category']) < 2)
-          $errors[] = 'The request provided the "category" parameter as an array, but only had one value. Ensure your request contains multiple values for this parameter.';
+      case 201:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              if(!isset($properties['category']))
+                $errors[] = 'The request did not include a "category" parameter.';
+              elseif(!$properties['category'])
+                $errors[] = 'The request provided a "category" parameter that was empty. Make sure you include two or more categories.';
+              elseif(!is_array($properties['category']))
+                $errors[] = 'The "category" parameter in the request was sent as a string. Ensure you are using the form-encoded square bracket notation to specify multiple values.';
+              elseif(count($properties['category']) < 2)
+                $errors[] = 'The request provided the "category" parameter as an array, but only had one value. Ensure your request contains multiple values for this parameter.';
+            }
+          }
+        }
 
         break;
 
       case 104:
-      case 203:
-
-        if($num == 104 && $format != 'form') {
-          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
-        } elseif($num == 203 && $format != 'json') {
-          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        if($this->_requireFormEncoded($format, $errors)) {
+          if($this->_requireFormHEntry($params, $errors)) {
+            if(!isset($params['photo']))
+              $errors[] = 'The request did not include a "photo" parameter.';
+            elseif(!$params['photo'])
+              $errors[] = 'The "photo" parameter was empty';
+            elseif(!is_string($params['photo']))
+              $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
+            elseif(!is_url($params['photo']))
+              $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+          }
         }
-
-        if(!isset($params['h']))
-          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
-
-        if(!isset($params['photo']))
-          $errors[] = 'The request did not include a "photo" parameter.';
-        elseif(!$params['photo'])
-          $errors[] = 'The "photo" parameter was empty';
-        elseif(!is_string($params['photo']))
-          $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
-        elseif(!is_url($params['photo']))
-          $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
 
         break;
 
+      case 203:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              if(!isset($properties['photo']))
+                $errors[] = 'The request did not include a "photo" parameter.';
+              elseif(!$properties['photo'])
+                $errors[] = 'The "photo" parameter was empty';
+              elseif(!is_array($properties['photo']))
+                $errors[] = 'All values in JSON format must be arrays.';
+              elseif(!array_key_exists(0, $properties['photo']) || !is_url($properties['photo'][0]))
+                $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+            }
+          }
+        }
+        break;
+
+      case 204:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+
+          }
+        }
+
+        break;
 
       default:
         $status = 500;
@@ -553,6 +591,65 @@ class ClientTests {
     }
 
     return $response->withStatus($status);
+  }
+
+  private function _requireFormEncoded($format, &$errors) {
+    if($format != 'form') {
+      $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
+      return false;
+    } {
+      return true;
+    }
+  }
+
+  private function _requireJSONEncoded($format, &$errors) {
+    if($format != 'json') {
+      $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private function _requireFormHEntry($params, &$errors) {
+    if(!isset($params['h']) || $params['h'] != 'entry') {
+      $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private function _requireJSONHEntry($params, &$errors) {
+    if(!isset($params['type']) || $params['type'] != 'h-entry') {
+      $errors[] = 'The request to create an h-entry must include a parameter "type" set to "h-entry"';
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private function _validateJSONProperties($params, &$errors) {
+    if(!isset($params['properties'])) {
+      $errors[] = 'JSON requests must send a Microformats 2 object where the values are in a key named "properties".';
+      return false;
+    }
+
+    $properties = $params['properties'];
+
+    $has_error = false;
+    foreach($properties as $k=>$v) {
+      if(!is_array($v) || !array_key_exists(0, $v)) {
+        $errors[] = 'The "'.$k.'" parameter was not provided as an array. In JSON format, all values are arrays, even if there is only one value.';
+        $has_error = true;
+      }
+    }
+
+    if($has_error) {
+      return false;
+    } else {
+      return $properties;
+    }
   }
 
   public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {

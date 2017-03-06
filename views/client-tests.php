@@ -61,6 +61,7 @@
       <? $this->insert('partials/client-test-row', ['num'=>200, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>201, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>203, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>204, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Editing Posts</h4>
