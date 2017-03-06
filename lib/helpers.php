@@ -39,8 +39,12 @@ function e($text) {
 function mf2_val($in) {
   if(is_string($in)) return $in;
   if(is_array($in)) {
-    if(array_key_exists(0, $in) && is_string($in[0]))
+    if(array_key_exists(0, $in) && is_string($in[0])) 
       return $in[0];
+    if(array_key_exists(0, $in) && is_array($in[0])) {
+      if(array_key_exists('value', $in[0]))
+        return $in[0]['value'];
+    }
     if(array_key_exists('value', $in))
       return $in['value'];
   }

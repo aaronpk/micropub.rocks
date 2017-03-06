@@ -368,6 +368,7 @@ class ClientTests {
       case 201:
       case 203:
       case 204:
+      case 205:
         $template = 'basic'; break;
       default:
         $template = 'not-found'; break;
@@ -546,8 +547,6 @@ class ClientTests {
                 $errors[] = 'The request did not include a "photo" parameter.';
               elseif(!$properties['photo'])
                 $errors[] = 'The "photo" parameter was empty';
-              elseif(!is_array($properties['photo']))
-                $errors[] = 'All values in JSON format must be arrays.';
               elseif(!array_key_exists(0, $properties['photo']) || !is_url($properties['photo'][0]))
                 $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
             }
@@ -583,7 +582,30 @@ class ClientTests {
             }            
           }
         }
+        break;
 
+      case 205:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              if(!isset($properties['photo']))
+                $errors[] = 'The request did not include a "photo" parameter.';
+              elseif(!$properties['photo'])
+                $errors[] = 'The "photo" parameter was empty';
+              elseif(!is_array($properties['photo'][0]))
+                $errors[] = 'The value of the "photo" parameter does not appear to include alt text.';
+              else {
+                $photo = $properties['photo'][0];
+                if(!isset($photo['value'])) {
+                  $errors[] = 'The photo value is missing a URL. Provide the URL in the "value" property.';
+                }
+                if(!isset($photo['alt'])) {
+                  $errors[] = 'The photo value is missing alt text. Provide the image alt text in the "alt" property.';
+                }
+              }
+            }
+          }
+        }
         break;
 
       default:
