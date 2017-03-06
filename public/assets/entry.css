@@ -19,6 +19,9 @@
 .post-container .post-main .meta a:hover {
   color: #999;
 }
+.post-container .post-main .meta {
+  color: #777;
+}
 
 @media(max-width: 616px) {
   .post-container {
@@ -42,6 +45,14 @@
 }
 .post-container .right {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.post-container .right .content {
+  flex: auto;
+}
+.post-container .right .meta {
+  flex: 0 auto;
 }
 .post-container img {
   background: white;

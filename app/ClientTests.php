@@ -360,7 +360,15 @@ class ClientTests {
       $post_debug = '';
     }
 
-    $response->getBody()->write(view('client-tests/'.$args['num'], [
+    switch($args['num']) {
+      case 100:
+      case 101:
+        $template = 'basic'; break;
+      default:
+        $template = 'not-found'; break;
+    }
+
+    $response->getBody()->write(view('client-tests/'.$template, [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
       'test' => $test,
@@ -425,13 +433,27 @@ class ClientTests {
       return $response->withStatus($status);
     }
 
-    $params = $request->getParsedBody();
+    $content_type = $request->getHeaderLine('Content-Type');
+    if($content_type == 'application/json') {
+      $params = @json_decode($request_body, true);
+      $format = 'json';
+    } elseif($content_type == 'multipart/form-data') {
+      $format = 'multipart';
+    } else {
+      $params = $request->getParsedBody();
+      $format = 'form';
+    }
 
     // Check what test was last viewed
     $num = $this->client->last_viewed_test;
 
+    $html = false;
+
     switch($num) {
       case 100:
+        if($format != 'form')
+          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a propert form-encoded request with valid parameters.';
+
         // Check for required parameters
         if(!isset($params['h']))
           $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
@@ -443,32 +465,49 @@ class ClientTests {
         elseif(!is_string($params['content']))
           $errors[] = 'To pass this test you must provide content as a string';
 
-        if(count($errors)) {
-          $html = view('client-tests/errors', ['errors'=>$errors]);
-          $status = 400;
-        } else {
-          $html = view('client-tests/entry', $params);
+        break;
 
-          // Cache the HTML so that it can be rendered in a permalink
-          $key = random_string(8);
-          Redis::storePostHTML($this->client->token, $num, $key, $html, $debug);
+      case 101:
+        if(!isset($params['h']))
+          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
 
-          $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key);
-          $status = 201;
+        if(!isset($params['category']))
+          $errors[] = 'The request did not include a "category" parameter.';
+        elseif(!$params['category'])
+          $errors[] = 'The request provided a "category" parameter that was empty. Make sure you include two or more categories.';
+        elseif(!is_array($params['category']))
+          $errors[] = 'The "category" parameter in the request was sent as a string. Ensure you are using the form-encoded square bracket notation to specify multiple values.';
+        elseif(count($params['category']) < 2)
+          $errors[] = 'The request provided the "category" parameter as an array, but only had one value. Ensure your request contains multiple values for this parameter.';
 
-          $html = view('client-tests/success', ['num'=>$num]).$html;
-        }
-
-        streaming_publish('client-'.$this->client->token, [
-          'action' => 'client-result',
-          'html' => $html,
-          'debug' => $debug
-        ]);
         break;
 
       default:
         $status = 500;
         break;
+    }
+
+    if(count($errors)) {
+      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $status = 400;
+    } else {
+      $html = view('client-tests/entry', $params);
+      $html = view('client-tests/success', ['num'=>$num]).$html;
+
+      // Cache the HTML so that it can be rendered in a permalink
+      $key = random_string(8);
+      Redis::storePostHTML($this->client->token, $num, $key, $html, $debug);
+
+      $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key);
+      $status = 201;
+    }
+
+    if($html) {
+      streaming_publish('client-'.$this->client->token, [
+        'action' => 'client-result',
+        'html' => $html,
+        'debug' => $debug
+      ]);
     }
 
     return $response->withStatus($status);

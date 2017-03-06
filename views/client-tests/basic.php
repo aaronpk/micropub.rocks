@@ -8,9 +8,7 @@
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
     <?php if(!$post_html): ?>
-      <p>This is a basic test of creating an h-entry post from your client in form-encoded format.</p>
-      <p>To pass this test, use your client to create an h-entry post with plain text content. It doesn't matter what text you send.</p>
-      <p>Keep this page open and post from your client. Your post will appear here.</p>
+      <?= $test->description ?>
     <?php endif ?>
   </section>
 
