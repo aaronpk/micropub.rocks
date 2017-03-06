@@ -12,6 +12,7 @@ CREATE TABLE `tests` (
   `group` enum('server','client') DEFAULT NULL,
   `number` int(11) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `description` text,
   PRIMARY KEY (`id`),
   KEY `group_number` (`group`,`number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

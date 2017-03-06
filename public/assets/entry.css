@@ -58,6 +58,7 @@
   background: white;
   border: 1px #abcce9 solid;
   border-radius: .28571429rem;
+  max-width: 100%;
 }
 
 

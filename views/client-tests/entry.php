@@ -10,6 +10,9 @@
       <? if(isset($content)): ?>
         <div class="e-content content"><?= $this->e($content) ?></div>
       <? endif ?>
+      <? if(isset($photo)): ?>
+        <div class="photo"><img src="<?= $this->e($photo) ?>" class="u-photo"></div>
+      <? endif ?>
       <div class="meta">
         <? if(isset($category)): ?>
           <div class="tags">

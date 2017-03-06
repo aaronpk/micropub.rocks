@@ -363,6 +363,10 @@ class ClientTests {
     switch($args['num']) {
       case 100:
       case 101:
+      case 104:
+      case 200:
+      case 201:
+      case 203:
         $template = 'basic'; break;
       default:
         $template = 'not-found'; break;
@@ -451,8 +455,13 @@ class ClientTests {
 
     switch($num) {
       case 100:
-        if($format != 'form')
-          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a propert form-encoded request with valid parameters.';
+      case 200:
+
+        if($num == 100 && $format != 'form') {
+          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
+        } elseif($num == 200 && $format != 'json') {
+          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        }
 
         // Check for required parameters
         if(!isset($params['h']))
@@ -468,6 +477,14 @@ class ClientTests {
         break;
 
       case 101:
+      case 201:
+
+        if($num == 101 && $format != 'form') {
+          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
+        } elseif($num == 201 && $format != 'json') {
+          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        }
+
         if(!isset($params['h']))
           $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
 
@@ -482,8 +499,33 @@ class ClientTests {
 
         break;
 
+      case 104:
+      case 203:
+
+        if($num == 104 && $format != 'form') {
+          $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
+        } elseif($num == 203 && $format != 'json') {
+          $errors[] = 'The request was not a JSON request. Ensure you are sending a proper JSON request with valid parameters.';
+        }
+
+        if(!isset($params['h']))
+          $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
+
+        if(!isset($params['photo']))
+          $errors[] = 'The request did not include a "photo" parameter.';
+        elseif(!$params['photo'])
+          $errors[] = 'The "photo" parameter was empty';
+        elseif(!is_string($params['photo']))
+          $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
+        elseif(!is_url($params['photo']))
+          $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+
+        break;
+
+
       default:
         $status = 500;
+        $errors[] = 'This test is not yet implemented';
         break;
     }
 
