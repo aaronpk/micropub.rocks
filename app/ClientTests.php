@@ -464,6 +464,7 @@ class ClientTests {
               $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some text in your post.';
             elseif(!is_string($params['content']))
               $errors[] = 'To pass this test you must provide content as a string';
+            $properties = $params;
           }
         }
 
@@ -496,6 +497,7 @@ class ClientTests {
               $errors[] = 'The "category" parameter in the request was sent as a string. Ensure you are using the form-encoded square bracket notation to specify multiple values.';
             elseif(count($params['category']) < 2)
               $errors[] = 'The request provided the "category" parameter as an array, but only had one value. Ensure your request contains multiple values for this parameter.';
+            $properties = $params;
           }
         }
 
@@ -530,6 +532,7 @@ class ClientTests {
               $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
             elseif(!is_url($params['photo']))
               $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+            $properties = $params;
           }
         }
 
@@ -555,7 +558,29 @@ class ClientTests {
       case 204:
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
-
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              // Check that at least one of the values is a mf2 object
+              $has_nested_object = false;
+              foreach($properties as $k=>$values) {
+                if(is_array($values)) {
+                  foreach($values as $v) {
+                    if(isset($v['type']) && is_array($v['type']) 
+                      && isset($v['type'][0]) && preg_match('/^h-.+/', $v['type'][0])) {
+                      if(isset($v['properties']) && is_array($v['properties'])) {
+                        foreach($v['properties'] as $v2) {
+                          if(is_array($v2) && array_key_exists(0, $v2)) {
+                            $has_nested_object = true;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              if(!$has_nested_object) {
+                $errors[] = 'None of the values provided look like nested Microformats 2 objects.';
+              }
+            }            
           }
         }
 
@@ -571,7 +596,7 @@ class ClientTests {
       $html = view('client-tests/errors', ['errors'=>$errors]);
       $status = 400;
     } else {
-      $html = view('client-tests/entry', $params);
+      $html = view('client-tests/entry', $properties);
       $html = view('client-tests/success', ['num'=>$num]).$html;
 
       // Cache the HTML so that it can be rendered in a permalink
@@ -621,8 +646,8 @@ class ClientTests {
   }
 
   private function _requireJSONHEntry($params, &$errors) {
-    if(!isset($params['type']) || $params['type'] != 'h-entry') {
-      $errors[] = 'The request to create an h-entry must include a parameter "type" set to "h-entry"';
+    if(!isset($params['type']) || !is_array($params['type']) || !in_array('h-entry', $params['type'])) {
+      $errors[] = 'The request to create an h-entry must include a parameter "type" set to ["h-entry"]';
       return false;
     } else {
       return true;

@@ -35,6 +35,18 @@ function e($text) {
   return htmlspecialchars($text);
 }
 
+// Always return a string
+function mf2_val($in) {
+  if(is_string($in)) return $in;
+  if(is_array($in)) {
+    if(array_key_exists(0, $in) && is_string($in[0]))
+      return $in[0];
+    if(array_key_exists('value', $in))
+      return $in['value'];
+  }
+  return '';
+}
+
 function random_string($len) {
   $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   $str = '';

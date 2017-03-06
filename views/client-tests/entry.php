@@ -5,18 +5,18 @@
     </div>
     <div class="right">
       <? if(isset($name)): ?>
-        <h1 class="p-name content"><?= $this->e($name) ?></h1>
+        <h1 class="p-name content"><?= $this->e(mf2_val($name)) ?></h1>
       <? endif ?>
       <? if(isset($content)): ?>
-        <div class="e-content content"><?= $this->e($content) ?></div>
+        <div class="e-content content"><?= $this->e(mf2_val($content)) ?></div>
       <? endif ?>
       <? if(isset($photo)): ?>
-        <div class="photo"><img src="<?= $this->e($photo) ?>" class="u-photo"></div>
+        <div class="photo"><img src="<?= $this->e(mf2_val($photo)) ?>" class="u-photo"></div>
       <? endif ?>
       <div class="meta">
         <? if(isset($category)): ?>
           <div class="tags">
-            <?= $this->e(implode(' ', array_map(function($el){ return '#'.$el; }, $category))) ?>
+            <?= $this->e(implode(' ', array_map(function($el){ if($t=mf2_val($el)) { return '#'.$t; }; }, $category))) ?>
           </div>
         <? endif ?>
         <time><?= date('F j, Y \a\t g:ia T') ?></time>
