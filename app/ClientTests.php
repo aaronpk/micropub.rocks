@@ -377,10 +377,27 @@ class ClientTests {
         return $response->withStatus(404);
     }
 
-    $params = $request->getParsedBody();
+    $errors = [];
+    $status = 400;
 
-    // Check what test was last viewed
-    $num = $this->client->last_viewed_test;
+    // Check the access token
+    $authorization = $request->getHeaderLine('Authorization');
+    if(preg_match('/^Bearer (.+)$/', $authorization, $match)) {
+      $access_token = $match[1];
+      $check = ORM::for_table('client_access_tokens')
+        ->where('client_id', $this->client->id)
+        ->where('token', $access_token)
+        ->find_one();
+      if(!$check) {
+        $errors[] = 'The access token provided was not valid.';
+        $status = 403;
+      } else {
+        $check->last_used = date('Y-m-d H:i:s');
+        $check->save();
+      }
+    } else {
+      $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>';
+    }
 
     // Include the original info from the request
     // Method
@@ -397,10 +414,25 @@ class ClientTests {
     $request_body = str_replace('&', "&\n", $request_body);
     $debug = $request_method . "\n" . $request_headers . "\n" . $request_body;
 
+    // Bail out now if there were any authentication errors
+    if(count($errors)) {
+      $html = view('client-tests/errors', ['errors'=>$errors]);
+      streaming_publish('client-'.$this->client->token, [
+        'action' => 'client-result',
+        'html' => $html,
+        'debug' => $debug
+      ]);
+      return $response->withStatus($status);
+    }
+
+    $params = $request->getParsedBody();
+
+    // Check what test was last viewed
+    $num = $this->client->last_viewed_test;
+
     switch($num) {
       case 100:
         // Check for required parameters
-        $errors = [];
         if(!isset($params['h']))
           $errors[] = 'The request to create an h-entry must include a parameter "h" set to "entry"';
 
@@ -423,6 +455,8 @@ class ClientTests {
 
           $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key);
           $status = 201;
+
+          $html = view('client-tests/success', ['num'=>$num]).$html;
         }
 
         streaming_publish('client-'.$this->client->token, [
@@ -433,7 +467,7 @@ class ClientTests {
         break;
 
       default:
-        $status = 400;
+        $status = 500;
         break;
     }
 

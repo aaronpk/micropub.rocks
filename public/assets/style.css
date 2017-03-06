@@ -55,6 +55,11 @@ section.content.errors {
   border-color: #daa;
 }
 
+section.content.success {
+  background-color: #e1eccc;
+  border-color: #a2cc56;
+}
+
 section.content.code {
   background: #eee;
   font-size: 14px;
