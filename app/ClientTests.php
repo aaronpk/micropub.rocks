@@ -392,6 +392,7 @@ class ClientTests {
 
       case 600:
       case 601:
+      case 700:
         $template = 'basic'; break;
 
       default:
@@ -779,6 +780,116 @@ class ClientTests {
     return $response->withStatus($status);
   }
 
+  public function media_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Allow un-cookied requests, but do check if this token endpoint exists
+    if($check = $this->_check_permissions($request, $response, $args['token'])) {
+      if(!$this->client) 
+        return $response->withStatus(404);
+    }
+
+    list($errors, $status) = $this->_check_access_token_header($request);
+
+    if(count($errors)) {
+      return $response->withStatus($status);
+    }
+
+    // Check what test was last viewed
+    $num = $this->client->last_viewed_test;
+
+
+    $content_type = $request->getHeaderLine('Content-Type');
+    if(preg_match('/^multipart\/form-data; boundary=.+$/', $content_type))
+      $format = 'multipart';
+    else
+      $format = false;
+
+
+    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    // Headers
+    $request_headers = "";
+    foreach($request->getHeaders() as $k=>$vs) {
+      foreach($vs as $v) {
+        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
+      }
+    }
+    // Body
+    $request_body = (string)$request->getBody();
+    $request_body = str_replace('&', "&\n", $request_body);
+    $debug = $request_method . "\n" . $request_headers . "\n" . $request_body;
+
+
+
+    $url = false;
+
+    $status = 400;
+
+    if($this->_requireMultipartEncoded($format, $errors)) {
+      $files = $request->getUploadedFiles();
+
+      if(!isset($files['file'])) {
+        $errors[] = 'You must upload a file in a part named "file".';
+      } else {
+        $file = $files['file'];
+        $img = $file->getStream()->__toString();
+
+        $key = random_string(8);
+        Redis::storePostImage($this->client->token, $num, $key, $img);
+
+        $url = Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key.'/file';
+      }
+    }
+
+    $html = false;
+
+    if($url && $num) {
+      switch($num) {
+        case 700:
+          $html = '<div class="post-container"><img src="'.$url.'" style="width:100%"></div>';
+          $features = [16];
+          break;
+      }
+    }
+
+
+    $test = ORM::for_table('tests')
+      ->where('group', 'client')
+      ->where('number', $num)
+      ->find_one();
+    if($test) {
+      $last = ORM::for_table('test_results')
+        ->where('client_id', $this->client->id)
+        ->where('test_id', $test->id)
+        ->find_one();
+      if(!$last) {
+        $last = ORM::for_table('test_results')->create();
+        $last->client_id = $this->client->id;
+        $last->test_id = $test->id;
+        $last->created_at = date('Y-m-d H:i:s');
+      }
+      $last->passed = count($errors) == 0 ? 1 : -1;
+      $last->response = $debug;
+      $last->last_result_at = date('Y-m-d H:i:s');
+      $last->save();
+
+      foreach($features as $feature) {
+        ImplementationReport::store_client_feature($this->client->id, $feature, count($errors) == 0 ? 1 : -1, $test->id);
+      }
+    }
+
+    if($html) {
+      streaming_publish('client-'.$this->client->token, [
+        'action' => 'client-result',
+        'html' => $html,
+        'debug' => $debug
+      ]);
+    }
+
+    if($url)
+      return $response->withHeader('Location', $url)->withStatus(201);
+    else
+      return $response->withStatus($status);
+  }
+
   public function get_image(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // First check that this client exists and belongs to the logged-in user
     $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
@@ -861,18 +972,10 @@ class ClientTests {
     }
   }
 
-  public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    // Allow un-cookied requests, but do check if this token endpoint exists
-    if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
-        return $response->withStatus(404);
-    }
-
-    $params = $request->getQueryParams();
-    $status = 400;
+  private function _check_access_token_header($request) {
     $errors = [];
+    $status = 400;
 
-    // Check the access token
     $authorization = $request->getHeaderLine('Authorization');
     if(preg_match('/^Bearer (.+)$/', $authorization, $match)) {
       $access_token = $match[1];
@@ -890,6 +993,20 @@ class ClientTests {
     } else {
       $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>';
     }
+
+    return [$errors, $status];
+  }
+
+  public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // Allow un-cookied requests, but do check if this token endpoint exists
+    if($check = $this->_check_permissions($request, $response, $args['token'])) {
+      if(!$this->client) 
+        return $response->withStatus(404);
+    }
+
+    $params = $request->getQueryParams();
+
+    list($errors, $status) = $this->_check_access_token_header($request);
 
     // Include the original info from the request
     // Method
@@ -1002,7 +1119,8 @@ class ClientTests {
     } else {
       if(isset($params['q']) && $params['q'] == 'config') {
         $response = (new JsonResponse([
-          'syndicate-to' => $syndicate_to
+          'syndicate-to' => $syndicate_to,
+          'media-endpoint' => Config::$base.'client/'.$this->client->token.'/media'
         ]));
         ImplementationReport::store_client_feature($this->client->id, 27, 1, $num ?: 0);
       } elseif(isset($params['q']) && $params['q'] == 'syndicate-to') {

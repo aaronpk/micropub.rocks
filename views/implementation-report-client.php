@@ -124,7 +124,7 @@ Developer(s): [Name](https://you.example.com)
 * [<?= result_checkbox($results, 15) ?>] 105: Allows the user to specify one or more syndication endpoints from their list of endpoints discovered in the `q=config` or `q=syndicate-to` query.
 
 ## Media Endpoint
-* [ ] Checks to see if the Micropub endpoint specifies a Media Endpoint, and uploads photos there instead.
+* [<?= result_checkbox($results, 16) ?>] Checks to see if the Micropub endpoint specifies a Media Endpoint, and uploads photos there instead.
 * [ ] Uses multipart requests only as a fallback when there is no Media Endpoint specified.
 
 ## Updates

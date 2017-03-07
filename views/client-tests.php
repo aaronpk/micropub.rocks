@@ -83,6 +83,11 @@
     </table>
     -->
 
+    <h4>Media Endpoint</h4>
+    <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>700, 'tests'=>$tests, 'client'=>$client]); ?>
+    </table>
+
     <h4>Query</h4>
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>600, 'tests'=>$tests, 'client'=>$client]); ?>
