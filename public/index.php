@@ -70,6 +70,7 @@ $route->map('GET', '/reports', 'App\\ImplementationReport::show_reports');
 $route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::get_server_report');
 $route->map('GET', '/implementation-report/server/{id}/{token}', 
   'App\\ImplementationReport::view_server_report');
+$route->map('GET', '/implementation-report/client/{id}', 'App\\ImplementationReport::get_client_report');
 $route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
 $route->map('POST', '/implementation-report/save', 'App\\ImplementationReport::save_report');
 $route->map('POST', '/implementation-report/publish', 'App\\ImplementationReport::publish_report');

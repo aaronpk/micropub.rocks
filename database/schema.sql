@@ -20,6 +20,7 @@ CREATE TABLE `tests` (
 CREATE TABLE `test_results` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `endpoint_id` int(11) DEFAULT NULL,
+  `client_id` int(11) DEFAULT NULL,
   `test_id` int(11) DEFAULT NULL,
   `passed` tinyint(4) DEFAULT NULL,
   `response` blob,
@@ -49,10 +50,24 @@ CREATE TABLE `micropub_endpoints` (
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `micropub_clients` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `token` varchar(100) DEFAULT NULL,
+  `last_viewed_test` int(11) NOT NULL DEFAULT '100',
+  `created_at` datetime DEFAULT NULL,
+  `share_token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `features` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `group` enum('server','client') DEFAULT NULL,
   `number` int(11) unsigned NOT NULL,
   `description` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`number`)
+  `tests` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `feature_results` (

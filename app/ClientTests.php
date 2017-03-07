@@ -120,6 +120,7 @@ class ClientTests {
       ];
     } else {
       $scope = $params['scope'];
+      ImplementationReport::store_client_feature($this->client->id, 4, 1, 0);
     }
 
     if(!array_key_exists('me', $params)) {
@@ -329,6 +330,8 @@ class ClientTests {
       'client_id' => $data->client_id
     ]);
 
+    ImplementationReport::store_client_feature($this->client->id, 1, 1, 0);
+
     return (new JsonResponse([
       'access_token' => $token->token,
       'scope' => 'create',
@@ -397,16 +400,19 @@ class ClientTests {
 
     $content_type = $request->getHeaderLine('Content-Type');
     $access_token = false;
+    $access_token_in_post_body = false;
     if(preg_match('/application\/x-www-form-urlencoded/', $content_type)) {
       $params = $request->getParsedBody();
-      if(array_key_exists('access_token', $params))
+      if(array_key_exists('access_token', $params)) {
         $access_token = $params['access_token'];
+        $access_token_in_post_body = true;
+      }
     }
 
     // Check the access token
     $authorization = $request->getHeaderLine('Authorization');
     if(preg_match('/^Bearer (.+)$/', $authorization, $match) || $access_token) {
-      $access_token = $access_token ?: $match[1];
+      $access_token = $access_token_in_post_body ? $access_token : $match[1];
       $check = ORM::for_table('client_access_tokens')
         ->where('client_id', $this->client->id)
         ->where('token', $access_token)
@@ -417,6 +423,12 @@ class ClientTests {
       } else {
         $check->last_used = date('Y-m-d H:i:s');
         $check->save();
+        if($access_token_in_post_body) {
+          ImplementationReport::store_client_feature($this->client->id, 3, 1, 0);
+        }
+        if($match) {
+          ImplementationReport::store_client_feature($this->client->id, 2, 1, 0);
+        }
       }
     } else {
       $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>, or in a form-encoded body parameter <code>access_token</code>. The header method is recommended.';
@@ -463,9 +475,11 @@ class ClientTests {
     $num = $this->client->last_viewed_test;
 
     $html = false;
+    $features = [];
 
     switch($num) {
       case 100:
+        $features = [5];
         if($this->_requireFormEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
             if(!isset($params['content']))
@@ -481,6 +495,7 @@ class ClientTests {
         break;
 
       case 200:
+        $features = [6];
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
@@ -497,6 +512,7 @@ class ClientTests {
         break;
 
       case 101:
+        $features = [7];
         if($this->_requireFormEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
             if(!isset($params['category']))
@@ -514,6 +530,7 @@ class ClientTests {
         break;
 
       case 201:
+        $features = [8];
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
@@ -532,6 +549,7 @@ class ClientTests {
         break;
 
       case 104:
+        $features = [11];
         if($this->_requireFormEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
             if(!isset($params['photo']))
@@ -549,6 +567,7 @@ class ClientTests {
         break;
 
       case 203:
+        $features = [12];
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
@@ -564,6 +583,7 @@ class ClientTests {
         break;
 
       case 204:
+        $features = [9];
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
@@ -594,6 +614,7 @@ class ClientTests {
         break;
 
       case 205:
+        $features = [13];
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
@@ -618,6 +639,7 @@ class ClientTests {
         break;
 
       case 300:
+        $features = [10];
         if($this->_requireMultipartEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
             $files = $request->getUploadedFiles();
@@ -645,6 +667,31 @@ class ClientTests {
         $errors[] = 'This test is not yet implemented';
         break;
     }
+
+
+    $test = ORM::for_table('tests')
+      ->where('group', 'client')
+      ->where('number', $num)
+      ->find_one();
+    $last = ORM::for_table('test_results')
+      ->where('client_id', $this->client->id)
+      ->where('test_id', $test->id)
+      ->find_one();
+    if(!$last) {
+      $last = ORM::for_table('test_results')->create();
+      $last->client_id = $this->client->id;
+      $last->test_id = $test->id;
+      $last->created_at = date('Y-m-d H:i:s');
+    }
+    $last->passed = count($errors) == 0 ? 1 : -1;
+    $last->response = $debug;
+    $last->last_result_at = date('Y-m-d H:i:s');
+    $last->save();
+
+    foreach($features as $feature) {
+      ImplementationReport::store_client_feature($this->client->id, $feature, count($errors) == 0 ? 1 : -1, $num);
+    }
+
 
     if(count($errors)) {
       $html = view('client-tests/errors', ['errors'=>$errors]);

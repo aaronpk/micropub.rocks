@@ -49,6 +49,10 @@
     <br>
     <p>Note: Your client does not need to pass every test. It's okay to pass only the tests you're interested in if your client is intentionally supporting a subset of features.</p>
 
+    <div style="margin: 20px 0;">
+      <a href="/implementation-report/client/<?= $client->id ?>">Implementation Report</a>
+    </div>
+
     <h4>Creating Posts (Form-Encoded)</h4>
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>100, 'tests'=>$tests, 'client'=>$client]); ?>
