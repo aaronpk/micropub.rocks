@@ -58,6 +58,7 @@
       <? $this->insert('partials/client-test-row', ['num'=>100, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>101, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>104, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>105, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Creating Posts (JSON)</h4>

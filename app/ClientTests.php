@@ -370,6 +370,7 @@ class ClientTests {
       case 100:
       case 101:
       case 104:
+      case 105:
       case 200:
       case 201:
       case 203:
@@ -579,6 +580,30 @@ class ClientTests {
             elseif(!is_url($params['photo']))
               $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
             $properties = $params;
+          }
+        }
+
+        break;
+
+      case 105:
+        $features = [15];
+        if($this->_requireFormEncoded($format, $errors)) {
+          if($this->_requireFormHEntry($params, $errors)) {
+            if(!isset($params['mp-syndicate-to']))
+              $errors[] = 'The request did not include a "mp-syndicate-to" parameter.';
+            elseif(!$params['mp-syndicate-to'])
+              $errors[] = 'The "mp-syndicate-to" parameter was empty';
+            $properties = $params;
+            if(!is_array($properties['mp-syndicate-to']))
+              $properties['mp-syndicate-to'] = [$properties['mp-syndicate-to']];
+            $passed = false;
+            foreach($properties['mp-syndicate-to'] as $syn) {
+              if($syn == 'https://news.indieweb.org/en')
+                $passed = true;
+            }
+            if(!$passed) {
+              $errors[] = 'The "mp-syndicate-to" parameter was not set to one of the valid options returned by the endpoint.';
+            }
           }
         }
 
