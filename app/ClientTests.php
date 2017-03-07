@@ -387,6 +387,11 @@ class ClientTests {
         }
 
         break;
+
+      case 600:
+      case 601:
+        $template = 'basic'; break;
+
       default:
         $template = 'not-found'; break;
     }
@@ -702,7 +707,7 @@ class ClientTests {
     $last->save();
 
     foreach($features as $feature) {
-      ImplementationReport::store_client_feature($this->client->id, $feature, count($errors) == 0 ? 1 : -1, $num);
+      ImplementationReport::store_client_feature($this->client->id, $feature, count($errors) == 0 ? 1 : -1, $test->id);
     }
 
 
@@ -822,14 +827,158 @@ class ClientTests {
     }
 
     $params = $request->getQueryParams();
+    $status = 400;
+    $errors = [];
+
+    // Check the access token
+    $authorization = $request->getHeaderLine('Authorization');
+    if(preg_match('/^Bearer (.+)$/', $authorization, $match)) {
+      $access_token = $match[1];
+      $check = ORM::for_table('client_access_tokens')
+        ->where('client_id', $this->client->id)
+        ->where('token', $access_token)
+        ->find_one();
+      if(!$check) {
+        $errors[] = 'The access token provided was not valid.';
+        $status = 403;
+      } else {
+        $check->last_used = date('Y-m-d H:i:s');
+        $check->save();
+      }
+    } else {
+      $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>';
+    }
+
+    // Include the original info from the request
+    // Method
+    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    // Headers
+    $request_headers = "";
+    foreach($request->getHeaders() as $k=>$vs) {
+      foreach($vs as $v) {
+        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
+      }
+    }
+    $debug = $request_method . "\n" . $request_headers;
+
+    // Bail out now if there were any authentication errors
+    if(count($errors)) {
+      $html = view('client-tests/errors', ['errors'=>$errors]);
+      streaming_publish('client-'.$this->client->token, [
+        'action' => 'client-result',
+        'html' => $html,
+        'debug' => $debug
+      ]);
+      return $response->withStatus($status);
+    }
+
 
     // Check what test was last viewed
     $num = $this->client->last_viewed_test;
 
+    $test = false;
+    if($num) {
+      $test = ORM::for_table('tests')
+        ->where('group', 'client')
+        ->where('number', $num)
+        ->find_one();
+    }
 
+    $status = 200;
+    $html = '';
+
+    $features = [];
+
+    switch($num) {
+      case 600:
+        $features[] = 27;
+
+        if(count($params) > 1) {
+          $errors[] = 'The configuration query must have only one query parameter, q=config';
+        } else if(!array_key_exists('q', $params) || $params['q'] != 'config') {
+          $errors[] = 'The configuration query must have one parameter, q=config';
+        }
+
+        if(count($errors) == 0) {
+          $html = view('client-tests/success', ['num'=>$num]);
+        }
+
+        break;
+
+      case 601:
+        $features[] = 30;
+
+        if(count($params) > 1) {
+          $errors[] = 'The configuration query must have only one query parameter, q=syndicate-to';
+        } else if(!array_key_exists('q', $params) || $params['q'] != 'syndicate-to') {
+          $errors[] = 'The configuration query must have one parameter, q=syndicate-to';
+        }
+
+        if(count($errors) == 0) {
+          $html = view('client-tests/success', ['num'=>$num]);
+        }
+
+        break;
+    }
+
+    foreach($features as $feature) {
+      ImplementationReport::store_client_feature($this->client->id, $feature, count($errors) == 0 ? 1 : -1, ($test ? $test->id : 0));
+    }
+
+    if($test) {
+      $last = ORM::for_table('test_results')
+        ->where('client_id', $this->client->id)
+        ->where('test_id', $test->id)
+        ->find_one();
+      if(!$last) {
+        $last = ORM::for_table('test_results')->create();
+        $last->client_id = $this->client->id;
+        $last->test_id = $test->id;
+        $last->created_at = date('Y-m-d H:i:s');
+      }
+      $last->passed = count($errors) == 0 ? 1 : -1;
+      $last->response = $debug;
+      $last->last_result_at = date('Y-m-d H:i:s');
+      $last->save();
+    }
+
+    // In addition to providing the testing features above, we also need to respond to 
+    // configuration queries like a normal server, since clients may be querying this outside
+    // of the context of running a specific query test.
+    // We can also check off features based on the request, and not mark them as fails here.
+
+    $syndicate_to = [
+            [
+              'uid' => 'https://news.indieweb.org/en',
+              'name' => 'IndieNews'
+            ]
+          ];
+
+    if(count($errors)) {
+      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $status = 400;
+    } else {
+      if(isset($params['q']) && $params['q'] == 'config') {
+        $response = (new JsonResponse([
+          'syndicate-to' => $syndicate_to
+        ]));
+        ImplementationReport::store_client_feature($this->client->id, 27, 1, $num ?: 0);
+      } elseif(isset($params['q']) && $params['q'] == 'syndicate-to') {
+        $response = (new JsonResponse([
+          'syndicate-to' => $syndicate_to
+        ]));
+        ImplementationReport::store_client_feature($this->client->id, 30, 1, $num ?: 0);
+      }
+    }
+
+    if($html) {
+      streaming_publish('client-'.$this->client->token, [
+        'action' => 'client-result',
+        'html' => $html,
+        'debug' => $debug
+      ]);
+    }
     
-    
-    
-    return $response;
+    return $response->withStatus($status);
   }
 }

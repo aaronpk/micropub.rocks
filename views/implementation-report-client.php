@@ -140,10 +140,10 @@ Developer(s): [Name](https://you.example.com)
 * [ ] Sends undeletion requests using JSON syntax.
 
 ## Querying
-* [ ] Queries the Micropub endpoint with `q=config`
+* [<?= result_checkbox($results, 27) ?>] Queries the Micropub endpoint with `q=config`
  * [ ] Looks in the response for the Media Endpoint
  * [ ] Looks in the response for syndication targets
-* [ ] Queries the Micropub endpoint with `q=syndicate-to`
+* [<?= result_checkbox($results, 30) ?>] Queries the Micropub endpoint with `q=syndicate-to`
 * [ ] Queries the Micropub endpoint for a post's source content without specifying a list of properties
 * [ ] Queries the Micropub endpoint for a post's source content looking only for specific properties
 
