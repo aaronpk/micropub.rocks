@@ -723,6 +723,49 @@ class ClientTests {
 
         break;
 
+      case 700:
+        if($format == 'json') {
+
+          // This is just here so that the post will appear in the interface for test 700.
+          // This does not actually imply the feature is or is not implemented.
+          if($this->_requireJSONEncoded($format, $errors)) {
+            if($this->_requireJSONHEntry($params, $errors)) {
+              if($properties=$this->_validateJSONProperties($params, $errors)) {
+                if(!isset($properties['photo']))
+                  $errors[] = 'The request did not include a "photo" parameter.';
+                elseif(!$properties['photo'])
+                  $errors[] = 'The "photo" parameter was empty';
+                elseif(!array_key_exists(0, $properties['photo']) || !is_url($properties['photo'][0]))
+                  $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+              }
+            }
+          }
+
+        } elseif($format == 'form') {
+
+          // This is just here so that the post will appear in the interface for test 700.
+          // This does not actually imply the feature is or is not implemented.
+          if($this->_requireFormEncoded($format, $errors)) {
+            if($this->_requireFormHEntry($params, $errors)) {
+              if(!isset($params['photo']))
+                $errors[] = 'The request did not include a "photo" parameter.';
+              elseif(!$params['photo'])
+                $errors[] = 'The "photo" parameter was empty';
+              elseif(!is_string($params['photo']))
+                $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
+              elseif(!is_url($params['photo']))
+                $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+              $properties = $params;
+            }
+          }
+
+        } else {
+          $errors[] = 'You should not send file upload to the Micropub endpoint if you uploaded the photo to the Media Endpoint';
+          $features[] = 16;
+        }
+
+        break;
+
       default:
         $status = 500;
         $errors[] = 'This test is not yet implemented';
