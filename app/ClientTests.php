@@ -850,7 +850,7 @@ class ClientTests {
 
     $has_error = false;
     foreach($properties as $k=>$v) {
-      if(!is_array($v) || !array_key_exists(0, $v)) {
+      if(!is_array($v) || (count($v) > 0 && !array_key_exists(0, $v))) {
         $errors[] = 'The "'.$k.'" parameter was not provided as an array. In JSON format, all values are arrays, even if there is only one value.';
         $has_error = true;
       }
