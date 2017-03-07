@@ -54,6 +54,7 @@ CREATE TABLE `micropub_clients` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
+  `redirect_uri` varchar(255) DEFAULT NULL,
   `token` varchar(100) DEFAULT NULL,
   `last_viewed_test` int(11) NOT NULL DEFAULT '100',
   `created_at` datetime DEFAULT NULL,

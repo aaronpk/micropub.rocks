@@ -119,7 +119,7 @@ Developer(s): [Name](https://you.example.com)
 * [<?= result_checkbox($results, 11) ?>] 104: Allows creating posts with a photo referenced by URL rather than uploading the photo as a Multipart request. (form-encoded)
 * [<?= result_checkbox($results, 12) ?>] 203: Allows creating posts with a photo referenced by URL rather than uploading the photo as a Multipart request. (JSON)
 * [<?= result_checkbox($results, 13) ?>] 205: Allows creating posts with a photo including image alt text.
-* [ ] Recognizes HTTP 201 and 202 with a `Location` header as a successful response from the Micropub endpoint.
+* [<?= result_checkbox($results, 14) ?>] Recognizes HTTP 201 and 202 with a `Location` header as a successful response from the Micropub endpoint.
 * [ ] Allows the user to specify one or more syndication endpoints from their list of endpoints discovered in the `q=config` or `q=syndicate-to` query.
 
 ## Media Endpoint

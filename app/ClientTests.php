@@ -324,6 +324,9 @@ class ClientTests {
     $token->token = random_string(128);
     $token->save();
 
+    $this->client->redirect_uri = $data->redirect_uri;
+    $this->client->save();
+
     // Publish to streaming clients that the login was successful
     streaming_publish('client-'.$this->client->token, [
       'action' => 'authorization-complete',
@@ -373,7 +376,17 @@ class ClientTests {
       case 204:
       case 205:
       case 300:
-        $template = 'basic'; break;
+        $template = 'basic'; 
+
+        // If the referer is set to the same host as the client, then assume the 
+        // client redirected here on success so check off that feature.
+        if(isset($_SERVER['HTTP_REFERER'])) {
+          if(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) == parse_url($this->client->redirect_uri, PHP_URL_HOST)) {
+            ImplementationReport::store_client_feature($this->client->id, 14, 1, 0);
+          }
+        }
+
+        break;
       default:
         $template = 'not-found'; break;
     }
