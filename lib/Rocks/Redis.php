@@ -20,4 +20,16 @@ class Redis {
     return [$html, $raw];
   }
 
+  public static function storePostImage($client, $num, $key, $img) {
+    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':img';
+    redis()->setex($key, 60*60*24*7, base64_encode($img));
+  }
+
+  public static function getPostImage($client, $num, $key) {
+    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':img';
+    $data = redis()->get($key);
+    if($data) 
+      return base64_decode($data);
+    return null;
+  }
 }

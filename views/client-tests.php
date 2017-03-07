@@ -65,10 +65,17 @@
       <? $this->insert('partials/client-test-row', ['num'=>205, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
+    <h4>Creating Posts (Multipart)</h4>
+    <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>300, 'tests'=>$tests, 'client'=>$client]); ?>
+    </table>
+
+    <!--
     <h4>Editing Posts</h4>
     <table class="ui compact table">
 
     </table>
+    -->
 
 
     <div class="ui warning message">Note: The client tests for Micropub.rocks are still in progress. Please check back later, or follow the <a href="https://github.com/aaronpk/micropub.rocks/issues">issues</a> for progress updates.</div>

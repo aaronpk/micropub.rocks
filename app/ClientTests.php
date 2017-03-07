@@ -369,6 +369,7 @@ class ClientTests {
       case 203:
       case 204:
       case 205:
+      case 300:
         $template = 'basic'; break;
       default:
         $template = 'not-found'; break;
@@ -443,7 +444,8 @@ class ClientTests {
     if($content_type == 'application/json') {
       $params = @json_decode($request_body, true);
       $format = 'json';
-    } elseif($content_type == 'multipart/form-data') {
+    } elseif(preg_match('/^multipart\/form-data; boundary=.+$/', $content_type)) {
+      $params = $request->getParsedBody();
       $format = 'multipart';
     } else {
       $params = $request->getParsedBody();
@@ -608,6 +610,29 @@ class ClientTests {
         }
         break;
 
+      case 300:
+        if($this->_requireMultipartEncoded($format, $errors)) {
+          if($this->_requireFormHEntry($params, $errors)) {
+            $files = $request->getUploadedFiles();
+
+            if(!isset($files['photo'])) {
+              $errors[] = 'You must upload a file in a part named "photo".';
+            } else {
+              $photo = $files['photo'];
+              $img = $photo->getStream()->__toString();
+
+              $key = random_string(8);
+              Redis::storePostImage($this->client->token, $num, $key, $img);
+
+              $params['photo'] = Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key.'/photo.jpg';
+
+              $properties = $params;
+            }
+          }
+        }
+
+        break;
+
       default:
         $status = 500;
         $errors[] = 'This test is not yet implemented';
@@ -640,9 +665,32 @@ class ClientTests {
     return $response->withStatus($status);
   }
 
+  public function get_image(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // First check that this client exists and belongs to the logged-in user
+    $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
+
+    $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
+    if($img) {
+      $response = $response->withHeader('Content-Type', 'image/jpeg');
+      $response->getBody()->write($img);
+      return $response;
+    } else {
+      return $response->withStatus(404);
+    }
+  }
+
   private function _requireFormEncoded($format, &$errors) {
     if($format != 'form') {
       $errors[] = 'The request was not a form-encoded request. Ensure you are sending a proper form-encoded request with valid parameters.';
+      return false;
+    } {
+      return true;
+    }
+  }
+
+  private function _requireMultipartEncoded($format, &$errors) {
+    if($format != 'multipart') {
+      $errors[] = 'The request was not a multipart-encoded request. Ensure you are sending a proper multipart request with valid parameters.';
       return false;
     } {
       return true;
