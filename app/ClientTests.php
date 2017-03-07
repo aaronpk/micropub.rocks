@@ -647,31 +647,29 @@ class ClientTests {
       case 204:
         $features = [9];
         if($this->_requireJSONEncoded($format, $errors)) {
-          if($this->_requireJSONHEntry($params, $errors)) {
-            if($properties=$this->_validateJSONProperties($params, $errors)) {
-              // Check that at least one of the values is a mf2 object
-              $has_nested_object = false;
-              foreach($properties as $k=>$values) {
-                if(is_array($values)) {
-                  foreach($values as $v) {
-                    if(isset($v['type']) && is_array($v['type']) 
-                      && isset($v['type'][0]) && preg_match('/^h-.+/', $v['type'][0])) {
-                      if(isset($v['properties']) && is_array($v['properties'])) {
-                        foreach($v['properties'] as $v2) {
-                          if(is_array($v2) && array_key_exists(0, $v2)) {
-                            $has_nested_object = true;
-                          }
+          if($properties=$this->_validateJSONProperties($params, $errors)) {
+            // Check that at least one of the values is a mf2 object
+            $has_nested_object = false;
+            foreach($properties as $k=>$values) {
+              if(is_array($values)) {
+                foreach($values as $v) {
+                  if(isset($v['type']) && is_array($v['type']) 
+                    && isset($v['type'][0]) && preg_match('/^h-.+/', $v['type'][0])) {
+                    if(isset($v['properties']) && is_array($v['properties'])) {
+                      foreach($v['properties'] as $v2) {
+                        if(is_array($v2) && array_key_exists(0, $v2)) {
+                          $has_nested_object = true;
                         }
                       }
                     }
                   }
                 }
               }
-              if(!$has_nested_object) {
-                $errors[] = 'None of the values provided look like nested Microformats 2 objects.';
-              }
-            }            
-          }
+            }
+            if(!$has_nested_object) {
+              $errors[] = 'None of the values provided look like nested Microformats 2 objects.';
+            }
+          }            
         }
         break;
 
