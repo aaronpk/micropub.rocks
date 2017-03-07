@@ -150,6 +150,15 @@ function result_icon($passed, $id=false) {
   }
 }
 
+function result_checkbox($results, $num) {
+  foreach($results as $result) {
+    if($result->number == $num) {
+      return $result->implements ? 'x' : ' ';
+    }
+  }
+  return ' ';
+}
+
 function test_url($test_num, $endpoint_id) {
   return '/server-tests/' . $test_num . '?endpoint=' . $endpoint_id;
 }
