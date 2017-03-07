@@ -395,10 +395,18 @@ class ClientTests {
     $errors = [];
     $status = 400;
 
+    $content_type = $request->getHeaderLine('Content-Type');
+    $access_token = false;
+    if(preg_match('/application\/x-www-form-urlencoded/', $content_type)) {
+      $params = $request->getParsedBody();
+      if(array_key_exists('access_token', $params))
+        $access_token = $params['access_token'];
+    }
+
     // Check the access token
     $authorization = $request->getHeaderLine('Authorization');
-    if(preg_match('/^Bearer (.+)$/', $authorization, $match)) {
-      $access_token = $match[1];
+    if(preg_match('/^Bearer (.+)$/', $authorization, $match) || $access_token) {
+      $access_token = $access_token ?: $match[1];
       $check = ORM::for_table('client_access_tokens')
         ->where('client_id', $this->client->id)
         ->where('token', $access_token)
@@ -411,7 +419,7 @@ class ClientTests {
         $check->save();
       }
     } else {
-      $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>';
+      $errors[] = 'The client must send the access token in the Authorization header in the format <code>Authorization: Bearer xxxxx</code>, or in a form-encoded body parameter <code>access_token</code>. The header method is recommended.';
     }
 
     // Include the original info from the request
@@ -440,7 +448,6 @@ class ClientTests {
       return $response->withStatus($status);
     }
 
-    $content_type = $request->getHeaderLine('Content-Type');
     if($content_type == 'application/json') {
       $params = @json_decode($request_body, true);
       $format = 'json';
