@@ -87,12 +87,14 @@
 
     <p>Below is an implementation report template you can use to submit an implementation report. The answers have been pre-filled based on the checkboxes above, but there are some questions that do not have a corresponding automatic test. Please review the answers in this report and fill out any missing information based on your implementation. When you are complete, you can submit this as a new file <a href="https://github.com/w3c/Micropub/tree/master/implementation-reports#clients">on GitHub</a>.</p>
 
+    <p>Any items in the list below with double square brackets, (e.g. <code>[[ ]]</code>) will need to be self-reported, as there is no automated test that will check those off. Any items with single square brackets will be checked off for you as you progress through the tests. When a specific test corresponds with a checkbox, the test number is noted in the list. Some items such as authentication will be checked off from multiple tests.</p>
+
     <pre id="impl-report-text"># Implementation Name (Replace this header)
 
 Implementation Home Page URL: 
 
 Source code repo URL(s) (optional):
-* [ ] 100% open source implementation
+* [[ ]] 100% open source implementation
 
 Programming Language(s): 
 
@@ -124,29 +126,29 @@ Developer(s): [Name](https://you.example.com)
 * [<?= result_checkbox($results, 15) ?>] 105: Allows the user to specify one or more syndication endpoints from their list of endpoints discovered in the `q=config` or `q=syndicate-to` query.
 
 ## Media Endpoint
-* [<?= result_checkbox($results, 16) ?>] Checks to see if the Micropub endpoint specifies a Media Endpoint, and uploads photos there instead.
-* [ ] Uses multipart requests only as a fallback when there is no Media Endpoint specified.
+* [<?= result_checkbox($results, 16) ?>] 700: Checks to see if the Micropub endpoint specifies a Media Endpoint, and uploads photos there instead.
+* [[ ]] Uses multipart requests only as a fallback when there is no Media Endpoint specified.
 
 ## Updates
-* [ ] Supports replacing all values of a property (e.g. replacing the post content).
-* [ ] Supports adding a value to a property (e.g. adding a tag).
-* [ ] Supports removing a value from a property (e.g. removing a specific tag).
-* [ ] Supports removing a property.
-* [ ] Recognizes HTTP 200, 201 and 204 as a successful response from the Micropub endpoint.
+* [[ ]] Supports replacing all values of a property (e.g. replacing the post content).
+* [[ ]] Supports adding a value to a property (e.g. adding a tag).
+* [[ ]] Supports removing a value from a property (e.g. removing a specific tag).
+* [[ ]] Supports removing a property.
+* [[ ]] Recognizes HTTP 200, 201 and 204 as a successful response from the Micropub endpoint.
 
 ## Deletes
-* [ ] Sends deletion requests using `x-www-form-urlencoded` syntax.
-* [ ] Sends deletion requests using JSON syntax.
-* [ ] Sends undeletion requests using `x-www-form-urlencoded` syntax.
-* [ ] Sends undeletion requests using JSON syntax.
+* [[ ]] Sends deletion requests using `x-www-form-urlencoded` syntax.
+* [[ ]] Sends deletion requests using JSON syntax.
+* [[ ]] Sends undeletion requests using `x-www-form-urlencoded` syntax.
+* [[ ]] Sends undeletion requests using JSON syntax.
 
 ## Querying
-* [<?= result_checkbox($results, 27) ?>] Queries the Micropub endpoint with `q=config`
- * [ ] Looks in the response for the Media Endpoint
- * [ ] Looks in the response for syndication targets
-* [<?= result_checkbox($results, 30) ?>] Queries the Micropub endpoint with `q=syndicate-to`
-* [ ] Queries the Micropub endpoint for a post's source content without specifying a list of properties
-* [ ] Queries the Micropub endpoint for a post's source content looking only for specific properties
+* [<?= result_checkbox($results, 27) ?>] 600: Queries the Micropub endpoint with `q=config`
+ * [[ ]] Looks in the response for the Media Endpoint
+ * [[ ]] Looks in the response for syndication targets
+* [<?= result_checkbox($results, 30) ?>] 601: Queries the Micropub endpoint with `q=syndicate-to`
+* [[ ]] Queries the Micropub endpoint for a post's source content without specifying a list of properties
+* [[ ]] Queries the Micropub endpoint for a post's source content looking only for specific properties
 
 ## Extensions
 
