@@ -47,7 +47,8 @@ VALUES
   (49, 'client', 107, 'Create an h-entry post with one category (form-encoded)', '      <p>This is a test of creating an h-entry post from your client in form-encoded format with one value for a property that also supports multiple values.</p>\n      <p>To pass this test, use your client to create an h-entry post with one category, using the parameter <code>category</code> rather than <code>category[]</code>. It doesn\'t matter what text you send as the content, or what category name you use.</p>\n      <p>Keep this page open and post from your client. Your post will appear here.</p>'),
   (50, 'client', 600, 'Configuration Query', '<p>To pass this test, your client will need to make a <a href=\"https://www.w3.org/TR/micropub/#configuration\">configuration query</a> to the Micropub endpoint.</p>'),
   (51, 'client', 601, 'Syndication Query', '<p>To pass this test, your client will need to make a <a href=\"https://www.w3.org/TR/micropub/#syndication-targets\">configuration query</a> to the Micropub endpoint requesting the list of syndication targets.</p>'),
-  (52, 'client', 105, 'Create an h-entry and syndicate it', '<p>This test will ensure that your client supports allowing the user to select a syndication destination for the post.</p>\n<p>Typically the client will show the syndication options that the user\'s Micropub endpoint returns as buttons or checkboxes, and allow the user to select one or more of them.</p>\n<p>To pass this test, you will need to include at least one <a href=\"https://www.w3.org/TR/micropub/#syndication-targets\">syndication target</a> that is returned by the Micropub endpoint in the request to create the h-entry.</p>');
+  (52, 'client', 105, 'Create an h-entry and syndicate it', '<p>This test will ensure that your client supports allowing the user to select a syndication destination for the post.</p>\n<p>Typically the client will show the syndication options that the user\'s Micropub endpoint returns as buttons or checkboxes, and allow the user to select one or more of them.</p>\n<p>To pass this test, you will need to include at least one <a href=\"https://www.w3.org/TR/micropub/#syndication-targets\">syndication target</a> that is returned by the Micropub endpoint in the request to create the h-entry.</p>'),
+  (53, 'client', 202, 'Create an h-entry with HTML content (JSON)', '      <p>This is a test of creating an h-entry post from your client with HTML content.</p>\n      <p>To pass this test, use your client to create an h-entry post with HTML, the request should be in JSON format. See <a href=\"https://www.w3.org/TR/micropub/#new-article-with-html\">New Article with HTML</a> for details on the syntax to use.</p>\n      <p>Keep this page open and post from your client. Your post will appear here.</p>');
 
 
 INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)
@@ -116,6 +117,8 @@ VALUES
   (62, 'client', 29, 'Looks in the response for syndication targets', NULL),
   (63, 'client', 30, 'Queries the Micropub endpoint with q=syndicate-to', NULL),
   (64, 'client', 31, 'Queries the Micropub endpoint for a post\'s source content without specifying a list of properties', NULL),
-  (65, 'client', 32, 'Queries the Micropub endpoint for a post\'s source content looking only for specific properties', NULL);
+  (65, 'client', 32, 'Queries the Micropub endpoint for a post\'s source content looking only for specific properties', NULL),
+  (66, 'server', 34, 'Creating a post with HTML content', NULL),
+  (67, 'client', 33, 'Creating a post with HTML content', NULL);
 
 

@@ -373,6 +373,7 @@ class ClientTests {
       case 105:
       case 200:
       case 201:
+      case 202:
       case 203:
       case 204:
       case 205:
@@ -607,6 +608,24 @@ class ClientTests {
           }
         }
 
+        break;
+
+      case 202:
+        $features = [33];
+        if($this->_requireJSONEncoded($format, $errors)) {
+          if($this->_requireJSONHEntry($params, $errors)) {
+            if($properties=$this->_validateJSONProperties($params, $errors)) {
+              if(!isset($properties['content']))
+                $errors[] = 'The request did not include a "content" parameter.';
+              elseif(!$properties['content'])
+                $errors[] = 'The request provided a "content" parameter that was empty. Make sure you include some HTML in your post.';
+              elseif(!is_array($properties['content'][0]))
+                $errors[] = 'To pass this test you must provide content as an object.';
+              elseif(!array_key_exists('html', $properties['content'][0]))
+                $errors[] = 'The "content" parameter must be an object containing a key "html".';
+            }
+          }
+        }
         break;
 
       case 203:

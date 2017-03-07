@@ -112,6 +112,7 @@ Developer(s): [Name](https://you.example.com)
 * [<?= result_checkbox($results, 6) ?>] 200: Creates posts using JSON syntax.
 * [<?= result_checkbox($results, 7) ?>] 101: Creates posts using `x-www-form-urlencoded` syntax with multiple values of the same property name (e.g. tags).
 * [<?= result_checkbox($results, 8) ?>] 201: Creates posts using JSON syntax with multiple values of the same property name (e.g. tags).
+* [<?= result_checkbox($results, 33) ?>] 202: Creates posts with HTML content. (JSON)
 * [<?= result_checkbox($results, 9) ?>] 204: Creates posts using JSON syntax including a nested Microformats2 object.
 * [<?= result_checkbox($results, 10) ?>] 300: Creates posts including a file by sending the request as `multipart/form-data` to the Micropub endpoint.
 
@@ -120,7 +121,7 @@ Developer(s): [Name](https://you.example.com)
 * [<?= result_checkbox($results, 12) ?>] 203: Allows creating posts with a photo referenced by URL rather than uploading the photo as a Multipart request. (JSON)
 * [<?= result_checkbox($results, 13) ?>] 205: Allows creating posts with a photo including image alt text.
 * [<?= result_checkbox($results, 14) ?>] Recognizes HTTP 201 and 202 with a `Location` header as a successful response from the Micropub endpoint.
-* [<?= result_checkbox($results, 15) ?>] Allows the user to specify one or more syndication endpoints from their list of endpoints discovered in the `q=config` or `q=syndicate-to` query.
+* [<?= result_checkbox($results, 15) ?>] 105: Allows the user to specify one or more syndication endpoints from their list of endpoints discovered in the `q=config` or `q=syndicate-to` query.
 
 ## Media Endpoint
 * [ ] Checks to see if the Micropub endpoint specifies a Media Endpoint, and uploads photos there instead.

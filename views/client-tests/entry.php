@@ -8,7 +8,7 @@
         <h1 class="p-name content"><?= $this->e(mf2_val($name)) ?></h1>
       <? endif ?>
       <? if(isset($content)): ?>
-        <div class="e-content content"><?= $this->e(mf2_val($content)) ?></div>
+        <div class="e-content content"><?= is_array($content) ? $content[0]['html'] : $this->e(mf2_val($content)) ?></div>
       <? endif ?>
       <? if(isset($photo)): ?>
         <div class="photo"><img src="<?= $this->e(mf2_val($photo)) ?>" class="u-photo"></div>

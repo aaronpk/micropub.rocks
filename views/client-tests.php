@@ -65,6 +65,7 @@
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>200, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>201, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>202, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>203, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>204, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>205, 'tests'=>$tests, 'client'=>$client]); ?>
