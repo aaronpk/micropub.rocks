@@ -130,10 +130,10 @@ Developer(s): [Name](https://you.example.com)
 * [[ ]] Uses multipart requests only as a fallback when there is no Media Endpoint specified.
 
 ## Updates
-* [[ ]] Supports replacing all values of a property (e.g. replacing the post content).
-* [[ ]] Supports adding a value to a property (e.g. adding a tag).
-* [[ ]] Supports removing a value from a property (e.g. removing a specific tag).
-* [[ ]] Supports removing a property.
+* [<?= result_checkbox($results, 18) ?>] 400: Supports replacing all values of a property (e.g. replacing the post content).
+* [<?= result_checkbox($results, 19) ?>] 401: Supports adding a value to a property (e.g. adding a tag).
+* [<?= result_checkbox($results, 20) ?>] 402: Supports removing a value from a property (e.g. removing a specific tag).
+* [<?= result_checkbox($results, 21) ?>] 403: Supports removing a property.
 * [[ ]] Recognizes HTTP 200, 201 and 204 as a successful response from the Micropub endpoint.
 
 ## Deletes
