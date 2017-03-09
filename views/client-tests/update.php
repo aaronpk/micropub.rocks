@@ -9,7 +9,7 @@
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
     <?php if(!$post_debug): ?>
       <?= $test->description ?>
-      <p>The post's URL to reference in the update is:<br>
+      <p>The post's URL to reference in the request is:<br>
         <input type="url" style="width:100%" value="<?= $post_url ?>"></p>
     <?php endif ?>
   </section>

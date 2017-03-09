@@ -137,18 +137,18 @@ Developer(s): [Name](https://you.example.com)
 * [[ ]] Recognizes HTTP 200, 201 and 204 as a successful response from the Micropub endpoint.
 
 ## Deletes
-* [[ ]] Sends deletion requests using `x-www-form-urlencoded` syntax.
-* [[ ]] Sends deletion requests using JSON syntax.
-* [[ ]] Sends undeletion requests using `x-www-form-urlencoded` syntax.
-* [[ ]] Sends undeletion requests using JSON syntax.
+* [<?= result_checkbox($results, 23) ?>] 500: Sends deletion requests using `x-www-form-urlencoded` syntax.
+* [<?= result_checkbox($results, 24) ?>] 500: Sends deletion requests using JSON syntax.
+* [<?= result_checkbox($results, 25) ?>] 502: Sends undeletion requests using `x-www-form-urlencoded` syntax.
+* [<?= result_checkbox($results, 26) ?>] 502: Sends undeletion requests using JSON syntax.
 
 ## Querying
 * [<?= result_checkbox($results, 27) ?>] 600: Queries the Micropub endpoint with `q=config`
  * [[ ]] Looks in the response for the Media Endpoint
  * [[ ]] Looks in the response for syndication targets
 * [<?= result_checkbox($results, 30) ?>] 601: Queries the Micropub endpoint with `q=syndicate-to`
-* [[ ]] Queries the Micropub endpoint for a post's source content without specifying a list of properties
-* [[ ]] Queries the Micropub endpoint for a post's source content looking only for specific properties
+* [ ] Queries the Micropub endpoint for a post's source content without specifying a list of properties
+* [ ] Queries the Micropub endpoint for a post's source content looking only for specific properties
 
 ## Extensions
 

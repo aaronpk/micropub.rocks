@@ -407,10 +407,19 @@ class ClientTests {
 
       case 402:
       case 403:
+      case 500:
         $post_properties = [
           'content' => ['Hello world'],
           'category' => ['foo','bar']
         ];
+        break;
+
+      case 502:
+        $post_properties = [
+          'content' => ['Hello world'],
+          'category' => ['foo','bar']
+        ];
+        $post_html = '<span></span>';
         break;
 
       case 600:
@@ -426,7 +435,8 @@ class ClientTests {
       // Create a post that will be updated
       $key = random_string(8);
 
-      $post_html = view('client-tests/entry', $post_properties);
+      if(!isset($post_html))
+        $post_html = view('client-tests/entry', $post_properties);
       Redis::storePostHTML($this->client->token, $args['num'], $key, $post_html, false, $post_properties);
 
       $post_url = Config::$base.'client/'.$this->client->token.'/'.$args['num'].'/'.$key;
@@ -857,6 +867,48 @@ class ClientTests {
         }
         break;      
 
+      case 500:
+        if($format == 'json') {
+          $features = [24];
+          if($this->_requireJSONEncoded($format, $errors)) {
+            list($post_html, $post_raw, $post_properties, $key) = $this->_requireDeleteAction($params, $num, $errors);
+            if($post_html) {
+              $post_html = '';
+              $properties = false;
+            }
+          }
+        } elseif($format == 'form') {
+          $features = [23];
+          if($this->_requireFormEncoded($format, $errors)) {
+            list($post_html, $post_raw, $post_properties, $key) = $this->_requireDeleteAction($params, $num, $errors);
+            if($post_html) {
+              $post_html = '';
+              $properties = false;
+            }
+          }
+        }
+        break;      
+
+      case 502:
+        if($format == 'json') {
+          $features = [26];
+          if($this->_requireJSONEncoded($format, $errors)) {
+            list($post_html, $post_raw, $post_properties, $key) = $this->_requireUndeleteAction($params, $num, $errors);
+            if($post_html) {
+              $properties = $post_properties;
+            }
+          }
+        } elseif($format == 'form') {
+          $features = [25];
+          if($this->_requireFormEncoded($format, $errors)) {
+            list($post_html, $post_raw, $post_properties, $key) = $this->_requireUndeleteAction($params, $num, $errors);
+            if($post_html) {
+              $properties = $post_properties;
+            }
+          }
+        }
+        break;      
+
       case 700:
         if($format == 'json') {
 
@@ -935,7 +987,10 @@ class ClientTests {
       $html = view('client-tests/errors', ['errors'=>$errors]);
       $status = 400;
     } else {
-      $html = view('client-tests/entry', $properties);
+      if($properties)
+        $html = view('client-tests/entry', $properties);
+      else
+        $html = '';
       $html = view('client-tests/success', ['num'=>$num]).$html;
 
       // Cache the HTML so that it can be rendered in a permalink
@@ -1152,29 +1207,49 @@ class ClientTests {
     }
   }
 
-  function _requireUpdateAction($params, $num, &$errors) {
+  private function _requireDeleteAction($params, $num, &$errors) {
+    if(!isset($params['action']) || $params['action'] !== 'delete')
+      $errors[] = 'To make a delete request, include <code>"action":"delete"</code> in the JSON request, or <code>action=delete</code> in the form-encoded request.';
+    elseif(!isset($params['url']))
+      $errors[] = 'A delete request must specify the URL of the post that is being deleted. Include a parameter <code>"url"</code> with the URL of the post you\'re deleting.';
+    else
+      return $this->_loadPostFromRedis($params['url'], $num, $errors);
+  }
+
+  private function _requireUndeleteAction($params, $num, &$errors) {
+    if(!isset($params['action']) || $params['action'] !== 'undelete')
+      $errors[] = 'To make an undelete request, include <code>"action":"undelete"</code> in the JSON request, or <code>action=undelete</code> in the form-encoded request.';
+    elseif(!isset($params['url']))
+      $errors[] = 'An undelete request must specify the URL of the post that is being undeleted. Include a parameter <code>"url"</code> with the URL of the post you\'re undeleting.';
+    else
+      return $this->_loadPostFromRedis($params['url'], $num, $errors);
+  }
+
+  private function _requireUpdateAction($params, $num, &$errors) {
     if(!isset($params['action']) || $params['action'] !== 'update')
       $errors[] = 'To make an update request, include <code>"action":"update"</code> in the JSON request.';
     elseif(!isset($params['url']))
       $errors[] = 'An update request must specify the URL of the post that is being updated. Include a parameter <code>"url"</code> with the URL of the post you\'re updating.';
-    else {
-      $url = $params['url'];
-      $regex = '/'.str_replace('/','\\/',Config::$base).'client\/'.$this->client->token.'\/'.$num.'\/([a-zA-Z0-9]+)/';
-      if(!is_url($url)) {
-        $errors[] = 'The value of the <code>"url"</code> parameter does not look like a URL. Ensure you are sending the full URL of the post to update.';
-      } elseif(!preg_match($regex, $url, $match)) {
-        $errors[] = 'The URL provided is not supported. Verify that you are sending the correct URL based on the test you are trying to pass.';
+    else
+      return $this->_loadPostFromRedis($params['url'], $num, $errors);
+  }
+
+  private function _loadPostFromRedis($url, $num, &$errors) {
+    $regex = '/'.str_replace('/','\\/',Config::$base).'client\/'.$this->client->token.'\/'.$num.'\/([a-zA-Z0-9]+)/';
+    if(!is_url($url)) {
+      $errors[] = 'The value of the <code>"url"</code> parameter does not look like a URL. Ensure you are sending the full URL of the post to update.';
+    } elseif(!preg_match($regex, $url, $match)) {
+      $errors[] = 'The URL provided is not supported. Verify that you are sending the correct URL based on the test you are trying to pass.';
+    } else {
+      $key = $match[1];
+      list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($this->client->token, $num, $key);
+      if(!$post_html) {
+        $errors[] = 'The post you are trying to edit has expired.';
       } else {
-        $key = $match[1];
-        list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($this->client->token, $num, $key);
-        if(!$post_html) {
-          $errors[] = 'The post you are trying to edit has expired.';
-        } else {
-          return [$post_html, $post_raw, $post_properties, $key];
-        }
+        return [$post_html, $post_raw, $post_properties, $key];
       }
     }
-    return [false,false,false,false];
+    return [false,false,false,false];    
   }
 
   private function _check_access_token_header($request) {

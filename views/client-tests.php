@@ -84,6 +84,12 @@
       <? $this->insert('partials/client-test-row', ['num'=>403, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
+    <h4>Deletes</h4>
+    <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>500, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>502, 'tests'=>$tests, 'client'=>$client]); ?>
+    </table>
+
     <h4>Query</h4>
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>600, 'tests'=>$tests, 'client'=>$client]); ?>
