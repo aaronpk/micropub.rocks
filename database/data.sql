@@ -51,7 +51,8 @@ VALUES
   (53, 'client', 202, 'Create an h-entry with HTML content (JSON)', '      <p>This is a test of creating an h-entry post from your client with HTML content.</p>\n      <p>To pass this test, use your client to create an h-entry post with HTML, the request should be in JSON format. See <a href=\"https://www.w3.org/TR/micropub/#new-article-with-html\">New Article with HTML</a> for details on the syntax to use.</p>\n      <p>Keep this page open and post from your client. Your post will appear here.</p>'),
   (54, 'client', 700, 'Upload a photo to the Media Endpoint', '<p>To pass this test, your client will need to discover the Media Endpoint of the server, and upload an image there.</p>\n<p>Your image will appear below after it\'s been uploaded.</p>'),
   (55, 'client', 400, 'Replace a property in a post', '<p>To pass this test, replace the <code>content</code> property with a string containing at least 3 words.</p>'),
-  (56, 'client', 401, 'Add a value to an existing property', '<p>To pass this test, add the value <code>foo</code> to the property <code>category</code>.</p>');
+  (56, 'client', 401, 'Add a value to an existing property', '<p>To pass this test, add the value <code>foo</code> to the property <code>category</code>.</p>'),
+  (57, 'client', 402, 'Remove a value from a property', '<p>To pass this test, remove the value <code>foo</code> from the property <code>category</code>.</p>');
 
 
 INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)
