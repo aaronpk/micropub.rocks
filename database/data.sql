@@ -52,7 +52,8 @@ VALUES
   (54, 'client', 700, 'Upload a photo to the Media Endpoint', '<p>To pass this test, your client will need to discover the Media Endpoint of the server, and upload an image there.</p>\n<p>Your image will appear below after it\'s been uploaded.</p>'),
   (55, 'client', 400, 'Replace a property in a post', '<p>To pass this test, replace the <code>content</code> property with a string containing at least 3 words.</p>'),
   (56, 'client', 401, 'Add a value to an existing property', '<p>To pass this test, add the value <code>foo</code> to the property <code>category</code>.</p>'),
-  (57, 'client', 402, 'Remove a value from a property', '<p>To pass this test, remove the value <code>foo</code> from the property <code>category</code>.</p>');
+  (57, 'client', 402, 'Remove a value from a property', '<p>To pass this test, remove the value <code>foo</code> from the property <code>category</code>.</p>'),
+  (58, 'client', 403, 'Remove a property', '<p>To pass this test, remove the entire <code>category</code> property.</p>');
 
 
 INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)

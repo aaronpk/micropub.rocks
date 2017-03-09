@@ -81,6 +81,7 @@
       <? $this->insert('partials/client-test-row', ['num'=>400, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>401, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>402, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>403, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Query</h4>

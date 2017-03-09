@@ -406,6 +406,7 @@ class ClientTests {
         break;
 
       case 402:
+      case 403:
         $post_properties = [
           'content' => ['Hello world'],
           'category' => ['foo','bar']
@@ -758,6 +759,7 @@ class ClientTests {
         break;
 
       case 400:
+        $features = [18];
         if($this->_requireJSONEncoded($format, $errors)) {
           list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
           if($post_html) {
@@ -784,13 +786,14 @@ class ClientTests {
         break;      
 
       case 401:
+        $features = [19];
         if($this->_requireJSONEncoded($format, $errors)) {
           list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
           if($post_html) {
             if(!isset($params['add'])) {
               $errors[] = 'Include a property <code>add</code> containing the list of properties to add.';
             } elseif(!is_array($params['add']) || array_key_exists(0, $params['add'])) {
-              $errors[] = 'The <code>add</code> property must be an object containing the list of properties to add.';
+              $errors[] = 'The <code>add</code> property must be an object containing the list of values to add.';
             } elseif(!array_key_exists('category', $params['add'])) {
               $errors[] = 'This test requires adding a value to the "category" property.';
             } elseif(!is_array($params['add']['category']) || !array_key_exists(0, $params['add']['category'])) {
@@ -809,13 +812,14 @@ class ClientTests {
         break;      
 
       case 402:
+        $features = [20];
         if($this->_requireJSONEncoded($format, $errors)) {
           list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
           if($post_html) {
             if(!isset($params['remove'])) {
               $errors[] = 'Include a property <code>remove</code> containing the list of properties to remove.';
             } elseif(!is_array($params['remove']) || array_key_exists(0, $params['remove'])) {
-              $errors[] = 'The <code>remove</code> property must be an object containing the list of properties to remove.';
+              $errors[] = 'The <code>remove</code> property must be an object containing the list of values to remove.';
             } elseif(!array_key_exists('category', $params['remove'])) {
               $errors[] = 'This test requires removing a value from the "category" property.';
             } elseif(!is_array($params['remove']['category']) || !array_key_exists(0, $params['remove']['category'])) {
@@ -827,6 +831,26 @@ class ClientTests {
             } else {
               $properties = $post_properties;
               $properties['category'] = array_diff($properties['category'], [$params['remove']['category'][0]]);
+              $existing_key = $key;
+            }
+          }
+        }
+        break;      
+
+      case 403:
+        $features = [21];
+        if($this->_requireJSONEncoded($format, $errors)) {
+          list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
+          if($post_html) {
+            if(!isset($params['remove'])) {
+              $errors[] = 'Include a property <code>remove</code> containing the name of the property to remove.';
+            } elseif(!is_array($params['remove']) || !array_key_exists(0, $params['remove'])) {
+              $errors[] = 'The <code>remove</code> property must be an array containing the list of properties to remove.';
+            } elseif(!in_array('category', $params['remove'])) {
+              $errors[] = 'This test requires removing the "category" property. Ensure the string "category" is in the list of properties to remove.';
+            } else {
+              $properties = $post_properties;
+              unset($properties['category']);
               $existing_key = $key;
             }
           }
@@ -1233,6 +1257,7 @@ class ClientTests {
       case 400:
       case 401:
       case 402:
+      case 403:
         if(isset($params['q']) && $params['q'] == 'source') {
           if(isset($params['url'])) {
             $url = $params['url'];
