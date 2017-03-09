@@ -394,7 +394,14 @@ class ClientTests {
 
       case 400:
         $post_properties = [
-          'content' => 'Hello world'
+          'content' => ['Hello world']
+        ];
+        break;
+ 
+      case 401:
+        $post_properties = [
+          'content' => ['Hello world'],
+          'category' => ['bar']
         ];
         break;
 
@@ -765,6 +772,31 @@ class ClientTests {
               $existing_key = $key;
             }
 
+          }
+        }
+        break;      
+
+      case 401:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
+          if($post_html) {
+            if(!isset($params['add'])) {
+              $errors[] = 'Include a property <code>add</code> containing the list of properties to add.';
+            } elseif(!is_array($params['add']) || array_key_exists(0, $params['add'])) {
+              $errors[] = 'The <code>add</code> property must be an object containing the list of properties to add.';
+            } elseif(!array_key_exists('category', $params['add'])) {
+              $errors[] = 'This test requires adding a value to the "category" property.';
+            } elseif(!is_array($params['add']['category']) || !array_key_exists(0, $params['add']['category'])) {
+              $errors[] = 'Remember that the values of everything you are adding must be an array, even if there is only a single value.';
+            } elseif(!is_string($params['add']['category'][0])) {
+              $errors[] = 'This test requires adding a value to the category property.';
+            } elseif($params['add']['category'][0] !== 'foo') {
+              $errors[] = 'This test requires adding the value "foo" to the category property.';
+            } else {
+              $properties = $post_properties;
+              $properties['category'][] = $params['add']['category'][0];
+              $existing_key = $key;
+            }
           }
         }
         break;      
@@ -1160,12 +1192,42 @@ class ClientTests {
         ->find_one();
     }
 
-    $status = 200;
+    $status = 400;
     $html = '';
 
     $features = [];
 
     switch($num) {
+      case 400:
+      case 401:
+        if(isset($params['q']) && $params['q'] == 'source') {
+          if(isset($params['url'])) {
+            $url = $params['url'];
+            if(preg_match('/client\/([a-zA-Z0-9]+)\/(\d+)\/([a-zA-Z0-9]+)/', $url, $match)) {
+              list($match, $client_token, $num, $key) = $match;
+              list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($client_token, $num, $key);
+              if($post_html) {
+                if(isset($params['properties']) && is_array($params['properties'])) {
+                  $feature = 32;
+                  $post_properties = array_filter($post_properties, function($k) use($params) {
+                    return in_array($k, $params['properties']);
+                  }, ARRAY_FILTER_USE_KEY);
+                } else {
+                  $feature = 31;
+                }
+                ImplementationReport::store_client_feature($this->client->id, $feature, 1, 0);
+
+                $response = (new JsonResponse([
+                  'properties' => $post_properties
+                ]));
+                return $response;
+              }
+            }
+          }
+        }
+
+        break;
+
       case 600:
         $features[] = 27;
 
@@ -1177,6 +1239,7 @@ class ClientTests {
 
         if(count($errors) == 0) {
           $html = view('client-tests/success', ['num'=>$num]);
+          $status = 200;
         }
 
         break;
@@ -1192,6 +1255,7 @@ class ClientTests {
 
         if(count($errors) == 0) {
           $html = view('client-tests/success', ['num'=>$num]);
+          $status = 200;
         }
 
         break;
