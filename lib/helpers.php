@@ -96,7 +96,7 @@ function display_url($url) {
 }
 
 function is_url($url) {
-  return preg_match('/^https?:\/\/[a-z0-9\.\-]\/?/', $url);
+  return is_string($url) && preg_match('/^https?:\/\/[a-z0-9\.\-]\/?/', $url);
 }
 
 function add_parameters_to_url($url, $add_params) {

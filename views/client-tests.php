@@ -76,12 +76,11 @@
       <? $this->insert('partials/client-test-row', ['num'=>300, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
-    <!--
-    <h4>Editing Posts</h4>
+    <h4>Updates</h4>
     <table class="ui compact table">
+      <? $this->insert('partials/client-test-row', ['num'=>400, 'tests'=>$tests, 'client'=>$client]); ?>
 
     </table>
-    -->
 
     <h4>Query</h4>
     <table class="ui compact table">

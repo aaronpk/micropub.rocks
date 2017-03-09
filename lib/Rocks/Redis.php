@@ -5,19 +5,25 @@ use Config;
 
 class Redis {
 
-  public static function storePostHTML($client, $num, $key, $html, $raw) {
-    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':html';
-    redis()->setex($key, 60*60*24*7, $html);
-    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':raw';
-    redis()->setex($key, 60*60*24*7, $raw);
+  public static function storePostHTML($client, $num, $key, $html, $raw, $properties=false) {
+    $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':html';
+    redis()->setex($redis_key, 60*60*24*7, $html);
+    $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':raw';
+    redis()->setex($redis_key, 60*60*24*7, $raw);
+    if($properties) {
+      $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':properties';
+      redis()->setex($redis_key, 60*60*24*7, json_encode($properties));
+    }
   }
 
   public static function getPostHTML($client, $num, $key) {
-    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':html';
-    $html = redis()->get($key);
-    $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':raw';
-    $raw = redis()->get($key);
-    return [$html, $raw];
+    $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':html';
+    $html = redis()->get($redis_key);
+    $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':raw';
+    $raw = redis()->get($redis_key);
+    $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':properties';
+    $properties = json_decode(redis()->get($redis_key), true);
+    return [$html, $raw, $properties];
   }
 
   public static function storePostImage($client, $num, $key, $img) {

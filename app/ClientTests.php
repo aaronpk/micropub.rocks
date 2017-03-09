@@ -360,11 +360,13 @@ class ClientTests {
     $this->client->save();
 
     if(array_key_exists('key', $args)) {
-      list($post_html, $post_debug) = Redis::getPostHTML($this->client->token, $args['num'], $args['key']);
+      list($post_html, $post_debug, $post_properties) = Redis::getPostHTML($this->client->token, $args['num'], $args['key']);
     } else {
       $post_html = '';
       $post_debug = '';
+      $post_properties = false;
     }
+    $post_url = false;
 
     switch($args['num']) {
       case 100:
@@ -390,6 +392,12 @@ class ClientTests {
 
         break;
 
+      case 400:
+        $post_properties = [
+          'content' => 'Hello world'
+        ];
+        break;
+
       case 600:
       case 601:
       case 700:
@@ -399,12 +407,24 @@ class ClientTests {
         $template = 'not-found'; break;
     }
 
+    if($post_properties) {
+      // Create a post that will be updated
+      $key = random_string(8);
+
+      $post_html = view('client-tests/entry', $post_properties);
+      Redis::storePostHTML($this->client->token, $args['num'], $key, $post_html, false, $post_properties);
+
+      $post_url = Config::$base.'client/'.$this->client->token.'/'.$args['num'].'/'.$key;
+      $template = 'update'; 
+    }
+
     $response->getBody()->write(view('client-tests/'.$template, [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
       'test' => $test,
       'post_html' => $post_html,
       'post_debug' => $post_debug,
+      'post_url' => $post_url
     ]));
     return $response;
   }
@@ -723,6 +743,32 @@ class ClientTests {
 
         break;
 
+      case 400:
+        if($this->_requireJSONEncoded($format, $errors)) {
+          list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
+          if($post_html) {
+            if(!isset($params['replace'])) {
+              $errors[] = 'Include a property <code>replace</code> containing the list of properties to replace.';
+            } elseif(!is_array($params['replace'])) {
+              $errors[] = 'The <code>replace</code> property must be an object containing the list of properties to replace.';
+            } elseif(!array_key_exists('content', $params['replace'])) {
+              $errors[] = 'This test requires replacing the value of the "content" property.';
+            } elseif(!is_array($params['replace']['content']) || !array_key_exists(0, $params['replace']['content'])) {
+              $errors[] = 'Remember that the values of everything you are replacing must be an array, even if there is only a single value.';
+            } elseif(!is_string($params['replace']['content'][0])) {
+              $errors[] = 'This test requires replacing the content of this post with a string.';
+            } elseif(count(explode(' ', $params['replace']['content'][0])) < 3) {
+              $errors[] = 'This test requires replacing the content of this post with a string containing 3 words or more.';
+            } else {
+              $properties = $post_properties;
+              $properties['content'] = $params['replace']['content'][0];
+              $existing_key = $key;
+            }
+
+          }
+        }
+        break;      
+
       case 700:
         if($format == 'json') {
 
@@ -805,7 +851,10 @@ class ClientTests {
       $html = view('client-tests/success', ['num'=>$num]).$html;
 
       // Cache the HTML so that it can be rendered in a permalink
-      $key = random_string(8);
+      if(isset($existing_key))
+        $key = $existing_key;
+      else
+        $key = random_string(8);
       Redis::storePostHTML($this->client->token, $num, $key, $html, $debug);
 
       $response = $response->withHeader('Location', Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key);
@@ -1013,6 +1062,31 @@ class ClientTests {
     } else {
       return $properties;
     }
+  }
+
+  function _requireUpdateAction($params, $num, &$errors) {
+    if(!isset($params['action']) || $params['action'] !== 'update')
+      $errors[] = 'To make an update request, include <code>"action":"update"</code> in the JSON request.';
+    elseif(!isset($params['url']))
+      $errors[] = 'An update request must specify the URL of the post that is being updated. Include a parameter <code>"url"</code> with the URL of the post you\'re updating.';
+    else {
+      $url = $params['url'];
+      $regex = '/'.str_replace('/','\\/',Config::$base).'client\/'.$this->client->token.'\/'.$num.'\/([a-zA-Z0-9]+)/';
+      if(!is_url($url)) {
+        $errors[] = 'The value of the <code>"url"</code> parameter does not look like a URL. Ensure you are sending the full URL of the post to update.';
+      } elseif(!preg_match($regex, $url, $match)) {
+        $errors[] = 'The URL provided is not supported. Verify that you are sending the correct URL based on the test you are trying to pass.';
+      } else {
+        $key = $match[1];
+        list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($this->client->token, $num, $key);
+        if(!$post_html) {
+          $errors[] = 'The post you are trying to edit has expired.';
+        } else {
+          return [$post_html, $post_raw, $post_properties, $key];
+        }
+      }
+    }
+    return [false,false,false,false];
   }
 
   private function _check_access_token_header($request) {
