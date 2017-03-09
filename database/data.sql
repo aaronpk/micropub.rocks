@@ -55,7 +55,9 @@ VALUES
   (57, 'client', 402, 'Remove a value from a property', '<p>To pass this test, remove the value <code>foo</code> from the property <code>category</code>.</p>'),
   (58, 'client', 403, 'Remove a property', '<p>To pass this test, remove the entire <code>category</code> property.</p>'),
   (59, 'client', 500, 'Delete a post', '<p>To pass this test, delete the post referred to by the URL below. You can send this request as either form-encoded or JSON.</p>'),
-  (60, 'client', 502, 'Undelete a post', '<p>To pass this test, undelete the post referred to by the URL below. You can send this request as either form-encoded or JSON.</p>');
+  (60, 'client', 502, 'Undelete a post', '<p>To pass this test, undelete the post referred to by the URL below. You can send this request as either form-encoded or JSON.</p>'),
+  (61, 'client', 602, 'Source Query (All Properties)', '<p>To pass this test, query the Micropub endpoint to find all the source properties for the post below. By not requesting any particular properties in the request, the endpoint will return all the properties.</p>'),
+  (62, 'client', 603, 'Source Query (Specific Properties)', '<p>To pass this test, query the Micropub endpoint to find the \"content\" and \"category\" properties for the post below. The endpoint will return just the properties requested.</p>');
 
 
 INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)

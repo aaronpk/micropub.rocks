@@ -408,6 +408,8 @@ class ClientTests {
       case 402:
       case 403:
       case 500:
+      case 602:
+      case 603:
         $post_properties = [
           'content' => ['Hello world'],
           'category' => ['foo','bar']
@@ -432,10 +434,10 @@ class ClientTests {
     }
 
     if($post_properties) {
-      // Create a post that will be updated
+      // Create a post that will be updated, deleted or queried
       $key = random_string(8);
 
-      if(!isset($post_html))
+      if(!$post_html)
         $post_html = view('client-tests/entry', $post_properties);
       Redis::storePostHTML($this->client->token, $args['num'], $key, $post_html, false, $post_properties);
 
@@ -909,6 +911,11 @@ class ClientTests {
         }
         break;      
 
+      case 602:
+      case 603: 
+        $errors[] = 'Query requests must be sent via GET, not POST';
+        break;
+
       case 700:
         if($format == 'json') {
 
@@ -1252,6 +1259,27 @@ class ClientTests {
     return [false,false,false,false];    
   }
 
+  private function _getPostProperties($url, $params) {
+    if(preg_match('/client\/([a-zA-Z0-9]+)\/(\d+)\/([a-zA-Z0-9]+)/', $url, $match)) {
+      list($match, $client_token, $num, $key) = $match;
+      list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($client_token, $num, $key);
+      if($post_html) {
+        if(isset($params['properties']) && is_array($params['properties'])) {
+          $feature = 32;
+          $post_properties = array_filter($post_properties, function($k) use($params) {
+            return in_array($k, $params['properties']);
+          }, ARRAY_FILTER_USE_KEY);
+        } else {
+          $feature = 31;
+        }
+        ImplementationReport::store_client_feature($this->client->id, $feature, 1, 0);
+
+        return $post_properties;
+      }
+    }
+    return false;
+  }
+
   private function _check_access_token_header($request) {
     $errors = [];
     $status = 400;
@@ -1329,6 +1357,62 @@ class ClientTests {
     $features = [];
 
     switch($num) {
+      case 602:
+      case 603:
+        $features[] = ($num == 602 ? 31 : 32);
+
+        if(!isset($params['q']) || !isset($params['url'])) {
+          $errors[] = 'The source query must contain two parameters, <code>q=source</code> and <code>url</code>';
+        } elseif($params['q'] != 'source') {
+          $errors[] = 'The source query must contain <code>q=source</code>';
+        } else {
+          if($num == 602) {
+            if(isset($params['properties'])) {
+              $errors[] = 'To query all properties of a post, do not request any specific properties.';
+            }
+          } else {
+            if(!isset($params['properties'])) {
+              $errors[] = 'To query specific properties of a post, include one or more <code>properties[]</code> parameters.';
+            } else {
+              if(!is_array($params['properties']))
+                $params['properties'] = [$params['properties']];
+
+              if(!array_key_exists(0, $params['properties'])) {
+                $errors[] = 'Something looks wrong. Ensure you are only requesting string values as properties.';
+              } else {
+                $check = true;
+                foreach($params['properties'] as $p) {
+                  if(!is_string($p)) {
+                    $check = false;
+                  }
+                }
+                if(!$check) {
+                  $errors[] = 'One or more values were not a string. Ensure you only include string values when requesting properties.';
+                } else {
+                  if(!in_array('content', $params['properties']) || !in_array('category', $params['properties'])) {
+                    $errors[] = 'This test requires requesting the "content" and "category" properties.';
+                  } elseif(count($params['properties']) > 2) {
+                    $errors[] = 'This test requires requesting the "content" and "category" properties.';
+                  } else {
+                    $post_properties = $this->_getPostProperties($params['url'], $params);
+                    if(!$post_properties) {
+                      $errors[] = 'The post URL provided was not found';
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+        }
+
+        if(count($errors) == 0) {
+          $html = view('client-tests/success', ['num'=>$num]);
+          $status = 200;
+        }
+
+        break;
+
       case 400:
       case 401:
       case 402:
@@ -1336,25 +1420,12 @@ class ClientTests {
         if(isset($params['q']) && $params['q'] == 'source') {
           if(isset($params['url'])) {
             $url = $params['url'];
-            if(preg_match('/client\/([a-zA-Z0-9]+)\/(\d+)\/([a-zA-Z0-9]+)/', $url, $match)) {
-              list($match, $client_token, $num, $key) = $match;
-              list($post_html, $post_raw, $post_properties) = Redis::getPostHTML($client_token, $num, $key);
-              if($post_html) {
-                if(isset($params['properties']) && is_array($params['properties'])) {
-                  $feature = 32;
-                  $post_properties = array_filter($post_properties, function($k) use($params) {
-                    return in_array($k, $params['properties']);
-                  }, ARRAY_FILTER_USE_KEY);
-                } else {
-                  $feature = 31;
-                }
-                ImplementationReport::store_client_feature($this->client->id, $feature, 1, 0);
-
-                $response = (new JsonResponse([
-                  'properties' => $post_properties
-                ]));
-                return $response;
-              }
+            $post_properties = $this->_getPostProperties($url, $params);
+            if($post_properties) {
+              $response = (new JsonResponse([
+                'properties' => $post_properties
+              ]));
+              return $response;
             }
           }
         }
@@ -1442,6 +1513,11 @@ class ClientTests {
           'syndicate-to' => $syndicate_to
         ]));
         ImplementationReport::store_client_feature($this->client->id, 30, 1, $num ?: 0);
+      } elseif(isset($params['q']) && $params['q'] == 'source') {
+        $response = (new JsonResponse([
+          'properties' => $post_properties
+        ]));
+        // Feature is recorded above
       }
     }
 

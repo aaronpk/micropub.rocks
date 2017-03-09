@@ -94,6 +94,8 @@
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>600, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>601, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>602, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>603, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Media Endpoint</h4>
