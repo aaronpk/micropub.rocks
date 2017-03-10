@@ -14,7 +14,7 @@ $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
-    <p>This test will ensure your endpoint does not store the access token in the post. It does this by creating a post while providing the access token in the post body, then querying the endpoint for the source properties of the post to ensure the access token is not returned as part of the content. In order to pass this test, you will also have to support the <a href="/server-tests/602?endpoint='.$endpoint->id.'">Source Query</a> test.</p>
+    <p>This test will ensure your endpoint does not store the access token in the post. It does this by creating a post while providing the access token in the post body, then querying the endpoint for the source properties of the post to ensure the access token is not returned as part of the content. In order to pass this test, you will also have to support the <a href="/server-tests/602?endpoint=<?= $endpoint->id ?>">Source Query</a> test.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
   </section>
 
