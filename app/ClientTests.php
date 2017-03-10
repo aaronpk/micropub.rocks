@@ -828,21 +828,21 @@ class ClientTests {
         if($this->_requireJSONEncoded($format, $errors)) {
           list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
           if($post_html) {
-            if(!isset($params['remove'])) {
-              $errors[] = 'Include a property <code>remove</code> containing the list of properties to remove.';
-            } elseif(!is_array($params['remove']) || array_key_exists(0, $params['remove'])) {
-              $errors[] = 'The <code>remove</code> property must be an object containing the list of values to remove.';
-            } elseif(!array_key_exists('category', $params['remove'])) {
+            if(!isset($params['delete'])) {
+              $errors[] = 'Include a property <code>delete</code> containing the list of properties to remove.';
+            } elseif(!is_array($params['delete']) || array_key_exists(0, $params['delete'])) {
+              $errors[] = 'The <code>delete</code> property must be an object containing the list of values to remove.';
+            } elseif(!array_key_exists('category', $params['delete'])) {
               $errors[] = 'This test requires removing a value from the "category" property.';
-            } elseif(!is_array($params['remove']['category']) || !array_key_exists(0, $params['remove']['category'])) {
+            } elseif(!is_array($params['delete']['category']) || !array_key_exists(0, $params['delete']['category'])) {
               $errors[] = 'Remember that the values of everything you are removing must be an array, even if there is only a single value.';
-            } elseif(!is_string($params['remove']['category'][0])) {
+            } elseif(!is_string($params['delete']['category'][0])) {
               $errors[] = 'This test requires removing a value from the category property.';
-            } elseif($params['remove']['category'][0] !== 'foo') {
+            } elseif($params['delete']['category'][0] !== 'foo') {
               $errors[] = 'This test requires removing the value "foo" from the category property.';
             } else {
               $properties = $post_properties;
-              $properties['category'] = array_diff($properties['category'], [$params['remove']['category'][0]]);
+              $properties['category'] = array_diff($properties['category'], [$params['delete']['category'][0]]);
               $existing_key = $key;
             }
           }
@@ -854,11 +854,11 @@ class ClientTests {
         if($this->_requireJSONEncoded($format, $errors)) {
           list($post_html, $post_raw, $post_properties, $key) = $this->_requireUpdateAction($params, $num, $errors);
           if($post_html) {
-            if(!isset($params['remove'])) {
-              $errors[] = 'Include a property <code>remove</code> containing the name of the property to remove.';
-            } elseif(!is_array($params['remove']) || !array_key_exists(0, $params['remove'])) {
-              $errors[] = 'The <code>remove</code> property must be an array containing the list of properties to remove.';
-            } elseif(!in_array('category', $params['remove'])) {
+            if(!isset($params['delete'])) {
+              $errors[] = 'Include a property <code>delete</code> containing the name of the property to remove.';
+            } elseif(!is_array($params['delete']) || !array_key_exists(0, $params['delete'])) {
+              $errors[] = 'The <code>delete</code> property must be an array containing the list of properties to remove.';
+            } elseif(!in_array('category', $params['delete'])) {
               $errors[] = 'This test requires removing the "category" property. Ensure the string "category" is in the list of properties to remove.';
             } else {
               $properties = $post_properties;
