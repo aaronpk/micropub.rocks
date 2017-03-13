@@ -42,8 +42,6 @@ class ClientTests {
 
       $response = $response->withHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/auth; rel="authorization_endpoint">');
 
-      $response = $response->withHeader('X-Foo', 'bar');
-
       // Don't actually redirect here, instead return a public page about the client
       $response->getBody()->write(view('client-info', [
         'title' => $this->client->name,
@@ -462,6 +460,8 @@ class ClientTests {
       if(!$this->client) 
         return $response->withStatus(404);
     }
+
+    $response = $this->_add_cors_headers($response);
 
     $errors = [];
     $status = 400;
@@ -1029,6 +1029,8 @@ class ClientTests {
         return $response->withStatus(404);
     }
 
+    $response = $this->_add_cors_headers($response);
+
     list($errors, $status) = $this->_check_access_token_header($request);
 
     if(count($errors)) {
@@ -1312,6 +1314,8 @@ class ClientTests {
         return $response->withStatus(404);
     }
 
+    $response = $this->_add_cors_headers($response);
+
     $params = $request->getQueryParams();
 
     list($errors, $status) = $this->_check_access_token_header($request);
@@ -1530,5 +1534,16 @@ class ClientTests {
     }
     
     return $response->withStatus($status);
+  }
+
+  public function options(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    $response = $this->_add_cors_headers($response);
+    return $response->withStatus(200);
+  }
+
+  private function _add_cors_headers($response) {
+    return $response->withHeader('Access-Control-Allow-Origin', '*')
+      ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      ->withHeader('Access-Control-Allow-Methods', 'GET, POST');
   }
 }
