@@ -144,7 +144,7 @@ Developer(s): [Name](https://you.example.com)
 
 ## Querying
 * [<?= result_checkbox($results, 27) ?>] 600: Queries the Micropub endpoint with `q=config`
- * [[ ]] Looks in the response for the Media Endpoint
+ * [[<?= result_checkbox($results, 28) ?>]] Looks in the response for the Media Endpoint
  * [[ ]] Looks in the response for syndication targets
 * [<?= result_checkbox($results, 30) ?>] 601: Queries the Micropub endpoint with `q=syndicate-to`
 * [<?= result_checkbox($results, 31) ?>] 602: Queries the Micropub endpoint for a post's source content without specifying a list of properties
