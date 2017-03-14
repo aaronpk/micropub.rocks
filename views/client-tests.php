@@ -103,8 +103,6 @@
       <? $this->insert('partials/client-test-row', ['num'=>700, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
-    <div class="ui warning message">Note: The client tests for Micropub.rocks are still in progress. Please check back later, or follow the <a href="https://github.com/aaronpk/micropub.rocks/issues">issues</a> for progress updates.</div>
-
   </section>
 </div>
 <script>
