@@ -62,6 +62,8 @@ $route->map('POST', '/client/{token}/auth', 'App\\ClientTests::auth_confirm');
 $route->map('POST', '/client/{token}/token', 'App\\ClientTests::token');
 $route->map('POST', '/client/{token}/micropub', 'App\\ClientTests::micropub');
 $route->map('POST', '/client/{token}/media', 'App\\ClientTests::media_endpoint');
+$route->map('OPTIONS', '/client/{token}/micropub', 'App\\ClientTests::options');
+$route->map('OPTIONS', '/client/{token}/media', 'App\\ClientTests::options');
 //////////////////////////////////////////////////////////////////////////
 
 
