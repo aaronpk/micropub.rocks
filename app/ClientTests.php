@@ -40,8 +40,6 @@ class ClientTests {
       if(!$this->client) 
         return $response->withStatus(404);
 
-      $response = $response->withHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/auth; rel="authorization_endpoint">');
-
       // Don't actually redirect here, instead return a public page about the client
       $response->getBody()->write(view('client-info', [
         'title' => $this->client->name,
@@ -251,17 +249,17 @@ class ClientTests {
     // Require grant_type=authorization_code
 
     if(!isset($params['grant_type'])) {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_request',
         'error_description' => 'This request must be made with a grant_type parameter set to authorization_code'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     if($params['grant_type'] != 'authorization_code') {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'unsupported_grant_type',
         'error_description' => 'Only the authorization_code grant is supported'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     // First parse the authorization code and check if it's expired
@@ -271,49 +269,47 @@ class ClientTests {
         throw new \Exception();
       }
     } catch(\Firebase\JWT\ExpiredException $e) {
-      $response = new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'The authorization code you provided has expired'
-      ]);
-      return $response->withStatus(400);
+      ])->withStatus(400);
     } catch(\Exception $e) {
-      $response = new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'The authorization code you provided is not valid',
-      ]);
-      return $response->withStatus(400);
+      ])->withStatus(400);
     }
 
     // Check that the client ID in the request matches the one in the code
 
     if(!isset($params['client_id'])) {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'You must provide the client_id that was used to generate this authorization code in the request'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     if($params['client_id'] != $data->client_id) {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'The client_id in this request did not match the client_id that was used to generate this authorization code'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     // Check that the redirect URI in the request matches the one in the code
 
     if(!isset($params['redirect_uri'])) {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'You must provide the redirect_uri that was used to generate this authorization code in the request'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     if($params['redirect_uri'] != $data->redirect_uri) {
-      return (new JsonResponse([
+      return $this->_conneg_response($request, $response, [
         'error' => 'invalid_grant',
         'error_description' => 'The redirect_uri in this request did not match the redirect_uri that was used to generate this authorization code'
-      ]))->withStatus(400);
+      ])->withStatus(400);
     }
 
     $token = ORM::for_table('client_access_tokens')->create();
@@ -333,11 +329,11 @@ class ClientTests {
 
     ImplementationReport::store_client_feature($this->client->id, 1, 1, 0);
 
-    return (new JsonResponse([
+    return $this->_conneg_response($request, $response, [
       'access_token' => $token->token,
       'scope' => 'create',
       'me' => $data->me
-    ]))->withStatus(200);
+    ])->withStatus(200);
   }
 
   public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
@@ -1545,5 +1541,15 @@ class ClientTests {
     return $response->withHeader('Access-Control-Allow-Origin', '*')
       ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
       ->withHeader('Access-Control-Allow-Methods', 'GET, POST');
+  }
+
+  private function _conneg_response($request, $response, $params) {
+    $accept = $request->getHeaderLine('Accept');
+    if(preg_match('/x-www-form-urlencoded/', $accept)) {
+      $response->getBody()->write(http_build_query($params));
+    } else {
+      $response = new JsonResponse($params);
+    }
+    return $response;
   }
 }
