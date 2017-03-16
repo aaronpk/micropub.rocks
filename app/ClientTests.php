@@ -1400,7 +1400,7 @@ class ClientTests {
                   $errors[] = 'One or more values were not a string. Ensure you only include string values when requesting properties.';
                 } else {
                   $post_properties = $this->_getPostProperties($params['url'], $params);
-                  if(!$post_properties) {
+                  if(!is_array($post_properties)) {
                     $errors[] = 'The post URL provided was not found';
                   }
                 }
