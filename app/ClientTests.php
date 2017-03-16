@@ -1507,10 +1507,15 @@ class ClientTests {
       $status = 400;
     } else {
       if(isset($params['q']) && $params['q'] == 'config') {
-        $response = (new JsonResponse([
+        $config = [
           'syndicate-to' => $syndicate_to,
-          'media-endpoint' => Config::$base.'client/'.$this->client->token.'/media'
-        ]));
+        ];
+
+        // Advertise the media endpoint unless the last viewed test was 300.
+        if($num != 300)
+          $config['media-endpoint'] = Config::$base.'client/'.$this->client->token.'/media';
+
+        $response = (new JsonResponse($config));
         ImplementationReport::store_client_feature($this->client->id, 27, 1, $num ?: 0);
       } elseif(isset($params['q']) && $params['q'] == 'syndicate-to') {
         $response = (new JsonResponse([
