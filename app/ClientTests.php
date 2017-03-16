@@ -1399,15 +1399,9 @@ class ClientTests {
                 if(!$check) {
                   $errors[] = 'One or more values were not a string. Ensure you only include string values when requesting properties.';
                 } else {
-                  if(!in_array('content', $params['properties']) || !in_array('category', $params['properties'])) {
-                    $errors[] = 'This test requires requesting the "content" and "category" properties.';
-                  } elseif(count($params['properties']) > 2) {
-                    $errors[] = 'This test requires requesting the "content" and "category" properties.';
-                  } else {
-                    $post_properties = $this->_getPostProperties($params['url'], $params);
-                    if(!$post_properties) {
-                      $errors[] = 'The post URL provided was not found';
-                    }
+                  $post_properties = $this->_getPostProperties($params['url'], $params);
+                  if(!$post_properties) {
+                    $errors[] = 'The post URL provided was not found';
                   }
                 }
               }
