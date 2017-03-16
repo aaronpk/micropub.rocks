@@ -1379,6 +1379,7 @@ class ClientTests {
             if(isset($params['properties'])) {
               $errors[] = 'To query all properties of a post, do not request any specific properties.';
             }
+            $post_properties = $this->_getPostProperties($params['url'], $params);
           } else {
             if(!isset($params['properties'])) {
               $errors[] = 'To query specific properties of a post, include one or more <code>properties[]</code> parameters.';
