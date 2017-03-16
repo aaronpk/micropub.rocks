@@ -1525,6 +1525,7 @@ class ClientTests {
         ImplementationReport::store_client_feature($this->client->id, 30, 1, $num ?: 0);
       } elseif(isset($params['q']) && $params['q'] == 'source') {
         $response = (new JsonResponse([
+          'type' => ['h-entry'],
           'properties' => $post_properties
         ]));
         // Feature is recorded above
