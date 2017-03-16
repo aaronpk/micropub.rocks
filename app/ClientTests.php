@@ -681,8 +681,17 @@ class ClientTests {
                 $errors[] = 'The request did not include a "photo" parameter.';
               elseif(!$properties['photo'])
                 $errors[] = 'The "photo" parameter was empty';
-              elseif(!array_key_exists(0, $properties['photo']) || !is_url($properties['photo'][0]))
-                $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+              elseif(!array_key_exists(0, $properties['photo']))
+                $errors[] = 'The value of the "photo" parameter must be an array containing the photo URL.';
+              else {
+                if(is_url($properties['photo'][0])) {
+                  // okay
+                } elseif(is_array($properties['photo'][0])) {
+                  if(!array_key_exists('value', $properties['photo'][0]) || !is_url($properties['photo'][0]['value']))
+                    $errors[] = 'When the "photo" property is not a plain URL, it must be an object with a "value" key containing the photo URL. See the section on posting images with alt text.';
+                } else
+                  $errors[] = 'The value of the "photo" parameter was not a URL or image with alt text.';
+              }
             }
           }
         }
