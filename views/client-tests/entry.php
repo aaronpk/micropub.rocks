@@ -13,6 +13,12 @@
       <? if(isset($photo)): ?>
         <div class="photo"><img src="<?= $this->e(mf2_val($photo)) ?>" class="u-photo"></div>
       <? endif ?>
+      <? if(isset($audio)): ?>
+        <div class="audio"><audio src="<?= $this->e(mf2_val($audio)) ?>" class="u-audio" controls style="width:100%"></audio></div>
+      <? endif ?>
+      <? if(isset($video)): ?>
+        <div class="video"><video src="<?= $this->e(mf2_val($video)) ?>" class="u-video" controls style="width:100%"></video></div>
+      <? endif ?>
       <div class="meta">
         <? if(isset($category)): ?>
           <div class="tags">

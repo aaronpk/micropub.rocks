@@ -57,6 +57,8 @@ $route->map('GET', '/client/{token}/micropub', 'App\\ClientTests::micropub_get')
 $route->map('GET', '/client/{token}/{num}', 'App\\ClientTests::get_test');
 $route->map('GET', '/client/{token}/{num}/{key}', 'App\\ClientTests::get_test');
 $route->map('GET', '/client/{token}/{num}/{key}/photo.jpg', 'App\\ClientTests::get_image');
+$route->map('GET', '/client/{token}/{num}/{key}/video.mp4', 'App\\ClientTests::get_video');
+$route->map('GET', '/client/{token}/{num}/{key}/audio.mp3', 'App\\ClientTests::get_audio');
 $route->map('GET', '/client/{token}/{num}/{key}/file', 'App\\ClientTests::get_image');
 $route->map('POST', '/client/{token}/auth', 'App\\ClientTests::auth_confirm');
 $route->map('POST', '/client/{token}/token', 'App\\ClientTests::token');

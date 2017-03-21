@@ -28,7 +28,7 @@ class Redis {
 
   public static function storePostImage($client, $num, $key, $img) {
     $key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':img';
-    redis()->setex($key, 60*60*24*7, base64_encode($img));
+    redis()->setex($key, 60*60*24*1, base64_encode($img));
   }
 
   public static function getPostImage($client, $num, $key) {

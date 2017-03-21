@@ -757,16 +757,29 @@ class ClientTests {
           if($this->_requireFormHEntry($params, $errors)) {
             $files = $request->getUploadedFiles();
 
-            if(!isset($files['photo'])) {
-              $errors[] = 'You must upload a file in a part named "photo".';
+            if(!isset($files['photo']) && !isset($files['video']) && !isset($files['audio'])) {
+              $errors[] = 'You must upload a file in a part named "photo", "video" or "audio".';
             } else {
-              $photo = $files['photo'];
-              $img = $photo->getStream()->__toString();
+              if(isset($files['photo'])) {
+                $file = $files['photo'];
+                $param = 'photo';
+                $name = 'photo.jpg';
+              } elseif(isset($files['video'])) {
+                $file = $files['video'];
+                $param = 'video';
+                $name = 'video.mp4';
+              } elseif(isset($files['audio'])) {
+                $file = $files['audio'];
+                $param = 'audio';
+                $name = 'audio.mp3';
+              }
+
+              $file_data = $file->getStream()->__toString();
 
               $key = random_string(8);
-              Redis::storePostImage($this->client->token, $num, $key, $img);
+              Redis::storePostImage($this->client->token, $num, $key, $file_data);
 
-              $params['photo'] = Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key.'/photo.jpg';
+              $params[$param] = Config::$base.'client/'.$this->client->token.'/'.$num.'/'.$key.'/'.$name;
 
               $properties = $params;
             }
@@ -1146,6 +1159,34 @@ class ClientTests {
     $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
     if($img) {
       $response = $response->withHeader('Content-Type', 'image/jpeg');
+      $response->getBody()->write($img);
+      return $response;
+    } else {
+      return $response->withStatus(404);
+    }
+  }
+
+  public function get_audio(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // First check that this client exists and belongs to the logged-in user
+    $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
+
+    $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
+    if($img) {
+      $response = $response->withHeader('Content-Type', 'audio/mpeg');
+      $response->getBody()->write($img);
+      return $response;
+    } else {
+      return $response->withStatus(404);
+    }
+  }
+
+  public function get_video(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    // First check that this client exists and belongs to the logged-in user
+    $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
+
+    $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
+    if($img) {
+      $response = $response->withHeader('Content-Type', 'video/mp4');
       $response->getBody()->write($img);
       return $response;
     } else {
