@@ -153,7 +153,7 @@ function result_icon($passed, $id=false) {
 function result_checkbox($results, $num) {
   foreach($results as $result) {
     if($result->number == $num) {
-      return $result->implements ? 'x' : ' ';
+      return $result->implements == 1 ? 'x' : ' ';
     }
   }
   return ' ';
