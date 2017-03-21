@@ -510,8 +510,7 @@ class ClientTests {
     }
     // Body
     $request_body = (string)$request->getBody();
-    $request_body = str_replace('&', "&\n", $request_body);
-    $debug = $request_method . "\n" . $request_headers . "\n" . $request_body;
+    $debug = $request_method . "\n" . $request_headers . "\n" . str_replace('&', "&\n", $request_body);
 
     // Bail out now if there were any authentication errors
     if(count($errors)) {
