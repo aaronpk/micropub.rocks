@@ -8,6 +8,12 @@
                     ]); ?>
 
 <div class="single-column" style="margin-top: 1em;">
-  <h2><?= $this->e($client->name) ?></h2>
-  <p>This a user profile page for testing the Micropub client <?= $this->e($client->name) ?>. Typically this would be the user's home page. This page advertises the user's Micropub endpoint and authorization endpoint that clients use when signing the user in.</p>
+  <div style="border: 1px #aaa solid; border-radius: 6px; padding: 20px; background: white;">
+    <h2><?= $this->e($client->name) ?></h2>
+    <p>This a user profile page for testing the Micropub client <?= $this->e($client->name) ?>. Typically this would be the user's home page. This page advertises the user's Micropub endpoint and authorization endpoint that clients use when signing the user in.</p>
+
+    <? if($client->profile_url): ?>
+      <a href="<?= $this->e($client->profile_url) ?>" rel="me"><?= $this->e($client->profile_url) ?></a>
+    <? endif ?>
+  </div>
 </div>

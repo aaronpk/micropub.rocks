@@ -57,6 +57,7 @@ CREATE TABLE `micropub_clients` (
   `redirect_uri` varchar(255) DEFAULT NULL,
   `token` varchar(100) DEFAULT NULL,
   `last_viewed_test` int(11) NOT NULL DEFAULT '100',
+  `profile_url` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `share_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)

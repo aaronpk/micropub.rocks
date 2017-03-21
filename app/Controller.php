@@ -117,6 +117,7 @@ class Controller {
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
     $client->name = $params['name'];
+    $client->profile_url = $params['profile_url'];
     $client->save();
 
     return $response->withHeader('Location', '/client/'.$client->token)->withStatus(302);
