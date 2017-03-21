@@ -7,7 +7,7 @@
 '
                     ]); ?>
 
-<div class="single-column">
+<div class="single-column" style="margin-top: 1em;">
   <h2><?= $this->e($client->name) ?></h2>
-  <p>This a Micropub endpoint.</p>
+  <p>This a user profile page for testing the Micropub client <?= $this->e($client->name) ?>. Typically this would be the user's home page. This page advertises the user's Micropub endpoint and authorization endpoint that clients use when signing the user in.</p>
 </div>
