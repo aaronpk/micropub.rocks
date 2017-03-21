@@ -616,14 +616,26 @@ class ClientTests {
         $features = [11];
         if($this->_requireFormEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
-            if(!isset($params['photo']))
-              $errors[] = 'The request did not include a "photo" parameter.';
-            elseif(!$params['photo'])
-              $errors[] = 'The "photo" parameter was empty';
-            elseif(!is_string($params['photo']))
-              $errors[] = 'The "photo" parameter provided was not a string. Ensure the client is sending only one URL in the photo parameter';
-            elseif(!is_url($params['photo']))
-              $errors[] = 'The value of the "photo" parameter does not appear to be a URL.';
+            if(!isset($params['photo']) && !isset($params['video']) && !isset($params['audio'])) {
+              $errors[] = 'The request did not include a "photo", "video" or "audio" parameter.';
+            } else {
+              if(isset($params['photo'])) {
+                $prop = 'photo';
+              } elseif(isset($params['video'])) {
+                $prop = 'video';
+              } elseif(isset($params['audio'])) {
+                $prop = 'audio';
+              }
+
+              if(!isset($params[$prop]))
+                $errors[] = 'The request did not include a "'.$prop.'" parameter.';
+              elseif(!$params[$prop])
+                $errors[] = 'The "'.$prop.'" parameter was empty';
+              elseif(!is_string($params[$prop]))
+                $errors[] = 'The "'.$prop.'" parameter provided was not a string. Ensure the client is sending only one URL in the parameter';
+              elseif(!is_url($params[$prop]))
+                $errors[] = 'The value of the "'.$prop.'" parameter does not appear to be a URL.';
+            }
             $properties = $params;
           }
         }
@@ -677,20 +689,30 @@ class ClientTests {
         if($this->_requireJSONEncoded($format, $errors)) {
           if($this->_requireJSONHEntry($params, $errors)) {
             if($properties=$this->_validateJSONProperties($params, $errors)) {
-              if(!isset($properties['photo']))
-                $errors[] = 'The request did not include a "photo" parameter.';
-              elseif(!$properties['photo'])
-                $errors[] = 'The "photo" parameter was empty';
-              elseif(!array_key_exists(0, $properties['photo']))
-                $errors[] = 'The value of the "photo" parameter must be an array containing the photo URL.';
-              else {
-                if(is_url($properties['photo'][0])) {
-                  // okay
-                } elseif(is_array($properties['photo'][0])) {
-                  if(!array_key_exists('value', $properties['photo'][0]) || !is_url($properties['photo'][0]['value']))
-                    $errors[] = 'When the "photo" property is not a plain URL, it must be an object with a "value" key containing the photo URL. See the section on posting images with alt text.';
-                } else
-                  $errors[] = 'The value of the "photo" parameter was not a URL or image with alt text.';
+              if(!isset($properties['photo']) && !isset($properties['video']) && !isset($properties['audio'])) {
+                $errors[] = 'The request did not include a "photo", "video" or "audio" parameter.';
+              } else {
+                if(isset($properties['photo'])) {
+                  $prop = 'photo';
+                } elseif(isset($properties['video'])) {
+                  $prop = 'video';
+                } elseif(isset($properties['audio'])) {
+                  $prop = 'audio';
+                }
+
+                if(!$properties[$prop])
+                  $errors[] = 'The "'.$prop.'" parameter was empty';
+                elseif(!array_key_exists(0, $properties[$prop]))
+                  $errors[] = 'The value of the "'.$prop.'" parameter must be an array containing the file URL.';
+                else {
+                  if(is_url($properties[$prop][0])) {
+                    // okay
+                  } elseif(is_array($properties['photo'][0])) {
+                    if(!array_key_exists('value', $properties['photo'][0]) || !is_url($properties['photo'][0]['value']))
+                      $errors[] = 'When the "photo" property is not a plain URL, it must be an object with a "value" key containing the photo URL. See the section on posting images with alt text.';
+                  } else
+                    $errors[] = 'The value of the "'.$prop.'" parameter was not a URL or image with alt text.';
+                }
               }
             }
           }
