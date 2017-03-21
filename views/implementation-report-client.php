@@ -100,6 +100,9 @@ Programming Language(s):
 
 Developer(s): [Name](https://you.example.com)
 
+Answers are:
+* [x] Confirmed via micropub.rocks
+
 ## Discovery
 * [<?= result_checkbox($results, 1) ?>] The client discovers the Micropub endpoint given the profile URL of a user (e.g. the sign-in form asks the user to enter their URL, which is used to find the Micropub endpoint)
 
