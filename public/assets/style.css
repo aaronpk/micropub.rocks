@@ -147,3 +147,10 @@ section.content textarea {
 #report-details td {
   padding: 2px;
 }
+
+
+.last-updated {
+  font-size: 12px;
+  display: block;
+}
+

@@ -71,15 +71,29 @@ $route->map('OPTIONS', '/client/{token}/media', 'App\\ClientTests::options');
 
 //////////////////////////////////////////////////////////////////////////
 // Reports
-$route->map('GET', '/reports', 'App\\ImplementationReport::show_reports');
-
-$route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::get_server_report');
-$route->map('GET', '/implementation-report/server/{id}/{token}', 
+$route->map('GET', '/implementation-reports/servers/', 'App\\ImplementationReport::show_reports');
+$route->map('GET', '/implementation-reports/servers/summary/', 'App\\ImplementationReport::server_report_summary');
+$route->map('GET', '/implementation-reports/servers/{id}', 'App\\ImplementationReport::get_server_report');
+$route->map('GET', '/implementation-reports/servers/{id}/{token}', 
   'App\\ImplementationReport::view_server_report');
+
+$route->map('GET', '/implementation-reports/clients/', 'App\\ClientReports::show_reports');
+
+$route->map('GET', '/implementation-reports/', function(ServerRequestInterface $request, ResponseInterface $response){
+  return $response->withHeader('Location', '/')->withStatus(302);
+});
+
 $route->map('GET', '/implementation-report/client/{id}', 'App\\ImplementationReport::get_client_report');
 $route->map('POST', '/implementation-report/store-result', 'App\\ImplementationReport::store_result');
 $route->map('POST', '/implementation-report/save', 'App\\ImplementationReport::save_report');
 $route->map('POST', '/implementation-report/publish', 'App\\ImplementationReport::publish_report');
+
+// Old redirects
+$route->map('GET', '/implementation-report/server/{id}', 'App\\ImplementationReport::redirect_server');
+$route->map('GET', '/implementation-report/server/{id}/{token}', 'App\\ImplementationReport::redirect_server');
+$route->map('GET', '/reports', function(ServerRequestInterface $request, ResponseInterface $response){
+  return $response->withHeader('Location', '/implementation-reports/servers/')->withStatus(301);
+});
 //////////////////////////////////////////////////////////////////////////
 
 

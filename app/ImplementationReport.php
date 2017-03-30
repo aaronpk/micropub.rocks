@@ -341,13 +341,29 @@ class ImplementationReport {
       $features[$q->number] = $q->description;
     }
 
-    $response->getBody()->write(view('show-reports', [
-      'title' => 'Micropub Rocks!',
+    $response->getBody()->write(view('reports/servers', [
+      'title' => 'Server Reports - Micropub Rocks!',
       'endpoints' => $endpoints,
       'results' => $results,
       'features' => $features
     ]));
     return $response;
+  }
+
+  public function server_report_summary(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    $response->getBody()->write(view('reports/server-summary', [
+      'title' => 'Server Report Summary - Micropub Rocks!',
+    ]));
+    return $response;
+  }
+
+  public function redirect_server(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    $path = $args['id'];
+    if(isset($args['token']))
+      $path .= '/' . $args['token'];
+    return $response->withHeader('Location', '/implementation-reports/servers/'.$path)->withStatus(301);
   }
 
 }

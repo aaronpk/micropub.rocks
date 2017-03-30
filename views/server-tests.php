@@ -13,7 +13,7 @@
     </div>
 
     <div style="margin: 20px 0;">
-      <a href="/implementation-report/server/<?= $endpoint->id ?>">Implementation Report</a>
+      <a href="/implementation-reports/servers/<?= $endpoint->id ?>">Implementation Report</a>
     </div>
 
     <h4>Creating Posts (Form-Encoded)</h4>

@@ -17,8 +17,19 @@ class Controller {
   public function index(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup();
     
+    $num_server_reports = ORM::for_table('micropub_endpoints')
+      ->where_not_null('share_token')
+      ->count();
+
+    $last_server_report_date = ORM::for_table('micropub_endpoints')
+      ->select('last_test_at')
+      ->where_not_null('share_token')
+      ->max('last_test_at');
+
     $response->getBody()->write(view('index', [
       'title' => 'Micropub Rocks!',
+      'num_server_reports' => $num_server_reports,
+      'last_server_report_date' => $last_server_report_date
     ]));
     return $response;
   }

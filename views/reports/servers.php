@@ -5,12 +5,14 @@
 <div class="single-column">
 
 <section class="content">
+  <h2>Micropub Server Implementation Reports</h2>
+
   <table class="implementation-features">  
     <tr>
       <td></td>
       <? foreach($endpoints as $i=>$endpoint): ?>
         <td>
-          <a href="/implementation-report/server/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
+          <a href="/implementation-reports/servers/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
             <?= $i+1 ?>
           </a>
         </td>
@@ -35,12 +37,14 @@
     <? foreach($endpoints as $i=>$endpoint): ?>
       <li>
         <?= $i+1 ?>: 
-        <a href="/implementation-report/server/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
+        <a href="/implementation-reports/servers/<?= $endpoint->id ?>/<?= $endpoint->share_token ?>">
           <?= $endpoint->implementation_name ?: $endpoint->micropub_endpoint ?>
         </a>
       </li>
     <? endforeach; ?>
   </ul>
+
+  <p><a href="summary/">view server report summary</a>
 </section>
 
 </div>
