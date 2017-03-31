@@ -1568,6 +1568,7 @@ class ClientTests {
       $html = view('client-tests/errors', ['errors'=>$errors]);
       $status = 400;
     } else {
+      $status = 200;
       if(isset($params['q']) && $params['q'] == 'config') {
         $config = [
           'syndicate-to' => $syndicate_to,
