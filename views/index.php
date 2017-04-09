@@ -9,6 +9,27 @@
   </section>
 
   <section class="content">
+    <h3>Implementation Reports</h3>
+
+    <p>
+      <a href="/implementation-reports/clients/">
+       13 Micropub Client Reports
+      </a>
+      <span class="last-updated">
+        Last updated 2017-03-22
+      </span>
+    </p>
+    <p>
+      <a href="/implementation-reports/servers/">
+        <span class="flipnum"><?= $num_server_reports ?></span> Micropub Server Reports
+      </a>
+      <span class="last-updated">
+        Last updated <?= date('Y-m-d', strtotime($last_server_report_date)) ?>
+      </span>
+    </p>
+  </section>
+
+  <section class="content">
   <? if(!is_logged_in()): ?>
     <h3>Sign in to begin</h3>
 

@@ -72,6 +72,7 @@ set_up_json_test(test, endpoint, function(data){
     $(".step_instructions").addClass("hidden");
     store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
 
+    store_server_feature(endpoint, 34, 1, test);
     if(passed_code && passed_location) {
       // Returned HTTP 201 or 202
       store_server_feature(endpoint, (data.code == 201 ? 14 : 15), 1, test);

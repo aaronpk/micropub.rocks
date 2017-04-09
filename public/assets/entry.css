@@ -1,0 +1,86 @@
+.post-container .post-main {
+  display: flex;
+  flex-direction: row;  
+
+  border-radius: .28571429rem;
+  border: 1px #abcce9 solid;
+
+  background: #fff;
+  padding: 12px;
+
+  margin-bottom: 12px;
+}
+.post-container .post-main .meta {
+  font-size: 10pt;
+}
+.post-container .post-main .meta a {
+  color: #777;
+}
+.post-container .post-main .meta a:hover {
+  color: #999;
+}
+.post-container .post-main .meta {
+  color: #777;
+}
+
+@media(max-width: 616px) {
+  .post-container {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+@media(max-width: 400px) {
+  .post-container .post-main {
+    display: block;
+  }
+  .post-container .left {
+    float: left;
+  }
+}
+
+.post-container .left {
+  flex: 0 auto; /* this needs to be "0 auto" for Safari, but works as "0" for everything else */
+  padding-right: 12px;
+}
+.post-container .right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.post-container .right .content {
+  flex: auto;
+}
+.post-container .right .meta {
+  flex: 0 auto;
+}
+.post-container img {
+  background: white;
+  border: 1px #abcce9 solid;
+  border-radius: .28571429rem;
+  max-width: 100%;
+}
+
+
+
+/* name of the test */
+.post-container h1 {
+  margin: 0;
+  font-size: 16pt;
+  font-weight: bold;
+}
+/* name if a comment has the name, or if the comment text includes h tags */
+.post-container .post-responses h1,
+.post-container .post-responses h2,
+.post-container .post-responses h3 {
+  font-size: 15pt;
+  font-weight: bold;
+}
+.post-container .post-responses h4,
+.post-container .post-responses h5,
+.post-container .post-responses h6 {
+  font-size: 13pt;
+  font-weight: bold;
+}
+
+

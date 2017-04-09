@@ -23,12 +23,33 @@ class ImplementationReport {
       ->raw_query('SELECT features.*, feature_results.implements FROM features
         LEFT JOIN feature_results ON features.number = feature_results.feature_num
           AND feature_results.endpoint_id = :endpoint_id
+        WHERE features.group = "server"
         ORDER BY features.number', ['endpoint_id'=>$this->endpoint->id])
       ->find_many();
 
     $response->getBody()->write(view('implementation-report', [
       'title' => 'Micropub Rocks!',
       'endpoint' => $this->endpoint,
+      'results' => $results,
+    ]));
+    return $response;
+  }
+
+  public function get_client_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    if($check = $this->_client_report($request, $response, $args))
+      return $check;
+
+    $results = ORM::for_table('tests')
+      ->raw_query('SELECT features.*, feature_results.implements FROM features
+        LEFT JOIN feature_results ON features.number = feature_results.feature_num
+          AND feature_results.client_id = :client_id
+        WHERE features.group = "client"
+        ORDER BY features.number', ['client_id'=>$this->client->id])
+      ->find_many();
+
+    $response->getBody()->write(view('implementation-report-client', [
+      'title' => 'Micropub Rocks!',
+      'client' => $this->client,
       'results' => $results,
     ]));
     return $response;
@@ -42,6 +63,7 @@ class ImplementationReport {
       ->raw_query('SELECT features.*, feature_results.implements FROM features
         LEFT JOIN feature_results ON features.number = feature_results.feature_num
           AND feature_results.endpoint_id = :endpoint_id
+        WHERE features.group = "server"
         ORDER BY features.number', ['endpoint_id'=>$this->endpoint->id])
       ->find_many();
 
@@ -129,6 +151,35 @@ class ImplementationReport {
     return null;
   }
 
+  private function _client_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    session_setup();
+
+    if(array_key_exists('token', $args)) {
+      $this->client = ORM::for_table('micropub_clients')
+        ->where('share_token', $args['token'])
+        ->where('id', $args['id'])
+        ->find_one();
+
+      if(!$this->client) {
+        return $response->withHeader('Location', '/?error=404')->withStatus(302);
+      }
+
+    } else {
+      if(!is_logged_in()) {
+        return login_required($response);
+      }
+
+      $this->user = logged_in_user();
+
+      $this->client = ORM::for_table('micropub_clients')
+        ->where('user_id', $this->user->id)
+        ->where('id', $args['id'])
+        ->find_one();
+    }
+    
+    return null;
+  }
+
   private function _check_permissions(&$request, &$response, $source='query') {
     session_setup();
 
@@ -203,6 +254,41 @@ class ImplementationReport {
     ]);
   }
 
+  public static function store_client_feature($client_id, $feature_num, $implements, $test_id) {
+    $result = ORM::for_table('feature_results')
+      ->where('client_id', $client_id)
+      ->where('feature_num', $feature_num)
+      ->find_one();
+
+    if(!$result) {
+      // New result
+      $result = ORM::for_table('feature_results')->create();
+      $result->client_id = $client_id;
+      $result->feature_num = $feature_num;
+      $result->created_at = date('Y-m-d H:i:s');
+      $result->implements = $implements;
+    } else {
+      // Updating a result, only set to fail (-1) if the new result is from the same test
+      if($implements == 1) {
+        $result->implements = $implements;
+      } else {
+        if($result->source_test_id == $test_id) {
+          $result->implements = $implements;
+        }
+      }
+    }
+
+    $result->source_test_id = $test_id;
+    $result->updated_at = date('Y-m-d H:i:s');
+    $result->save();
+
+    // Publish this result on the streaming API
+    streaming_publish('client-'.$client_id, [
+      'feature' => $feature_num,
+      'implements' => $implements
+    ]);
+  }
+
   public function store_result(ServerRequestInterface $request, ResponseInterface $response) {
     if($check = $this->_check_permissions($request, $response, 'body'))
       return $check;
@@ -236,6 +322,7 @@ class ImplementationReport {
         ->raw_query('SELECT features.*, feature_results.implements FROM features
           LEFT JOIN feature_results ON features.number = feature_results.feature_num
             AND feature_results.endpoint_id = :endpoint_id
+          WHERE features.group = "server"
           ORDER BY features.number', ['endpoint_id'=>$q->id])
         ->find_many();
 
@@ -247,19 +334,36 @@ class ImplementationReport {
     }
 
     $query = ORM::for_table('features')
+      ->where('group', 'server')
       ->order_by_asc('number')
       ->find_many();
     foreach($query as $q) {
       $features[$q->number] = $q->description;
     }
 
-    $response->getBody()->write(view('show-reports', [
-      'title' => 'Micropub Rocks!',
+    $response->getBody()->write(view('reports/servers', [
+      'title' => 'Server Reports - Micropub Rocks!',
       'endpoints' => $endpoints,
       'results' => $results,
       'features' => $features
     ]));
     return $response;
+  }
+
+  public function server_report_summary(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
+    $response->getBody()->write(view('reports/server-summary', [
+      'title' => 'Server Report Summary - Micropub Rocks!',
+    ]));
+    return $response;
+  }
+
+  public function redirect_server(ServerRequestInterface $request, ResponseInterface $response, $args) {
+    $path = $args['id'];
+    if(isset($args['token']))
+      $path .= '/' . $args['token'];
+    return $response->withHeader('Location', '/implementation-reports/servers/'.$path)->withStatus(301);
   }
 
 }

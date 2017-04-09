@@ -35,6 +35,22 @@ function e($text) {
   return htmlspecialchars($text);
 }
 
+// Always return a string
+function mf2_val($in) {
+  if(is_string($in)) return $in;
+  if(is_array($in)) {
+    if(array_key_exists(0, $in) && is_string($in[0])) 
+      return $in[0];
+    if(array_key_exists(0, $in) && is_array($in[0])) {
+      if(array_key_exists('value', $in[0]))
+        return $in[0]['value'];
+    }
+    if(array_key_exists('value', $in))
+      return $in['value'];
+  }
+  return '';
+}
+
 function random_string($len) {
   $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   $str = '';
@@ -79,6 +95,27 @@ function display_url($url) {
   return $url;
 }
 
+function is_url($url) {
+  return is_string($url) && preg_match('/^https?:\/\/[a-z0-9\.\-]\/?/', $url);
+}
+
+function add_parameters_to_url($url, $add_params) {
+  $parts = parse_url($url);
+  if(array_key_exists('query', $parts) && $parts['query']) {
+    parse_str($parts['query'], $params);
+  } else {
+    $params = [];
+  }
+
+  foreach($add_params as $k=>$v) {
+    $params[$k] = $v;
+  }
+
+  $parts['query'] = http_build_query($params);
+
+  return http_build_url($parts);
+}
+
 if(!function_exists('http_build_url')) {
   function http_build_url($parsed_url) {
     $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
@@ -94,6 +131,13 @@ if(!function_exists('http_build_url')) {
   }
 }
 
+function http_header_case($str) {
+  $str = str_replace('-', ' ', $str);
+  $str = ucwords($str);
+  $str = str_replace(' ', '-', $str);
+  return $str;
+}
+
 function result_icon($passed, $id=false) {
   if($passed == 1) {
     return '<span id="'.$id.'" class="ui green circular label">&#x2714;</span>';
@@ -106,8 +150,21 @@ function result_icon($passed, $id=false) {
   }
 }
 
+function result_checkbox($results, $num) {
+  foreach($results as $result) {
+    if($result->number == $num) {
+      return $result->implements == 1 ? 'x' : ' ';
+    }
+  }
+  return ' ';
+}
+
 function test_url($test_num, $endpoint_id) {
   return '/server-tests/' . $test_num . '?endpoint=' . $endpoint_id;
+}
+
+function client_test_url($test_num, $token) {
+  return '/client/' . $token . '/' . $test_num;
 }
 
 function build_micropub_query_url($endpoint, $params) {
