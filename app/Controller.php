@@ -281,7 +281,6 @@ class Controller {
       'me' => $params['me'],
       'code' => $params['code'],
       'redirect_uri' => self::_redirectURI(),
-      'state' => $params['state'],
       'client_id' => Config::$base
     )));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
