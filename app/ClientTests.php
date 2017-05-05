@@ -40,6 +40,8 @@ class ClientTests {
       if(!$this->client) 
         return $response->withStatus(404);
 
+      $response = $this->_add_cors_headers($response);
+
       // Don't actually redirect here, instead return a public page about the client
       $response->getBody()->write(view('client-info', [
         'title' => $this->client->name,
