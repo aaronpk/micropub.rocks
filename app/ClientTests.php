@@ -40,12 +40,17 @@ class ClientTests {
       if(!$this->client) 
         return $response->withStatus(404);
 
-      // Don't actually redirect here, instead return a public page about the client
+      $response = $this->_add_cors_headers($response);
+
+      // Don't actually redirect here, instead return a public page about the client, with
+      // the rel tags for discovery
       $response->getBody()->write(view('client-info', [
         'title' => $this->client->name,
         'client' => $this->client,
       ]));
-      return $response;
+      return $response->withHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/auth>; rel="authorization_endpoint"')
+        ->withAddedHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/token>; rel="token_endpoint"')
+        ->withAddedHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/micropub>; rel="micropub"');
     }
 
     $data = ORM::for_table('tests')

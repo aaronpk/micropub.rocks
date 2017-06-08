@@ -53,6 +53,6 @@ set_up_form_test(test, endpoint, function(data){
   store_result(test, endpoint, (passed_code && passed_location ? 1 : -1));
 
   store_server_feature(endpoint, 3, (passed_code && passed_location ? 1 : -1), test);
-}, false);
+}, true);
 
 </script>
