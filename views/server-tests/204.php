@@ -7,7 +7,7 @@
   <section class="content">
     <h2><?= e($test->number . ': ' . $test->name) ?></h2>
 
-    <p>This is a test of creating an h-entry post in JSON format including a nested Microformats 2 object. While it is not expected that your endpoint be able to render this particular post, it should still store the object given.</p>
+    <p>This is a test of creating an h-entry post in JSON format including a nested Microformats 2 object. While it is not expected that every endpoint will be able to render the <code>checkin</code> object, it should still store the checkin property and render the rest of the post.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
   </section>
 
@@ -17,19 +17,35 @@ Authorization: Bearer <?= $endpoint->access_token."\n" ?>
 Content-type: application/json
 
 <span id="postbody">{
-  "type": ["h-entry"],
-  "properties": {
-    "summary": ["Weighed 70.64 kg"],
-    "x-weight":[
-      {
-        "type": ["h-measure"],
-        "properties": {
-          "num": ["70.64"],
-          "unit": ["kg"]
-        }
-      }
-    ]
-  }
+    "type": [
+        "h-entry"
+    ],
+    "properties": {
+        "published": [
+            "2017-05-31T12:03:36-07:00"
+        ],
+        "content": [
+            "Lunch meeting"
+        ],
+        "checkin": [
+            {
+                "type": [
+                    "h-card"
+                ],
+                "properties": {
+                    "name": ["Los Gorditos"],
+                    "url": ["https://foursquare.com/v/502c4bbde4b06e61e06d1ebf"],
+                    "latitude": [45.524330801154],
+                    "longitude": [-122.68068808051],
+                    "street-address": ["922 NW Davis St"],
+                    "locality": ["Portland"],
+                    "region": ["OR"],
+                    "country-name": ["United States"],
+                    "postal-code": ["97209"]
+                }
+            }
+        ]
+    }
 }</span></pre>
   </section>
 
