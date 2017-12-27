@@ -157,10 +157,10 @@ class ClientTests {
         'title' => 'missing <code>redirect_uri</code>',
         'description' => 'A "redirect_uri" parameter is required, and must be a full URL that you\'ll be sent to after approving this application.'
       ];
-    } elseif(!is_url($params['redirect_uri'])) {
+    } elseif(!is_url_any_scheme($params['redirect_uri'])) {
       $errors[] = [
         'title' => 'invalid <code>redirect_uri</code>',
-        'description' => 'The "redirect_uri" value provided was not a valid URL. Only http and https schemes are supported.'
+        'description' => 'The "redirect_uri" value provided was not a valid URL. You can use a URL with http, https or a custom scheme.'
       ];
     } else {
       $redirect_uri = $params['redirect_uri'];
