@@ -1622,10 +1622,11 @@ class ClientTests {
 
   private function _conneg_response($request, $response, $params) {
     $accept = $request->getHeaderLine('Accept');
-    if(preg_match('/x-www-form-urlencoded/', $accept)) {
-      $response->getBody()->write(http_build_query($params));
-    } else {
+    if(preg_match('/json/', $accept)) {
       $response = new JsonResponse($params);
+    } else {
+      $response = $response->withHeader('Content-Type', 'application/x-www-form-urlencoded');
+      $response->getBody()->write(http_build_query($params));
     }
     return $response;
   }
