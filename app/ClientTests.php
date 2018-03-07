@@ -32,12 +32,12 @@ class ClientTests {
     if(!$this->client || $this->client->user_id != $this->user->id)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    return null;    
+    return null;
   }
 
   public function index(ServerRequestInterface $request, ResponseInterface $response, $args) {
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
+      if(!$this->client)
         return $response->withStatus(404);
 
       $response = $this->_add_cors_headers($response);
@@ -56,7 +56,7 @@ class ClientTests {
     $data = ORM::for_table('tests')
       ->raw_query('SELECT tests.*, test_results.passed FROM tests
         LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.client_id = :client_id
-        WHERE tests.group = :group 
+        WHERE tests.group = :group
         ORDER BY tests.number', ['client_id'=>$this->client->id, 'group'=>'client'])
       ->find_many();
 
@@ -77,11 +77,11 @@ class ClientTests {
   }
 
   public function auth(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    // Require the user is already logged in. A real OAuth server would probably not do this, but it makes 
+    // Require the user is already logged in. A real OAuth server would probably not do this, but it makes
     // our lives easier for this code.
     // First check that this client exists and belongs to the logged-in user
     $check = $this->_check_permissions($request, $response, $args['token']);
-    if(!$this->client) 
+    if(!$this->client)
       return $response->withStatus(404);
 
     if($check)
@@ -205,7 +205,7 @@ class ClientTests {
   public function auth_confirm(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // Restrict access to the signed-in user that created this app
     $check = $this->_check_permissions($request, $response, $args['token']);
-    if(!$this->client) 
+    if(!$this->client)
       return $response->withStatus(404);
 
     if($check)
@@ -244,7 +244,7 @@ class ClientTests {
   public function token(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
+      if(!$this->client)
         return $response->withStatus(404);
     }
 
@@ -343,7 +343,7 @@ class ClientTests {
   public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // First check that this client exists and belongs to the logged-in user
     $check = $this->_check_permissions($request, $response, $args['token']);
-    if(!$this->client) 
+    if(!$this->client)
       return $response->withStatus(404);
 
     if($check)
@@ -378,9 +378,9 @@ class ClientTests {
       case 204:
       case 205:
       case 300:
-        $template = 'basic'; 
+        $template = 'basic';
 
-        // If the referer is set to the same host as the client, then assume the 
+        // If the referer is set to the same host as the client, then assume the
         // client redirected here on success so check off that feature.
         if(isset($_SERVER['HTTP_REFERER'])) {
           if(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) == parse_url($this->client->redirect_uri, PHP_URL_HOST)) {
@@ -395,7 +395,7 @@ class ClientTests {
           'content' => ['Hello world']
         ];
         break;
- 
+
       case 401:
         $post_properties = [
           'content' => ['Hello world'],
@@ -440,7 +440,7 @@ class ClientTests {
       Redis::storePostHTML($this->client->token, $args['num'], $key, $post_html, false, $post_properties);
 
       $post_url = Config::$base.'client/'.$this->client->token.'/'.$args['num'].'/'.$key;
-      $template = 'update'; 
+      $template = 'update';
     }
 
     $response->getBody()->write(view('client-tests/'.$template, [
@@ -457,7 +457,7 @@ class ClientTests {
   public function micropub(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
+      if(!$this->client)
         return $response->withStatus(404);
     }
 
@@ -731,7 +731,7 @@ class ClientTests {
             foreach($properties as $k=>$values) {
               if(is_array($values)) {
                 foreach($values as $v) {
-                  if(isset($v['type']) && is_array($v['type']) 
+                  if(isset($v['type']) && is_array($v['type'])
                     && isset($v['type'][0]) && preg_match('/^h-.+/', $v['type'][0])) {
                     if(isset($v['properties']) && is_array($v['properties'])) {
                       foreach($v['properties'] as $v2) {
@@ -747,7 +747,7 @@ class ClientTests {
             if(!$has_nested_object) {
               $errors[] = 'None of the values provided look like nested Microformats 2 objects.';
             }
-          }            
+          }
         }
         break;
 
@@ -838,7 +838,7 @@ class ClientTests {
 
           }
         }
-        break;      
+        break;
 
       case 401:
         $features = [19];
@@ -864,7 +864,7 @@ class ClientTests {
             }
           }
         }
-        break;      
+        break;
 
       case 402:
         $features = [20];
@@ -890,7 +890,7 @@ class ClientTests {
             }
           }
         }
-        break;      
+        break;
 
       case 403:
         $features = [21];
@@ -910,7 +910,7 @@ class ClientTests {
             }
           }
         }
-        break;      
+        break;
 
       case 500:
         if($format == 'json') {
@@ -932,7 +932,7 @@ class ClientTests {
             }
           }
         }
-        break;      
+        break;
 
       case 502:
         if($format == 'json') {
@@ -952,10 +952,10 @@ class ClientTests {
             }
           }
         }
-        break;      
+        break;
 
       case 602:
-      case 603: 
+      case 603:
         $errors[] = 'Query requests must be sent via GET, not POST';
         break;
 
@@ -1068,7 +1068,7 @@ class ClientTests {
   public function media_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
+      if(!$this->client)
         return $response->withStatus(404);
     }
 
@@ -1329,7 +1329,7 @@ class ClientTests {
         return [$post_html, $post_raw, $post_properties, $key];
       }
     }
-    return [false,false,false,false];    
+    return [false,false,false,false];
   }
 
   private function _getPostProperties($url, $params) {
@@ -1381,7 +1381,7 @@ class ClientTests {
   public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
-      if(!$this->client) 
+      if(!$this->client)
         return $response->withStatus(404);
     }
 
@@ -1556,7 +1556,7 @@ class ClientTests {
       $last->save();
     }
 
-    // In addition to providing the testing features above, we also need to respond to 
+    // In addition to providing the testing features above, we also need to respond to
     // configuration queries like a normal server, since clients may be querying this outside
     // of the context of running a specific query test.
     // We can also check off features based on the request, and not mark them as fails here.
@@ -1605,7 +1605,7 @@ class ClientTests {
         'debug' => $debug
       ]);
     }
-    
+
     return $response->withStatus($status);
   }
 
