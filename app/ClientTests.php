@@ -236,7 +236,6 @@ class ClientTests {
     $redirect = add_parameters_to_url($data->redirect_uri, [
       'code' => $code,
       'state' => $data->state,
-      'me' => $data->me
     ]);
 
     return $response->withHeader('Location', $redirect)->withStatus(302);
