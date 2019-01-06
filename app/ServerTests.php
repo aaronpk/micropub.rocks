@@ -113,6 +113,8 @@ class ServerTests {
       ];
     }
 
+    $options['allow_redirects'] = false;
+
     $endpoint_url = $endpoint->micropub_endpoint;
     switch($params['method']) {
       case 'get':
