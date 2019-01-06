@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "12b691327133dd09dc78bce3145ac944",
+    "content-hash": "6016f5203d4a004f3a8e2cb33bdbee32",
     "packages": [
         {
             "name": "barnabywalters/mf-cleaner",
@@ -211,32 +211,35 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.2.2",
+            "version": "6.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60"
+                "reference": "68d0ea14d5a3f42a20e87632a5f84931e2709c90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
-                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/68d0ea14d5a3f42a20e87632a5f84931e2709c90",
+                "reference": "68d0ea14d5a3f42a20e87632a5f84931e2709c90",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/promises": "^1.0",
-                "guzzlehttp/psr7": "^1.3.1",
+                "guzzlehttp/psr7": "^1.4",
                 "php": ">=5.5"
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.0",
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.4",
                 "psr/log": "^1.0"
+            },
+            "suggest": {
+                "psr/log": "Required for using the Log middleware"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "6.2-dev"
+                    "dev-master": "6.3-dev"
                 }
             },
             "autoload": {
@@ -269,7 +272,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-10-08T15:01:37+00:00"
+            "time": "2018-03-26T16:33:04+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -324,16 +327,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.3.1",
+            "version": "1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "5c6447c9df362e8f8093bda8f5d8873fe5c7f65b"
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/5c6447c9df362e8f8093bda8f5d8873fe5c7f65b",
-                "reference": "5c6447c9df362e8f8093bda8f5d8873fe5c7f65b",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
                 "shasum": ""
             },
             "require": {
@@ -369,36 +372,46 @@
                     "name": "Michael Dowling",
                     "email": "mtdowling@gmail.com",
                     "homepage": "https://github.com/mtdowling"
+                },
+                {
+                    "name": "Tobias Schultze",
+                    "homepage": "https://github.com/Tobion"
                 }
             ],
-            "description": "PSR-7 message implementation",
+            "description": "PSR-7 message implementation that also provides common utility methods",
             "keywords": [
                 "http",
                 "message",
+                "request",
+                "response",
                 "stream",
-                "uri"
+                "uri",
+                "url"
             ],
-            "time": "2016-06-24T23:00:38+00:00"
+            "time": "2017-03-20T17:10:46+00:00"
         },
         {
             "name": "indieauth/client",
-            "version": "0.1.16",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/indieweb/indieauth-client-php.git",
-                "reference": "81e425892c00afef1b6bf9fe16e771b4503bbb8a"
+                "reference": "3e47004ccfccddc5760639f4faf9ed5ceadb460e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indieweb/indieauth-client-php/zipball/81e425892c00afef1b6bf9fe16e771b4503bbb8a",
-                "reference": "81e425892c00afef1b6bf9fe16e771b4503bbb8a",
+                "url": "https://api.github.com/repos/indieweb/indieauth-client-php/zipball/3e47004ccfccddc5760639f4faf9ed5ceadb460e",
+                "reference": "3e47004ccfccddc5760639f4faf9ed5ceadb460e",
                 "shasum": ""
             },
             "require": {
-                "barnabywalters/mf-cleaner": "0.*",
-                "indieweb/link-rel-parser": "0.1.*",
-                "mf2/mf2": "~0.3",
+                "indieweb/representative-h-card": "^0.1.2",
+                "mf2/mf2": ">=0.3.2",
+                "p3k/http": ">=0.1.6",
                 "php": ">5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.8.*"
             },
             "type": "library",
             "autoload": {
@@ -408,16 +421,16 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "Apache 2.0"
+                "Apache-2.0"
             ],
             "authors": [
                 {
                     "name": "Aaron Parecki",
-                    "homepage": "http://aaronparecki.com"
+                    "homepage": "https://aaronparecki.com"
                 }
             ],
             "description": "IndieAuth Client Library",
-            "time": "2016-05-21T16:43:04+00:00"
+            "time": "2018-03-13T23:39:55+00:00"
         },
         {
             "name": "indieweb/link-rel-parser",
@@ -464,6 +477,51 @@
                 "microformats2"
             ],
             "time": "2016-04-13T17:48:59+00:00"
+        },
+        {
+            "name": "indieweb/representative-h-card",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indieweb/representative-h-card-php.git",
+                "reference": "b70b01bd0dd7f2a940602137335dbf46ab6e2e38"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indieweb/representative-h-card-php/zipball/b70b01bd0dd7f2a940602137335dbf46ab6e2e38",
+                "reference": "b70b01bd0dd7f2a940602137335dbf46ab6e2e38",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "mf2/mf2": "0.2.*",
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/mf2/representative-h-card.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Parecki",
+                    "homepage": "http://aaronparecki.com"
+                }
+            ],
+            "keywords": [
+                "h-card",
+                "indieweb",
+                "mf2",
+                "microformats"
+            ],
+            "time": "2015-12-23T18:11:19+00:00"
         },
         {
             "name": "j4mie/idiorm",
@@ -747,23 +805,25 @@
         },
         {
             "name": "mf2/mf2",
-            "version": "v0.3.0",
+            "version": "v0.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/indieweb/php-mf2.git",
-                "reference": "4fb2eb5365cbc0fd2e0c26ca748777d6c2539763"
+                "reference": "dc0d90d4ee30864bcf37cd3a8fc8db94f9134cc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indieweb/php-mf2/zipball/4fb2eb5365cbc0fd2e0c26ca748777d6c2539763",
-                "reference": "4fb2eb5365cbc0fd2e0c26ca748777d6c2539763",
+                "url": "https://api.github.com/repos/indieweb/php-mf2/zipball/dc0d90d4ee30864bcf37cd3a8fc8db94f9134cc4",
+                "reference": "dc0d90d4ee30864bcf37cd3a8fc8db94f9134cc4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*"
+                "mf2/tests": "@dev",
+                "phpdocumentor/phpdocumentor": "v2.8.4",
+                "phpunit/phpunit": "4.8.*"
             },
             "suggest": {
                 "barnabywalters/mf-cleaner": "To more easily handle the canonical data php-mf2 gives you"
@@ -796,7 +856,7 @@
                 "parser",
                 "semantic"
             ],
-            "time": "2016-03-14T12:13:34+00:00"
+            "time": "2017-05-27T15:27:47+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -840,6 +900,44 @@
                 "routing"
             ],
             "time": "2015-12-20T19:50:12+00:00"
+        },
+        {
+            "name": "p3k/http",
+            "version": "0.1.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aaronpk/p3k-http.git",
+                "reference": "1826647c4902a18dea5ec532f21509ba4d51210b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aaronpk/p3k-http/zipball/1826647c4902a18dea5ec532f21509ba4d51210b",
+                "reference": "1826647c4902a18dea5ec532f21509ba4d51210b",
+                "shasum": ""
+            },
+            "require": {
+                "indieweb/link-rel-parser": "0.1.*",
+                "mf2/mf2": ">=0.3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "p3k\\": "src/p3k"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Parecki",
+                    "homepage": "https://aaronparecki.com"
+                }
+            ],
+            "description": "A simple wrapper API around the PHP curl functions",
+            "homepage": "https://github.com/aaronpk/p3k-http",
+            "time": "2018-03-04T15:21:58+00:00"
         },
         {
             "name": "php-http/discovery",
