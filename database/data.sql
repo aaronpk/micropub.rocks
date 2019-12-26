@@ -57,13 +57,16 @@ VALUES
   (59, 'client', 500, 'Delete a post', '<p>To pass this test, delete the post referred to by the URL below. You can send this request as either form-encoded or JSON.</p>'),
   (60, 'client', 502, 'Undelete a post', '<p>To pass this test, undelete the post referred to by the URL below. You can send this request as either form-encoded or JSON.</p>'),
   (61, 'client', 602, 'Source Query (All Properties)', '<p>To pass this test, query the Micropub endpoint to find all the source properties for the post below. By not requesting any particular properties in the request, the endpoint will return all the properties.</p>'),
-  (62, 'client', 603, 'Source Query (Specific Properties)', '<p>To pass this test, query the Micropub endpoint to find the \"content\" and \"category\" properties for the post below. The endpoint will return just the properties requested.</p>');
+  (62, 'client', 603, 'Source Query (Specific Properties)', '<p>To pass this test, query the Micropub endpoint to find the \"content\" and \"category\" properties for the post below. The endpoint will return just the properties requested.</p>'),
+  (63, 'server', 805, 'Rejects multiple authentication methods', NULL),
+  (64, 'client', 106, 'Does not send multiple authentication methods (form-encoded)', 'This test will ensure that your client does not provide the access token in both the <code>Authorization</code> header, and the <code>access_token</code> form parameter, as this is not valid according to <a href="https://tools.ietf.org/html/rfc6750#section-3.1">RFC6750</a>.'),
+  (65, 'client', 301, 'Does not send multiple authentication methods (multipart)', 'This test will ensure that your client does not provide the access token in both the <code>Authorization</code> header, and the <code>access_token</code> form parameter, as this is not valid according to <a href="https://tools.ietf.org/html/rfc6750#section-3.1">RFC6750</a>.');
 
 
 INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)
 VALUES
   (1, 'server', 1, 'Discovering the Micropub endpoint given the profile URL of a user', NULL),
-  (2, 'server', 2, 'Authenticating requests by including the access token in the HTTP Authorization header', NULL),
+  (2, 'server', 2, 'Authenticating requests by including the access token in the HTTP Authorization header for x-www-form-urlencodedrequests', NULL),
   (3, 'server', 3, 'Authenticating requests by including the access token in the post body for x-www-form-urlencoded requests', NULL),
   (4, 'server', 4, 'Limiting the ability to create posts given an access token by requiring that the access token contain at least one OAuth 2.0 scope value', NULL),
   (5, 'server', 5, 'Creating a post using x-www-form-urlencoded syntax with one or more properties', NULL),
@@ -128,6 +131,8 @@ VALUES
   (64, 'client', 31, 'Queries the Micropub endpoint for a post\'s source content without specifying a list of properties', NULL),
   (65, 'client', 32, 'Queries the Micropub endpoint for a post\'s source content looking only for specific properties', NULL),
   (66, 'server', 34, 'Creating a post with HTML content', NULL),
-  (67, 'client', 33, 'Creating a post with HTML content', NULL);
+  (67, 'client', 33, 'Creating a post with HTML content', NULL),
+  (68, 'client', 34, 'Authenticating requests by including the access token in the HTTP Authorization header for multipart/form-data requests', NULL),
+  (69, 'client', 35, 'Authenticating requests by including the access token in the post body for multipart/form-data requests', NULL);
 
 
