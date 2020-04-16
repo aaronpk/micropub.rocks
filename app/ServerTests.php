@@ -21,7 +21,7 @@ class ServerTests {
     }
 
     $params = $request->getQueryParams();
-    
+
     $this->user = logged_in_user();
 
     // Verify an endpoint is specified and the user has permission to access it
@@ -36,7 +36,7 @@ class ServerTests {
     if(!$this->endpoint)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    return null;    
+    return null;
   }
 
   public function index(ServerRequestInterface $request, ResponseInterface $response) {
@@ -46,7 +46,7 @@ class ServerTests {
     $data = ORM::for_table('tests')
       ->raw_query('SELECT tests.*, test_results.passed FROM tests
         LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.endpoint_id = :endpoint_id
-        WHERE tests.group = :group 
+        WHERE tests.group = :group
         ORDER BY tests.number', ['endpoint_id'=>$this->endpoint->id, 'group'=>'server'])
       ->find_many();
 
@@ -113,6 +113,8 @@ class ServerTests {
       ];
     }
 
+    $options['allow_redirects'] = false;
+
     $endpoint_url = $endpoint->micropub_endpoint;
     switch($params['method']) {
       case 'get':
@@ -168,7 +170,7 @@ class ServerTests {
         'body' => '',
         'json' => [],
         'debug' => 'Invalid endpoint URL: '.$endpoint_url
-      ], 200);      
+      ], 200);
     }
 
     try {
@@ -190,7 +192,7 @@ class ServerTests {
         'body' => '',
         'json' => [],
         'debug' => (isset($debug) ? $debug : 'Unknown error making request to the Micropub endpoint')
-      ], 200);      
+      ], 200);
     }
 
     $code = $res->getStatusCode();

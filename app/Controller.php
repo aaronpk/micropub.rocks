@@ -278,13 +278,13 @@ class Controller {
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
       'grant_type' => 'authorization_code',
-      'me' => $params['me'],
+      'me' => $_SESSION['auth']['me'],
       'code' => $params['code'],
       'redirect_uri' => self::_redirectURI(),
       'client_id' => Config::$base
     )));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-      'Accept: application/x-www-form-urlencoded'
+      'Accept: application/json, application/x-www-form-urlencoded;q=0.8'
     ]);
     $tokenResponse = curl_exec($ch);
 
@@ -309,6 +309,26 @@ class Controller {
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Error Requesting Access Token',
         'error_description' => 'The token endpoint response did not include an access token. Below is the response the endpoint returned. Ensure the endpoint returns a property called "access_token".',
+        'error_debug' => $tokenResponse
+      ]));
+      return $response;
+    }
+
+    if(!isset($data['me'])) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Error Requesting Access Token',
+        'error_description' => 'The token endpoint response did not include the user that authenticated. Below is the response the endpoint returned. Ensure the endpoint returns a property called "me".',
+        'error_debug' => $tokenResponse
+      ]));
+      return $response;
+    }
+
+    if(parse_url($data['me'], PHP_URL_HOST) != parse_url($_SESSION['auth']['me'], PHP_URL_HOST)) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Error Authenticating',
+        'error_description' => 'The token endpoint returned a URL for a user on a different domain. Ensure the domain of the "me" URL returned from the token endpoint matches the domain of the URL you use to sign in.',
         'error_debug' => $tokenResponse
       ]));
       return $response;

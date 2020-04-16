@@ -99,6 +99,10 @@ function is_url($url) {
   return is_string($url) && preg_match('/^https?:\/\/[a-z0-9\.\-]\/?/', $url);
 }
 
+function is_url_any_scheme($url) {
+  return is_string($url) && preg_match('/^[a-z0-9\+\-\.]+?:\/\/[a-z0-9\.\-]\/?/', $url);
+}
+
 function add_parameters_to_url($url, $add_params) {
   $parts = parse_url($url);
   if(array_key_exists('query', $parts) && $parts['query']) {

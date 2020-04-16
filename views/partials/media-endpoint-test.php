@@ -75,7 +75,7 @@ set_up_query_test(test, endpoint, function(data){
   if(data.json && data.json['media-endpoint']) {
     if(typeof data.json['media-endpoint'] == "string") {
       // basic regex to validate this is a URL with a path
-      if(data.json['media-endpoint'].match(/^https?:\/\/[^\/]+\/[^\/]+/)) {
+      if(data.json['media-endpoint'].match(/^https?:\/\/[^\/]+\/[^ ]*$/)) {
         passed_body = true;
         media_endpoint = data.json['media-endpoint'];
       }
