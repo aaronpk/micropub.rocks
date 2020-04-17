@@ -1,5 +1,5 @@
 .DS_Store
 lib/config.php
 vendor/
-issues-micropub.rocks.html
-composer.lock
+.htaccess
+vhost.conf
