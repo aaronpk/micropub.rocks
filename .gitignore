@@ -1,5 +1,4 @@
 .DS_Store
 lib/config.php
 vendor/
-.htaccess
-vhost.conf
+.env

@@ -1,0 +1,71 @@
+version: '3'
+services:
+
+  # micropub.rocks service
+  app:
+    hostname: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - .env
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - redis
+
+  # Nginx Service
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "5000:80"
+    volumes:
+      - ./:/var/www
+      - ./config/nginx/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  # MySQL Service
+  db:
+    image: mariadb
+    hostname: db
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - .env
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
+      - ./database/data.sql:/docker-entrypoint-initdb.d/2_data.sql
+    networks:
+      - app-network
+
+  redis:
+    image: redis:alpine
+    hostname: redis
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
