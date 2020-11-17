@@ -96,6 +96,8 @@ set_up_query_test(test, endpoint, function(data){
     if(props.content && !props.access_token) {
       if(props.content[0] == "Testing accepting access token in post body") {
         passed_body = true;
+      } else if (props.content[0] && props.content[0].value && props.content[0].value == "Testing accepting access token in post body") {
+        passed_body = true;
       }
     }
   }
