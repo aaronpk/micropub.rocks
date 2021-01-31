@@ -1,3 +1,8 @@
+
+$(function(){
+  $("#galaxy").val(42);
+});
+
 function set_up_form_test(test, endpoint, callback, skipauth=false) {
   $(function(){
     $("#run").click(function(){

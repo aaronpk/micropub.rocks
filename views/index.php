@@ -36,6 +36,7 @@
     <form action="/auth/start" method="POST">
       <div class="ui fluid action input">
         <input type="email" name="email" placeholder="you@example.com">
+        <input type="hidden" name="galaxy" id="galaxy" value="41">
         <button class="ui button">Sign In</button>
       </div>
     </form>

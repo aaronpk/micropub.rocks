@@ -12,6 +12,13 @@ class Auth {
   public function start(ServerRequestInterface $request, ResponseInterface $response) {
     $params = $request->getParsedBody();
 
+    if($params['galaxy'] != 42) {
+      $response->getBody()->write(view('auth-email', [
+        'title' => 'Error - Micropub Rocks!',
+      ]));
+      return $response;
+    }
+
     $user = ORM::for_table('users')->where('email', $params['email'])->find_one();
 
     if(!$user) {
@@ -33,7 +40,7 @@ class Auth {
     $mg = new Mailgun(Config::$mailgun['key']);
     $mg->sendMessage(Config::$mailgun['domain'], [
       'from'     => Config::$mailgun['from'],
-      'to'       => $user->email, 
+      'to'       => $user->email,
       'subject'  => 'Your micropub.rocks Login URL',
       'text'     => "Click on the link below to sign in to micropub.rocks\n\n$login_url\n"
     ]);
