@@ -10,6 +10,8 @@ use Mailgun\Mailgun;
 class Auth {
 
   public function start(ServerRequestInterface $request, ResponseInterface $response) {
+    session_setup();
+
     $params = $request->getParsedBody();
 
     if($params['galaxy'] != 42) {
