@@ -26,7 +26,8 @@ class Controller {
       ->where_not_null('share_token')
       ->max('last_test_at');
 
-    $_SESSION['login_confirm'] = mt_rand(100, 999);
+    if(!isset($_SESSION['login_confirm']))
+      $_SESSION['login_confirm'] = mt_rand(100, 999);
 
     $response->getBody()->write(view('index', [
       'title' => 'Micropub Rocks!',
