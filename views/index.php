@@ -39,7 +39,7 @@
         <button class="ui button">Sign In</button>
       </div>
       <div class="ui fluid input">
-        <input type="text" name="confirm" placeholder="Please type {{ $confirm }} in this field">
+        <input type="text" name="confirm" placeholder="Please type <?= $confirm ?> in this field">
       </div>
       <input type="hidden" name="galaxy" id="galaxy" value="41">
     </form>
