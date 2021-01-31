@@ -15,7 +15,7 @@ class Controller {
   }
 
   public function index(ServerRequestInterface $request, ResponseInterface $response) {
-    session_setup();
+    session_setup(true);
 
     $num_server_reports = ORM::for_table('micropub_endpoints')
       ->where_not_null('share_token')
@@ -26,8 +26,7 @@ class Controller {
       ->where_not_null('share_token')
       ->max('last_test_at');
 
-    if(!isset($_SESSION['login_confirm']))
-      $_SESSION['login_confirm'] = mt_rand(100, 999);
+    $_SESSION['login_confirm'] = mt_rand(100, 999);
 
     $response->getBody()->write(view('index', [
       'title' => 'Micropub Rocks!',
