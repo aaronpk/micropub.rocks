@@ -16,7 +16,7 @@ class Controller {
 
   public function index(ServerRequestInterface $request, ResponseInterface $response) {
     session_setup();
-    
+
     $num_server_reports = ORM::for_table('micropub_endpoints')
       ->where_not_null('share_token')
       ->count();
@@ -26,8 +26,11 @@ class Controller {
       ->where_not_null('share_token')
       ->max('last_test_at');
 
+    $_SESSION['login_confirm'] = mt_rand(100, 999);
+
     $response->getBody()->write(view('index', [
       'title' => 'Micropub Rocks!',
+      'confirm' => $_SESSION['login_confirm'],
       'num_server_reports' => $num_server_reports,
       'last_server_report_date' => $last_server_report_date
     ]));
@@ -40,7 +43,7 @@ class Controller {
     if(!is_logged_in()) {
       return login_required($response);
     }
-    
+
     $user = logged_in_user();
 
     $endpoints = ORM::for_table('micropub_endpoints')->where('user_id', $user->id)->find_many();
@@ -178,8 +181,8 @@ class Controller {
       $url = parse_url($params['me']);
 
       // Do some basic checks to make sure this is a URL
-      if(!($url && isset($url['scheme']) 
-           && in_array($url['scheme'], ['http','https']) 
+      if(!($url && isset($url['scheme'])
+           && in_array($url['scheme'], ['http','https'])
            && isset($url['host']))) {
         return $response->withHeader('Location', '/dashboard')->withStatus(302);
       }

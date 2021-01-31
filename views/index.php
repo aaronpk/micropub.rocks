@@ -36,9 +36,12 @@
     <form action="/auth/start" method="POST">
       <div class="ui fluid action input">
         <input type="email" name="email" placeholder="you@example.com">
-        <input type="hidden" name="galaxy" id="galaxy" value="41">
         <button class="ui button">Sign In</button>
       </div>
+      <div class="ui fluid input">
+        <input type="text" name="confirm" placeholder="Please type {{ $confirm }} in this field">
+      </div>
+      <input type="hidden" name="galaxy" id="galaxy" value="41">
     </form>
 
     <p>You will receive an email with a link to sign in.</p>

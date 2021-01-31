@@ -19,6 +19,15 @@ class Auth {
       return $response;
     }
 
+    if($params['confirm'] != $_SESSION['login_confirm']) {
+      $response->getBody()->write(view('auth-error', [
+        'title' => 'Error - Micropub Rocks!',
+        'error' => 'Login Error',
+        'error_description' => 'Please make sure you enter the number given.',
+      ]));
+      return $response;
+    }
+
     $user = ORM::for_table('users')->where('email', $params['email'])->find_one();
 
     if(!$user) {
