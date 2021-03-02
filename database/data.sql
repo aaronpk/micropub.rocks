@@ -64,7 +64,7 @@ INSERT INTO `features` (`id`, `group`, `number`, `description`, `tests`)
 VALUES
   (1, 'server', 1, 'Discovering the Micropub endpoint given the profile URL of a user', NULL),
   (2, 'server', 2, 'Authenticating requests by including the access token in the HTTP Authorization header', NULL),
-  (3, 'server', 3, 'Authenticating requests by including the access token in the post body for x-www-form-urlencodedrequests', NULL),
+  (3, 'server', 3, 'Authenticating requests by including the access token in the post body for x-www-form-urlencoded requests', NULL),
   (4, 'server', 4, 'Limiting the ability to create posts given an access token by requiring that the access token contain at least one OAuth 2.0 scope value', NULL),
   (5, 'server', 5, 'Creating a post using x-www-form-urlencoded syntax with one or more properties', NULL),
   (6, 'server', 6, 'Creating a post using JSON syntax with one or more properties', NULL),
