@@ -120,6 +120,8 @@ section.content textarea {
 
 .implementation-features {
   margin: 1em 0;
+  display: block;
+  overflow: scroll;
 }
 .implementation-features td {
   padding: 2px 4px;
