@@ -371,6 +371,7 @@ class ClientTests {
       case 101:
       case 104:
       case 105:
+      case 106:
       case 200:
       case 201:
       case 202:
@@ -378,6 +379,7 @@ class ClientTests {
       case 204:
       case 205:
       case 300:
+      case 301:
         $template = 'basic';
 
         // If the referer is set to the same host as the client, then assume the
@@ -669,6 +671,16 @@ class ClientTests {
 
         break;
 
+      case 106:
+        $features = [2, 3];
+
+        if($this->_requireFormEncoded($format, $errors)) {
+          if(isset($params['access_token']) && isset($authorization)) {
+            $errors[] = 'The request should not contain an access token in both the Authorzation header and the request body';
+          }
+        }
+        break;
+
       case 202:
         $features = [33];
         if($this->_requireJSONEncoded($format, $errors)) {
@@ -811,6 +823,16 @@ class ClientTests {
           }
         }
 
+        break;
+
+      case 301:
+        $features = [34, 35];
+
+        if($this->_requireMultipartEncoded($format, $errors)) {
+          if(isset($params['access_token']) && isset($authorization)) {
+            $errors[] = 'The request should not contain an access token in both the Authorzation header and the request body';
+          }
+        }
         break;
 
       case 400:

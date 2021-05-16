@@ -107,8 +107,10 @@ Answers are:
 * [<?= result_checkbox($results, 1) ?>] The client discovers the Micropub endpoint given the profile URL of a user (e.g. the sign-in form asks the user to enter their URL, which is used to find the Micropub endpoint)
 
 ## Authentication
-* [<?= result_checkbox($results, 2) ?>] The client sends the access token in the HTTP `Authorization` header.
+* [<?= result_checkbox($results, 2) ?>] The client sends the access token in the HTTP `Authorization` header for `x-www-form-urlencoded` requests.
 * [<?= result_checkbox($results, 3) ?>] The client sends the access token in the post body for `x-www-form-urlencoded` requests.
+* [<?= result_checkbox($results, 34) ?>] The client sends the access token in the HTTP `Authorization` header for `multipart/form-data` requests.
+* [<?= result_checkbox($results, 35) ?>] The client sends the access token in the post body for `multipart/form-data` requests.
 * [<?= result_checkbox($results, 4) ?>] The client requests one or more `scope` values when obtaining user authorization.
  * (list scopes requested here)
 
