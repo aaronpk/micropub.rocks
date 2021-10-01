@@ -59,6 +59,7 @@
       <? $this->insert('partials/client-test-row', ['num'=>101, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>104, 'tests'=>$tests, 'client'=>$client]); ?>
       <? $this->insert('partials/client-test-row', ['num'=>105, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>106, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Creating Posts (JSON)</h4>
@@ -74,6 +75,7 @@
     <h4>Creating Posts (Multipart)</h4>
     <table class="ui compact table">
       <? $this->insert('partials/client-test-row', ['num'=>300, 'tests'=>$tests, 'client'=>$client]); ?>
+      <? $this->insert('partials/client-test-row', ['num'=>301, 'tests'=>$tests, 'client'=>$client]); ?>
     </table>
 
     <h4>Updates</h4>
