@@ -90,7 +90,10 @@ set_up_query_test(test, endpoint, function(data){
     if(props.content && props.category) {
       if($.inArray("micropub", props.category) >= 0 
         && $.inArray("test", props.category)
-        && props.content[0] == "Test of querying the endpoint for the source content") {
+        && (typeof props.content[0] === 'object' && props.content[0] !== null) ?
+         props.content[0].value == "Test of querying the endpoint for the source content" :
+         props.content[0] == "Test of querying the endpoint for the source content"
+      ) {
         passed_body = true;
       }
     }
