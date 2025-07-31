@@ -26,7 +26,7 @@ access_token=<?= $endpoint->access_token ?>
     <button class="ui green button" id="run">Run</button>
     <ul class="result-list">
       <li><span id="passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>400</code></li>
-      <li id="passed_error_body_line" class="hidden"><span id="passed_error_body" class="ui circular label">&nbsp;</span> Returned a correct error response (error: bad request)</li>
+      <li id="passed_error_body_line" class="hidden"><span id="passed_error_body" class="ui circular label">&nbsp;</span> Returned a correct error response (error: invalid_request)</li>
     </ul>
   </section>
 
@@ -49,7 +49,7 @@ set_up_form_test(test, endpoint, function(data){
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.json) {
     $("#passed_error_body_line").removeClass("hidden");
-    if(data.json.error && data.json.error == "bad request") {
+    if(data.json.error && data.json.error == "invalid_request") {
       passed_error_body = true;
     }
   } else {
