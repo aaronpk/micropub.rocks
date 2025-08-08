@@ -1,7 +1,7 @@
-<?php 
+<?php
 $this->layout('layout', [
                   'title' => $test->name,
-                ]); 
+                ]);
 
 $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
   'q' => 'source',
@@ -82,7 +82,7 @@ set_up_form_test(test, endpoint, function(data){
   store_result(test, endpoint, (passed_code && passed_location ? 0 : -1));
   $("#continue").removeClass("hidden");
   $("#query_url").text($("#query_url").text().replace("%25%25%25", encodeURIComponent(data.location)));
-});
+}, true);
 
 set_up_query_test(test, endpoint, function(data){
   var passed_code = false;
