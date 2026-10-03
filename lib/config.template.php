@@ -4,6 +4,12 @@ class Config {
 
   public static $redis = 'tcp://127.0.0.1:6379';
 
+  // URLs entered by users (websites, Micropub endpoints, media URLs) are only
+  // fetched if they resolve to public addresses, so the site can't be used to
+  // reach your private network. List hostnames, IP addresses or CIDR ranges
+  // here to allow them anyway, e.g. ['localhost'] to test a local endpoint.
+  public static $http_allow = [];
+
   public static $dbhost = '127.0.0.1';
   public static $dbname = 'micropubrocks';
   public static $dbuser = 'micropubrocks';

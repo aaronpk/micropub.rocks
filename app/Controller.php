@@ -211,6 +211,18 @@ class Controller {
 
       $me = $params['me'];
 
+      // Only public addresses are fetched, so the site can't be pointed at
+      // the private network it runs on
+      $check = (new \p3k\HTTP\Guard(http_allow()))->check($me);
+      if(isset($check['error'])) {
+        return $response->withBody(page('auth-error', [
+          'title' => 'Auth Error - Micropub Rocks!',
+          'error' => 'Invalid URL',
+          'error_description' => 'That URL can\'t be used: ' . $check['error_description'] . '. Your website needs to be reachable on the public internet.',
+        ]));
+      }
+      indieauth_safe_mode();
+
       // Servers that publish IndieAuth server metadata (rel=indieauth-metadata)
       // are discovered through it, and the authorization and token endpoints
       // are read from the metadata. This has to happen first: the library only
@@ -351,6 +363,7 @@ class Controller {
     $tokenEndpoint = $_SESSION['auth']['token_endpoint'];
     $micropubEndpoint = $_SESSION['auth']['micropub_endpoint'];
 
+    indieauth_safe_mode();
     $token = IndieAuth\Client::exchangeAuthorizationCode($tokenEndpoint, [
       'code' => $params['code'],
       'redirect_uri' => self::_redirectURI(),
@@ -358,6 +371,9 @@ class Controller {
       'code_verifier' => $_SESSION['auth']['code_verifier'] ?? null,
     ]);
     $tokenResponse = (string)$token['raw_response'];
+    // When no request was made (e.g. a refused private address) show why
+    if($tokenResponse === '' && !empty($token['response_details']['error']))
+      $tokenResponse = $token['response_details']['error'] . ': ' . ($token['response_details']['error_description'] ?? '');
     $data = $token['response'];
 
     if(!$data) {

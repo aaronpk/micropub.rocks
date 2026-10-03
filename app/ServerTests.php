@@ -111,7 +111,6 @@ class ServerTests {
       return Response::json(['error'=>'invalid_request'], 400);
     }
 
-    $client = new GuzzleHttp\Client();
     $options = [];
 
     if(!(array_key_exists('skipauth', $params) && $params['skipauth'] == 1)) {
@@ -184,7 +183,7 @@ class ServerTests {
     }
 
     try {
-      $res = $client->request($method, $endpoint_url, $options);
+      $res = safe_request($method, $endpoint_url, $options);
     } catch(RequestException $e) {
       $res = $e->getResponse();
       $debug = $e->getMessage();
@@ -286,10 +285,9 @@ class ServerTests {
 
     $user = logged_in_user();
 
-    $client = new GuzzleHttp\Client();
-
     try {
-      $res = $client->request('GET', (string)($params['url'] ?? ''), []);
+      // Follows redirects as Guzzle did by default, checking each hop
+      $res = safe_request('GET', (string)($params['url'] ?? ''), [], 5);
     } catch(RequestException $e) {
       $res = $e->getResponse();
     } catch(\Exception $e) {

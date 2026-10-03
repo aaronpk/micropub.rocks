@@ -16,6 +16,10 @@ micropub.rocks uses passkeys to sign in. Passkeys are bound to the hostname in `
 
 Accounts that signed in with an emailed link before the move to passkeys can keep doing so until `Config::$email_login_ends` (March 1, 2027), and are asked to add a passkey when they do. After that date email sign-in turns off automatically. Sending those links uses the Mailgun settings in the config.
 
+## Fetching URLs
+
+The site refuses to fetch URLs that users enter if they resolve to private or loopback addresses, including after redirects. To test a Micropub endpoint or website running on your own machine or network, add its hostname, IP or CIDR range to `Config::$http_allow`.
+
 ## Upgrading an existing install
 
 Apply the numbered migrations in `database/` that you haven't run yet. `0001.sql` adds the tables for passkey login.

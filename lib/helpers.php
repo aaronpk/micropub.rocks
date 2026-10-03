@@ -171,6 +171,59 @@ function csrf_valid($request) {
   return !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $sent);
 }
 
+// Hosts, IP addresses or CIDR ranges that may be fetched even though they're
+// private, e.g. localhost when testing a local Micropub endpoint in development
+function http_allow() {
+  return Config::$http_allow ?? [];
+}
+
+// URLs that users enter are only fetched if they resolve to public addresses,
+// so the site can't be used to reach the private network it runs on. The
+// IndieAuth client keeps its own user agent and timeout.
+function indieauth_safe_mode() {
+  IndieAuth\Client::setUpHTTP();
+  IndieAuth\Client::$http->set_safe_mode(true, http_allow());
+}
+
+// Makes a Guzzle request to a URL a user entered, refusing private addresses.
+// curl is pinned to the addresses that were checked, so a DNS answer that
+// changes in between makes no difference. Redirects are followed one hop at a
+// time (up to $max_redirects) and each hop is checked the same way.
+// Throws a RuntimeException when a URL is refused.
+function safe_request($method, $url, $options=[], $max_redirects=0) {
+  $guard = new p3k\HTTP\Guard(http_allow());
+  $client = new GuzzleHttp\Client();
+
+  for($hop = 0; ; $hop++) {
+    $check = $guard->check($url);
+    if(isset($check['error']))
+      throw new RuntimeException('Refused to fetch ' . $url . ': ' . $check['error_description']);
+
+    $addresses = array_map(function($address) {
+      return strpos($address, ':') !== false ? '[' . $address . ']' : $address;
+    }, $check['addresses']);
+
+    $request_options = $options;
+    $request_options['allow_redirects'] = false;
+    $request_options['curl'] = ($options['curl'] ?? []) + [
+      CURLOPT_RESOLVE => [$check['host'] . ':' . $check['port'] . ':' . implode(',', $addresses)],
+      CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+    ];
+
+    $response = $client->request($method, $url, $request_options);
+
+    $code = $response->getStatusCode();
+    if($hop >= $max_redirects || !in_array($code, [301, 302, 303, 307, 308]) || !$response->hasHeader('Location'))
+      return $response;
+
+    $url = (string)GuzzleHttp\Psr7\UriResolver::resolve(
+      new GuzzleHttp\Psr7\Uri($url),
+      new GuzzleHttp\Psr7\Uri($response->getHeaderLine('Location')));
+    if($code == 303)
+      $method = 'GET';
+  }
+}
+
 // php-jwt requires HMAC keys of at least 256 bits, so derive one from the configured secret
 function jwt_key() {
   return hash('sha256', Config::$secret, true);
