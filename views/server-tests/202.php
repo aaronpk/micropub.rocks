@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This is a test of creating an h-entry post in JSON format with HTML content. In this case, the client will send an object <code>{"html":...}</code> instead of just a text string for <code>content</code>. Your endpoint should treat the value as HTML, rendering the HTML instead of escaping it.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>

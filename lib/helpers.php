@@ -1,4 +1,8 @@
 <?php
+use Rocks\Http\Response;
+use Rocks\View\Raw;
+use Rocks\View\Template;
+
 date_default_timezone_set('UTC');
 
 if(getenv('ENV')) {
@@ -11,9 +15,32 @@ ORM::configure('mysql:host=' . Config::$dbhost . ';dbname=' . Config::$dbname);
 ORM::configure('username', Config::$dbuser);
 ORM::configure('password', Config::$dbpass);
 
+// Session cookies are only ever needed by this site's own pages
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
+if(parse_url(Config::$base, PHP_URL_SCHEME) == 'https')
+  ini_set('session.cookie_secure', '1');
+
+function templates() {
+  static $templates = null;
+  if(!$templates)
+    $templates = new Template(dirname(__FILE__).'/../views');
+  return $templates;
+}
+
+// Renders a template on its own, for partials and non-HTML output
 function view($template, $data=[]) {
-  global $templates;
-  return $templates->render($template, $data);
+  return templates()->render($template, $data);
+}
+
+// Renders a page template inside the shared layout
+function page($template, $data=[]) {
+  return templates()->render('layout', [
+    'title' => $data['title'] ?? 'Micropub Rocks!',
+    'link_tag' => new Raw((string)($data['link_tag'] ?? '')),
+    'client' => $data['client'] ?? null,
+    'content' => new Raw(view($template, $data)),
+  ]);
 }
 
 function redis() {
@@ -31,8 +58,16 @@ function flash($key) {
   }
 }
 
+// Marks every string in a (nested) list as trusted HTML. For messages built
+// from fixed text with any user-supplied values already escaped with e().
+function raw_list($list) {
+  return array_map(function($item) {
+    return is_array($item) ? raw_list($item) : new Raw((string)$item);
+  }, $list);
+}
+
 function e($text) {
-  return htmlspecialchars($text);
+  return htmlspecialchars((string)$text);
 }
 
 // Always return a string
@@ -56,7 +91,7 @@ function random_string($len) {
   $str = '';
   $c = strlen($charset)-1;
   for($i=0; $i<$len; $i++) {
-    $str .= $charset[mt_rand(0, $c)];
+    $str .= $charset[random_int(0, $c)];
   }
   return $str;
 }
@@ -64,23 +99,156 @@ function random_string($len) {
 // Sets up the session.
 // If create is true, the session will be created even if there is no cookie yet.
 // If create is false, the session will only be set up in PHP if they already have a session cookie.
+// Does nothing if the session has already been started in this request.
 function session_setup($create=false) {
+  if(session_status() == PHP_SESSION_ACTIVE)
+    return;
   if($create || isset($_COOKIE[session_name()])) {
     session_set_cookie_params(86400*30);
     session_start();
   }
 }
 
+// Also checks the account still exists, so a session for a deleted user is
+// treated as logged out rather than failing later
 function is_logged_in() {
-  return isset($_SESSION) && array_key_exists('user_id', $_SESSION);
+  if(!isset($_SESSION) || !array_key_exists('user_id', $_SESSION))
+    return false;
+  if(!logged_in_user()) {
+    unset($_SESSION['user_id'], $_SESSION['email']);
+    return false;
+  }
+  return true;
 }
 
-function login_required(&$response) {
-  return $response->withHeader('Location', '/?login_required')->withStatus(302);
+function login_required() {
+  return Response::redirect('/?login_required');
 }
 
 function logged_in_user() {
-  return ORM::for_table('users')->where('id', $_SESSION['user_id'])->find_one();
+  static $users = [];
+  $id = $_SESSION['user_id'] ?? null;
+  if(!$id)
+    return false;
+  if(!array_key_exists($id, $users))
+    $users[$id] = ORM::for_table('users')->where('id', $id)->find_one();
+  return $users[$id];
+}
+
+function log_in($user) {
+  session_setup(true);
+  // A new session id on login, so one planted before signing in is useless afterwards
+  session_regenerate_id(true);
+  $user->last_login = date('Y-m-d H:i:s');
+  $user->save();
+  $_SESSION['user_id'] = $user->id;
+  $_SESSION['email'] = $user->email;
+  $_SESSION['login'] = 'success';
+}
+
+function user_has_passkey($user_id) {
+  return ORM::for_table('passkeys')->where('user_id', $user_id)->count() > 0;
+}
+
+// Email login links stop working on this date, after which passkeys are the only way to sign in
+function email_login_ends() {
+  return strtotime((Config::$email_login_ends ?? '2027-03-01') . ' 00:00:00 UTC');
+}
+
+function email_login_open() {
+  return time() < email_login_ends();
+}
+
+// A per-session token that state-changing requests from logged-in pages must echo back
+function csrf_token() {
+  if(empty($_SESSION['csrf']))
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+  return $_SESSION['csrf'];
+}
+
+function csrf_valid($request) {
+  $sent = $request->header('X-CSRF-Token') ?? $request->post('csrf') ?? '';
+  return !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $sent);
+}
+
+// Hosts, IP addresses or CIDR ranges that may be fetched even though they're
+// private, e.g. localhost when testing a local Micropub endpoint in development
+function http_allow() {
+  return Config::$http_allow ?? [];
+}
+
+// URLs that users enter are only fetched if they resolve to public addresses,
+// so the site can't be used to reach the private network it runs on. The
+// IndieAuth client keeps its own user agent and timeout.
+function indieauth_safe_mode() {
+  IndieAuth\Client::setUpHTTP();
+  IndieAuth\Client::$http->set_safe_mode(true, http_allow());
+}
+
+// Makes a Guzzle request to a URL a user entered, refusing private addresses.
+// curl is pinned to the addresses that were checked, so a DNS answer that
+// changes in between makes no difference. Redirects are followed one hop at a
+// time (up to $max_redirects) and each hop is checked the same way.
+// Throws a RuntimeException when a URL is refused.
+function safe_request($method, $url, $options=[], $max_redirects=0) {
+  $guard = new p3k\HTTP\Guard(http_allow());
+  $client = new GuzzleHttp\Client();
+
+  for($hop = 0; ; $hop++) {
+    $check = $guard->check($url);
+    if(isset($check['error']))
+      throw new RuntimeException('Refused to fetch ' . $url . ': ' . $check['error_description']);
+
+    $addresses = array_map(function($address) {
+      return strpos($address, ':') !== false ? '[' . $address . ']' : $address;
+    }, $check['addresses']);
+
+    $request_options = $options;
+    $request_options['allow_redirects'] = false;
+    $request_options['curl'] = ($options['curl'] ?? []) + [
+      CURLOPT_RESOLVE => [$check['host'] . ':' . $check['port'] . ':' . implode(',', $addresses)],
+      CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+    ];
+
+    $response = $client->request($method, $url, $request_options);
+
+    $code = $response->getStatusCode();
+    if($hop >= $max_redirects || !in_array($code, [301, 302, 303, 307, 308]) || !$response->hasHeader('Location'))
+      return $response;
+
+    $url = (string)GuzzleHttp\Psr7\UriResolver::resolve(
+      new GuzzleHttp\Psr7\Uri($url),
+      new GuzzleHttp\Psr7\Uri($response->getHeaderLine('Location')));
+    if($code == 303)
+      $method = 'GET';
+  }
+}
+
+// php-jwt requires HMAC keys of at least 256 bits, so derive one from the configured secret
+function jwt_key() {
+  return hash('sha256', Config::$secret, true);
+}
+
+// Sends a plain text email through Mailgun's API. Only used for email login
+// links, which end on email_login_ends().
+function send_email($to, $subject, $text) {
+  $ch = curl_init('https://api.mailgun.net/v3/' . rawurlencode(Config::$mailgun['domain']) . '/messages');
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_USERPWD => 'api:' . Config::$mailgun['key'],
+    CURLOPT_POSTFIELDS => [
+      'from' => Config::$mailgun['from'],
+      'to' => $to,
+      'subject' => $subject,
+      'text' => $text,
+    ],
+    CURLOPT_TIMEOUT => 10,
+  ]);
+  curl_exec($ch);
+  $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+  if($code != 200)
+    error_log('Mailgun returned HTTP ' . $code . ' sending to ' . $to);
+  return $code == 200;
 }
 
 function domains_are_equal($a, $b) {
@@ -185,6 +353,9 @@ function streaming_publish($channel, $data) {
   $ch = curl_init(Config::$base . 'streaming/pub?id='.$channel);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  // Live updates are best-effort, so don't let a stuck push service hold up the test request
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 3);
   curl_exec($ch);
 }
 

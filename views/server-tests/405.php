@@ -1,12 +1,7 @@
-<?php
-  $this->layout('layout', [
-    'title' => $test->name,
-  ]);
-?>
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test makes an invalid request to your endpoint. Your endpoint should reject this with an HTTP 400 response.</p>
     <p>Clicking "Run" will first create a post, and after you've confirmed it's been created, you can click "Continue" to make the edit.</p>

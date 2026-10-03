@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will send the access token in the HTTP Authorization header, and the POST body, which is not valid according to <a href="https://tools.ietf.org/html/rfc6750#section-3.1">RFC6750</a>.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
@@ -26,7 +22,7 @@ access_token=<?= $endpoint->access_token ?>
     <button class="ui green button" id="run">Run</button>
     <ul class="result-list">
       <li><span id="passed_code" class="ui circular label">&nbsp;</span> Returned HTTP <code>400</code></li>
-      <li id="passed_error_body_line" class="hidden"><span id="passed_error_body" class="ui circular label">&nbsp;</span> Returned a correct error response (error: bad request)</li>
+      <li id="passed_error_body_line" class="hidden"><span id="passed_error_body" class="ui circular label">&nbsp;</span> Returned a correct error response (error: invalid_request)</li>
     </ul>
   </section>
 
@@ -49,7 +45,7 @@ set_up_form_test(test, endpoint, function(data){
   set_result_icon("#passed_code", passed_code ? 1 : -1);
   if(data.json) {
     $("#passed_error_body_line").removeClass("hidden");
-    if(data.json.error && data.json.error == "bad request") {
+    if(data.json.error && data.json.error == "invalid_request") {
       passed_error_body = true;
     }
   } else {

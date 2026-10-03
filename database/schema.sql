@@ -4,6 +4,33 @@ CREATE TABLE `users` (
   `auth_code` varchar(64) DEFAULT NULL,
   `auth_code_exp` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
+  `webauthn_id` varchar(64) DEFAULT NULL,
+  `date_created` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `webauthn_id` (`webauthn_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `passkeys` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL,
+  `credential_id` varchar(255) NOT NULL,
+  `public_key` text NOT NULL,
+  `label` varchar(64) NOT NULL DEFAULT 'Passkey',
+  `sign_count` int(11) unsigned NOT NULL DEFAULT '0',
+  `aaguid` varchar(32) DEFAULT NULL,
+  `date_created` datetime DEFAULT NULL,
+  `date_last_used` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `credential_id` (`credential_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `client_access_tokens` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `last_used` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -1,7 +1,3 @@
-<?php $this->layout('layout', [
-                      'title' => $title,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
@@ -28,14 +24,14 @@
         <tr>
           <td>Software Name</td>
           <td>
-            <input class="hidden" type="text" id="implementation_name" value="<?= htmlspecialchars($client->implementation_name) ?>">
-            <span class="hidden value"><?= htmlspecialchars($client->implementation_name) ?></span>
+            <input class="hidden" type="text" id="implementation_name" value="<?= $client->implementation_name ?>">
+            <span class="hidden value"><?= $client->implementation_name ?></span>
           </td>
         </tr>
         <tr>
           <td>Software Home Page</td>
           <td>
-            <input class="hidden" type="url" id="implementation_url" value="<?= htmlspecialchars($client->implementation_url) ?>">
+            <input class="hidden" type="url" id="implementation_url" value="<?= $client->implementation_url ?>">
             <a class="hidden value" href="<?= $client->implementation_url ?>">
               <?= $client->implementation_url ?>
             </a>
@@ -44,14 +40,14 @@
         <tr>
           <td>Developer Name</td>
           <td>
-            <input class="hidden" type="text" id="developer_name" value="<?= htmlspecialchars($client->developer_name) ?>">
-            <span class="hidden value"><?= htmlspecialchars($client->developer_name) ?></span>
+            <input class="hidden" type="text" id="developer_name" value="<?= $client->developer_name ?>">
+            <span class="hidden value"><?= $client->developer_name ?></span>
           </td>
         </tr>
         <tr>
           <td>Developer Home Page</td>
           <td>
-            <input class="hidden" type="url" id="developer_url" value="<?= htmlspecialchars($client->developer_url) ?>">
+            <input class="hidden" type="url" id="developer_url" value="<?= $client->developer_url ?>">
             <a class="hidden value" href="<?= $client->developer_url ?>">
               <?= $client->developer_url ?>
             </a>
@@ -60,7 +56,7 @@
         <tr>
           <td>Programming Language</td>
           <td>
-            <input class="hidden" type="text" id="programming_language" value="<?= htmlspecialchars($client->programming_language) ?>">
+            <input class="hidden" type="text" id="programming_language" value="<?= $client->programming_language ?>">
             <span class="hidden value"><?= $client->programming_language ?></span>
           </td>
         </tr>
@@ -74,13 +70,13 @@
     <div class="ui message" id="results-info">The results below are automatically compiled from the various test results for your implementation. You can re-run tests to update the results here.</div>
 
     <table class="implementation-features">
-      <? foreach($results as $result): ?>
+      <?php foreach($results as $result): ?>
         <tr id="feature-<?= $result->number ?>">
           <td class="num"><?= $result->number ?></td>
           <td class="result"><?= result_icon($result->implements) ?></td>
           <td><?= $result->description ?></td>
         </tr>
-      <? endforeach; ?>
+      <?php endforeach; ?>
     </table>
 
     <h3>Implementation Report Template</h3>

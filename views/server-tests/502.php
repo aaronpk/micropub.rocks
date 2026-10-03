@@ -1,9 +1,5 @@
 <?php 
-$this->layout('layout', [
-                'title' => $test->name,
-              ]);
-
-$this->insert('partials/undelete-test', [
+echo $view->partial('partials/undelete-test', [
   'test' => $test,
   'endpoint' => $endpoint,
   'description' => 'This test creates a post, deletes it, and then undeletes it.',

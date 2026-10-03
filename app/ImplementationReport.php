@@ -1,9 +1,9 @@
 <?php
 namespace App;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\JsonResponse;
+use Rocks\Http\Request;
+use Rocks\Http\Response;
+use Rocks\View\Raw;
 use ORM;
 use GuzzleHttp;
 use Config;
@@ -15,8 +15,9 @@ class ImplementationReport {
   private $endpoint;
   private $client;
 
-  public function get_server_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    if($check = $this->_server_report($request, $response, $args))
+  public function get_server_report(Request $request, $args = []) {
+    $response = Response::make();
+    if($check = $this->_server_report($request, $args))
       return $check;
 
     $results = ORM::for_table('tests')
@@ -27,7 +28,7 @@ class ImplementationReport {
         ORDER BY features.number', ['endpoint_id'=>$this->endpoint->id])
       ->find_many();
 
-    $response->getBody()->write(view('implementation-report', [
+    $response = $response->withBody(page('implementation-report', [
       'title' => 'Micropub Rocks!',
       'endpoint' => $this->endpoint,
       'results' => $results,
@@ -35,8 +36,9 @@ class ImplementationReport {
     return $response;
   }
 
-  public function get_client_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    if($check = $this->_client_report($request, $response, $args))
+  public function get_client_report(Request $request, $args = []) {
+    $response = Response::make();
+    if($check = $this->_client_report($request, $args))
       return $check;
 
     $results = ORM::for_table('tests')
@@ -47,7 +49,7 @@ class ImplementationReport {
         ORDER BY features.number', ['client_id'=>$this->client->id])
       ->find_many();
 
-    $response->getBody()->write(view('implementation-report-client', [
+    $response = $response->withBody(page('implementation-report-client', [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
       'results' => $results,
@@ -55,8 +57,9 @@ class ImplementationReport {
     return $response;
   }
 
-  public function view_server_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
-    if($check = $this->_server_report($request, $response, $args))
+  public function view_server_report(Request $request, $args = []) {
+    $response = Response::make();
+    if($check = $this->_server_report($request, $args))
       return $check;
 
     $results = ORM::for_table('tests')
@@ -70,7 +73,7 @@ class ImplementationReport {
     if(is_logged_in())
       $this->user = logged_in_user();
 
-    $response->getBody()->write(view('view-implementation-report', [
+    $response = $response->withBody(page('view-implementation-report', [
       'title' => 'Micropub Rocks!',
       'endpoint' => $this->endpoint,
       'user' => $this->user,
@@ -79,31 +82,38 @@ class ImplementationReport {
     return $response;
   }
 
-  public function save_report(ServerRequestInterface $request, ResponseInterface $response) {
+  public function save_report(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response, 'body'))
       return $check;
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     if($this->endpoint) {
-      foreach($params['data'] as $k=>$v) {
-        $this->endpoint->{$k} = $v;
+      // Only the report's descriptive fields can be changed here, not columns
+      // like user_id, share_token or access_token
+      $fields = ['implementation_name', 'implementation_url', 'programming_language', 'developer_name', 'developer_url'];
+      foreach((array)($params['data'] ?? []) as $k=>$v) {
+        if(in_array($k, $fields, true) && is_string($v))
+          $this->endpoint->{$k} = $v;
       }
       $this->endpoint->save();
     } elseif($this->client) {
 
     }
 
-    return new JsonResponse([
+    return Response::json([
       'result' => 'ok',
     ], 200);
   }
 
-  public function publish_report(ServerRequestInterface $request, ResponseInterface $response) {
+  public function publish_report(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response, 'body'))
       return $check;
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
+    $token = '';
 
     if($this->endpoint) {
       if($this->endpoint->share_token == '') {
@@ -115,14 +125,15 @@ class ImplementationReport {
 
     }
 
-    return new JsonResponse([
+    return Response::json([
       'result' => 'ok',
       'location' => Config::$base . 'implementation-report/'.$params['type'].'/'.$params['id'].'/'.$token
     ], 200);
   }
 
 
-  private function _server_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  private function _server_report(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(array_key_exists('token', $args)) {
@@ -137,7 +148,7 @@ class ImplementationReport {
 
     } else {
       if(!is_logged_in()) {
-        return login_required($response);
+        return login_required();
       }
 
       $this->user = logged_in_user();
@@ -146,12 +157,17 @@ class ImplementationReport {
         ->where('user_id', $this->user->id)
         ->where('id', $args['id'])
         ->find_one();
+
+      if(!$this->endpoint) {
+        return $response->withHeader('Location', '/dashboard?error=404')->withStatus(302);
+      }
     }
     
     return null;
   }
 
-  private function _client_report(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  private function _client_report(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(array_key_exists('token', $args)) {
@@ -166,7 +182,7 @@ class ImplementationReport {
 
     } else {
       if(!is_logged_in()) {
-        return login_required($response);
+        return login_required();
       }
 
       $this->user = logged_in_user();
@@ -175,6 +191,10 @@ class ImplementationReport {
         ->where('user_id', $this->user->id)
         ->where('id', $args['id'])
         ->find_one();
+
+      if(!$this->client) {
+        return $response->withHeader('Location', '/dashboard?error=404')->withStatus(302);
+      }
     }
     
     return null;
@@ -184,19 +204,19 @@ class ImplementationReport {
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
     if($source == 'body')
-      $params = $request->getParsedBody();
+      $params = $request->post;
     else
-      $params = $request->getQueryParams();
+      $params = $request->query;
     
     $this->user = logged_in_user();
 
     // Verify an endpoint is specified and the user has permission to access it
     if(!isset($params['id']) || !isset($params['type']) || !in_array($params['type'], ['client','server']))
-      return $response->withHeader('Location', '/dashboard?error='.$params['type'])->withStatus(302);
+      return $response->withHeader('Location', '/dashboard?error=invalid')->withStatus(302);
 
     if($params['type'] == 'server') {
       $this->endpoint = ORM::for_table('micropub_endpoints')
@@ -289,23 +309,26 @@ class ImplementationReport {
     ]);
   }
 
-  public function store_result(ServerRequestInterface $request, ResponseInterface $response) {
+  public function store_result(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response, 'body'))
       return $check;
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
-    $col = $params['type'] == 'server' ? 'endpoint_id' : 'client_id';
-    $id = $params['id'];
+    // _check_permissions has confirmed the endpoint or client belongs to this user
+    if($params['type'] == 'server')
+      self::store_server_feature($this->endpoint->id, (int)($params['feature_num'] ?? 0), (int)($params['implements'] ?? 0), (int)($params['source_test'] ?? 0));
+    else
+      self::store_client_feature($this->client->id, (int)($params['feature_num'] ?? 0), (int)($params['implements'] ?? 0), (int)($params['source_test'] ?? 0));
 
-    self::store_server_feature($id, $params['feature_num'], $params['implements'], $params['source_test']);
-
-    return new JsonResponse([
+    return Response::json([
       'result' => 'ok'
     ], 200);
   }
 
-  public function show_reports(ServerRequestInterface $request, ResponseInterface $response) {
+  public function show_reports(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     $endpoints = [];
@@ -341,7 +364,7 @@ class ImplementationReport {
       $features[$q->number] = $q->description;
     }
 
-    $response->getBody()->write(view('reports/servers', [
+    $response = $response->withBody(page('reports/servers', [
       'title' => 'Server Reports - Micropub Rocks!',
       'endpoints' => $endpoints,
       'results' => $results,
@@ -350,16 +373,18 @@ class ImplementationReport {
     return $response;
   }
 
-  public function server_report_summary(ServerRequestInterface $request, ResponseInterface $response) {
+  public function server_report_summary(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
-    $response->getBody()->write(view('reports/server-summary', [
+    $response = $response->withBody(page('reports/server-summary', [
       'title' => 'Server Report Summary - Micropub Rocks!',
     ]));
     return $response;
   }
 
-  public function redirect_server(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function redirect_server(Request $request, $args = []) {
+    $response = Response::make();
     $path = $args['id'];
     if(isset($args['token']))
       $path .= '/' . $args['token'];

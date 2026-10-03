@@ -1,9 +1,9 @@
 <?php
 namespace App;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\JsonResponse;
+use Rocks\Http\Request;
+use Rocks\Http\Response;
+use Rocks\View\Raw;
 use ORM;
 use GuzzleHttp;
 use GuzzleHttp\Exception\RequestException;
@@ -17,10 +17,10 @@ class ServerTests {
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getQueryParams();
+    $params = $request->query;
 
     $this->user = logged_in_user();
 
@@ -39,7 +39,8 @@ class ServerTests {
     return null;
   }
 
-  public function index(ServerRequestInterface $request, ResponseInterface $response) {
+  public function index(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response))
       return $check;
 
@@ -58,7 +59,7 @@ class ServerTests {
       ];
     }
 
-    $response->getBody()->write(view('server-tests', [
+    $response = $response->withBody(page('server-tests', [
       'title' => 'Micropub Rocks!',
       'endpoint' => $this->endpoint,
       'tests' => $tests,
@@ -66,44 +67,51 @@ class ServerTests {
     return $response;
   }
 
-  public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function get_test(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response))
       return $check;
 
     $test = ORM::for_table('tests')->where('group','server')->where('number',$args['num'])->find_one();
 
-    if(!$test)
+    // Some tests in the database have no page of their own
+    if(!$test || !is_file('views/server-tests/'.(int)$args['num'].'.php'))
       return $response->withHeader('Location', '/server-tests?endpoint='.$this->endpoint->id)->withStatus(302);
 
-    $response->getBody()->write(view('server-tests/'.$args['num'], [
-      'title' => 'Micropub Rocks!',
+    $response = $response->withBody(page('server-tests/'.(int)$args['num'], [
+      'title' => $test->name,
       'endpoint' => $this->endpoint,
       'test' => $test,
     ]));
     return $response;
   }
 
-  public function micropub_request(ServerRequestInterface $request, ResponseInterface $response) {
+  public function micropub_request(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return new JsonResponse(['error'=>'unauthorized'], 401);
+      return Response::json(['error'=>'unauthorized'], 401);
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
     $endpoint = ORM::for_table('micropub_endpoints')
       ->where('user_id', $user->id)
-      ->where('id', $params['endpoint'])
+      ->where('id', $params['endpoint'] ?? 0)
       ->find_one();
 
     if(!$endpoint) {
-      return new JsonResponse(['error'=>'invalid_endpoint'], 400);
+      return Response::json(['error'=>'invalid_endpoint'], 400);
     }
 
-    $client = new GuzzleHttp\Client();
+    if(!in_array($params['method'] ?? '', ['get', 'post', 'postjson', 'multipart']) || empty($params['test'])) {
+      return Response::json(['error'=>'invalid_request'], 400);
+    }
+
+    $options = [];
 
     if(!(array_key_exists('skipauth', $params) && $params['skipauth'] == 1)) {
       $options = [
@@ -119,24 +127,24 @@ class ServerTests {
     switch($params['method']) {
       case 'get':
         $method = 'GET';
-        $endpoint_url = $params['url'];
+        $endpoint_url = $params['url'] ?? '';
         $options['headers']['Accept'] = 'application/json';
         break;
       case 'post':
         $method = 'POST';
         $options['headers']['Content-type'] = 'application/x-www-form-urlencoded';
-        $options['body'] = $params['body'];
+        $options['body'] = (string)($params['body'] ?? '');
         break;
       case 'postjson':
         $method = 'POST';
-        $options['body'] = $params['body'];
+        $options['body'] = (string)($params['body'] ?? '');
         $options['headers']['Content-type'] = 'application/json';
         $options['headers']['Accept'] = 'application/json';
         break;
       case 'multipart':
         $method = 'POST';
         $options['multipart'] = [];
-        if(isset($params['params'])) {
+        if(isset($params['params']) && is_array($params['params'])) {
           foreach($params['params'] as $prop=>$val) {
             $options['multipart'][] = [
               'name' => $prop,
@@ -144,10 +152,11 @@ class ServerTests {
             ];
           }
         }
-        foreach($params['files'] as $prop=>$files) {
+        foreach((array)($params['files'] ?? []) as $prop=>$files) {
           if(!is_array($files)) $files = [$files];
           foreach($files as $file) {
-            if(strpos($file,'/') === false) {
+            // Only files from the bundled public/media folder can be sent
+            if(is_string($file) && strpos($file,'/') === false && is_file('public/media/'.$file)) {
               $options['multipart'][] = [
                 'name' => (count($files) == 1 ? $prop : $prop.'[]'),
                 'contents' => fopen('public/media/'.$file, 'r'),
@@ -162,7 +171,7 @@ class ServerTests {
     }
 
     if(!preg_match('/^https?:\/\//', $endpoint_url)) {
-      return new JsonResponse([
+      return Response::json([
         'code' => '',
         'location' => null,
         'content_type' => null,
@@ -174,7 +183,7 @@ class ServerTests {
     }
 
     try {
-      $res = $client->request($method, $endpoint_url, $options);
+      $res = safe_request($method, $endpoint_url, $options);
     } catch(RequestException $e) {
       $res = $e->getResponse();
       $debug = $e->getMessage();
@@ -184,7 +193,7 @@ class ServerTests {
     }
 
     if(!$res) {
-      return new JsonResponse([
+      return Response::json([
         'code' => '',
         'location' => null,
         'content_type' => null,
@@ -253,7 +262,7 @@ class ServerTests {
     $endpoint->last_test_at = date('Y-m-d H:i:s');
     $endpoint->save();
 
-    return new JsonResponse([
+    return Response::json([
       'code' => $code,
       'location' => $location,
       'content_type' => $content_type,
@@ -264,23 +273,33 @@ class ServerTests {
     ], 200);
   }
 
-  public function media_check(ServerRequestInterface $request, ResponseInterface $response) {
+  public function media_check(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return new JsonResponse(['error'=>'unauthorized'], 401);
+      return Response::json(['error'=>'unauthorized'], 401);
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
-    $client = new GuzzleHttp\Client();
-
     try {
-      $res = $client->request('GET', $params['url'], []);
+      // Follows redirects as Guzzle did by default, checking each hop
+      $res = safe_request('GET', (string)($params['url'] ?? ''), [], 5);
     } catch(RequestException $e) {
       $res = $e->getResponse();
+    } catch(\Exception $e) {
+      $res = null;
+    }
+
+    if(!$res) {
+      return Response::json([
+        'code' => 0,
+        'http' => 'Could not connect: ' . (isset($e) ? $e->getMessage() : 'unknown error'),
+        'content_type' => null,
+      ], 200);
     }
 
     $code = $res->getStatusCode();
@@ -289,44 +308,45 @@ class ServerTests {
       $content_type = $content_type[0];
     }
 
-    return new JsonResponse([
+    return Response::json([
       'code' => $code,
       'http' => 'HTTP/1.1 '.$code.' '.$res->getReasonPhrase(),
       'content_type' => $content_type,
     ], 200);
   }
 
-  public function store_result(ServerRequestInterface $request, ResponseInterface $response) {
+  public function store_result(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return new JsonResponse(['error'=>'unauthorized'], 401);
+      return Response::json(['error'=>'unauthorized'], 401);
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
     $endpoint = ORM::for_table('micropub_endpoints')
       ->where('user_id', $user->id)
-      ->where('id', $params['endpoint'])
+      ->where('id', $params['endpoint'] ?? 0)
       ->find_one();
 
     if(!$endpoint) {
-      return new JsonResponse(['error'=>'invalid_endpoint'], 400);
+      return Response::json(['error'=>'invalid_endpoint'], 400);
     }
 
     $last = ORM::for_table('test_results')
       ->where('endpoint_id', $endpoint->id)
-      ->where('test_id', $params['test'])
+      ->where('test_id', $params['test'] ?? 0)
       ->find_one();
 
     if($last) {
-      $last->passed = $params['passed'];
+      $last->passed = (int)($params['passed'] ?? 0);
       $last->save();
     }
 
-    return new JsonResponse([
+    return Response::json([
       'result' => 'ok'
     ], 200);
   }

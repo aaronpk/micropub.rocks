@@ -1,9 +1,10 @@
 <?php
 namespace App;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\JsonResponse;
+use Rocks\Http\Request;
+use Rocks\Http\Response;
+use Rocks\View\Raw;
+use Rocks\Passkeys;
 use ORM;
 use IndieAuth;
 use Config;
@@ -14,7 +15,8 @@ class Controller {
     return Config::$base.'endpoints/callback';
   }
 
-  public function index(ServerRequestInterface $request, ResponseInterface $response) {
+  public function index(Request $request, $args = []) {
+    $response = Response::make();
     session_setup(true);
 
     $num_server_reports = ORM::for_table('micropub_endpoints')
@@ -26,22 +28,35 @@ class Controller {
       ->where_not_null('share_token')
       ->max('last_test_at');
 
-    $_SESSION['login_confirm'] = mt_rand(100, 999);
+    $_SESSION['login_confirm'] = random_int(100, 999);
 
-    $response->getBody()->write(view('index', [
+    $response = $response->withBody(page('index', [
       'title' => 'Micropub Rocks!',
       'confirm' => $_SESSION['login_confirm'],
       'num_server_reports' => $num_server_reports,
-      'last_server_report_date' => $last_server_report_date
+      'last_server_report_date' => $last_server_report_date,
+      'passkeys_available' => Passkeys::available(),
+      'email_login_open' => email_login_open(),
+      'email_login_ends' => email_login_ends(),
+      'skipauth' => Config::$skipauth,
     ]));
     return $response;
   }
 
-  public function dashboard(ServerRequestInterface $request, ResponseInterface $response) {
+  public function redirect_home(Request $request, $args = []) {
+    return Response::redirect('/');
+  }
+
+  public function redirect_reports(Request $request, $args = []) {
+    return Response::redirect('/implementation-reports/servers/', 301);
+  }
+
+  public function dashboard(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
     $user = logged_in_user();
@@ -49,33 +64,36 @@ class Controller {
     $endpoints = ORM::for_table('micropub_endpoints')->where('user_id', $user->id)->find_many();
     $clients = ORM::for_table('micropub_clients')->where('user_id', $user->id)->find_many();
 
-    $response->getBody()->write(view('dashboard', [
+    $response = $response->withBody(page('dashboard', [
       'title' => 'Micropub Rocks!',
       'endpoints' => $endpoints,
-      'clients' => $clients
+      'clients' => $clients,
+      'needs_passkey' => !user_has_passkey($user->id),
+      'email_login_ends' => email_login_ends(),
     ]));
     return $response;
   }
 
-  public function new_client(ServerRequestInterface $request, ResponseInterface $response) {
+  public function new_client(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
     $client = ORM::for_table('micropub_clients')
       ->where('user_id', $user->id)
-      ->where('name', $params['name'])
+      ->where('name', (string)($params['name'] ?? ''))
       ->find_one();
     if(!$client) {
       $client = ORM::for_table('micropub_clients')->create();
       $client->user_id = $user->id;
-      $client->name = $params['name'];
+      $client->name = (string)($params['name'] ?? '');
       $client->token = random_string(16);
       $client->created_at = date('Y-m-d H:i:s');
     }
@@ -85,14 +103,15 @@ class Controller {
     return $response->withHeader('Location', '/client/'.$client->token)->withStatus(302);
   }
 
-  public function edit_client(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function edit_client(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
@@ -104,21 +123,22 @@ class Controller {
     if(!$client)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    $response->getBody()->write(view('edit-client', [
+    $response = $response->withBody(page('edit-client', [
       'title' => 'Edit Micropub Client - Micropub Rocks!',
       'client' => $client,
     ]));
     return $response;
   }
 
-  public function save_client(ServerRequestInterface $request, ResponseInterface $response) {
+  public function save_client(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
@@ -130,18 +150,19 @@ class Controller {
     if(!$client)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    $client->name = $params['name'];
-    $client->profile_url = $params['profile_url'];
+    $client->name = $params['name'] ?? $client->name;
+    $client->profile_url = $params['profile_url'] ?? $client->profile_url;
     $client->save();
 
     return $response->withHeader('Location', '/client/'.$client->token)->withStatus(302);
   }
 
-  public function create_client_access_token(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function create_client_access_token(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
     $user = logged_in_user();
@@ -160,19 +181,20 @@ class Controller {
     $token->token = random_string(128);
     $token->save();
 
-    return new JsonResponse([
+    return Response::json([
       'token' => $token->token
     ]);
   }
 
-  public function new_endpoint(ServerRequestInterface $request, ResponseInterface $response) {
+  public function new_endpoint(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
@@ -189,31 +211,73 @@ class Controller {
 
       $me = $params['me'];
 
+      // Only public addresses are fetched, so the site can't be pointed at
+      // the private network it runs on
+      $check = (new \p3k\HTTP\Guard(http_allow()))->check($me);
+      if(isset($check['error'])) {
+        return $response->withBody(page('auth-error', [
+          'title' => 'Auth Error - Micropub Rocks!',
+          'error' => 'Invalid URL',
+          'error_description' => 'That URL can\'t be used: ' . $check['error_description'] . '. Your website needs to be reachable on the public internet.',
+        ]));
+      }
+      indieauth_safe_mode();
+
+      // Servers that publish IndieAuth server metadata (rel=indieauth-metadata)
+      // are discovered through it, and the authorization and token endpoints
+      // are read from the metadata. This has to happen first: the library only
+      // consults metadata discovered for this URL, and otherwise falls back to
+      // the older rel=authorization_endpoint and rel=token_endpoint links.
+      $issuer = null;
+      $metadataEndpoint = IndieAuth\Client::discoverMetadataEndpoint($me);
+      if($metadataEndpoint) {
+        $issuer = IndieAuth\Client::discoverIssuer($metadataEndpoint);
+        if($issuer instanceof IndieAuth\ErrorResponse) {
+          [, $error] = $issuer->getArray();
+          return $response->withBody(page('auth-error', [
+            'title' => 'Auth Error - Micropub Rocks!',
+            'error' => 'Invalid IndieAuth Server Metadata',
+            'error_description' => $error['error_description'] . '. The "issuer" in the metadata at ' . $metadataEndpoint . ' must be a URL that the metadata URL begins with.',
+          ]));
+        }
+      }
+
       $authorizationEndpoint = IndieAuth\Client::discoverAuthorizationEndpoint($me);
       $tokenEndpoint = IndieAuth\Client::discoverTokenEndpoint($me);
       $micropubEndpoint = IndieAuth\Client::discoverMicropubEndpoint($me);
 
       if($tokenEndpoint && $micropubEndpoint && $authorizationEndpoint) {
-        // Generate a "state" parameter for the request
+        // Generate a "state" parameter and a PKCE code verifier for the request
         $state = IndieAuth\Client::generateStateParameter();
+        $codeVerifier = IndieAuth\Client::generatePKCECodeVerifier();
         $_SESSION['auth'] = [
           'state' => $state,
+          'code_verifier' => $codeVerifier,
+          'issuer' => $issuer,
           'me' => $me,
           'token_endpoint' => $tokenEndpoint,
           'micropub_endpoint' => $micropubEndpoint
         ];
 
-        $scope = 'create update delete undelete';
-        $authorizationURL = IndieAuth\Client::buildAuthorizationURL($authorizationEndpoint, $me, self::_redirectURI(), Config::$base, $state, $scope);
+        $authorizationURL = IndieAuth\Client::buildAuthorizationURL($authorizationEndpoint, [
+          'me' => $me,
+          'redirect_uri' => self::_redirectURI(),
+          'client_id' => Config::$base,
+          'state' => $state,
+          'scope' => 'create update delete undelete',
+          'code_verifier' => $codeVerifier,
+        ]);
       } else {
         $authorizationURL = false;
       }
 
-      $response->getBody()->write(view('auth-start', [
+      $response = $response->withBody(page('auth-start', [
         'title' => 'Begin Micropub Authorization',
         'tokenEndpoint' => $tokenEndpoint,
         'authorizationEndpoint' => $authorizationEndpoint,
         'micropubEndpoint' => $micropubEndpoint,
+        'metadataEndpoint' => $metadataEndpoint,
+        'issuer' => $issuer,
         'me' => $me,
         'meParts' => $url,
         'authorizationURL' => $authorizationURL
@@ -221,7 +285,7 @@ class Controller {
       return $response;
 
     } else {
-      if(!$params['micropub_endpoint'] || !$params['access_token']) {
+      if(empty($params['micropub_endpoint']) || empty($params['access_token'])) {
         return $response->withHeader('Location', '/dashboard')->withStatus(302);
       }
 
@@ -244,18 +308,19 @@ class Controller {
     }
   }
 
-  public function endpoint_callback(ServerRequestInterface $request, ResponseInterface $response) {
+  public function endpoint_callback(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
     $user = logged_in_user();
 
-    $params = $request->getQueryParams();
+    $params = $request->query;
 
     if(!array_key_exists('state', $params)) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Missing State',
         'error_description' => 'The authorization server did not include the "state" parameter. Ensure that the authorization server passes the state parameter back in the redirect.',
@@ -264,7 +329,7 @@ class Controller {
     }
 
     if(!isset($_SESSION['auth']['state']) || $_SESSION['auth']['state'] != $params['state']) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Invalid State',
         'error_description' => 'The "state" parameter provided in the redirect did not match the one that this server created when it started the flow.',
@@ -272,33 +337,47 @@ class Controller {
       return $response;
     }
 
+    // When the server advertised an issuer in its metadata, the redirect must
+    // include a matching "iss" parameter (RFC 9207), so a response from a
+    // different authorization server can't be mixed in.
+    if(!empty($_SESSION['auth']['issuer'])) {
+      $issuerError = IndieAuth\Client::validateIssuerMatch($params, $_SESSION['auth']['issuer']);
+      if($issuerError) {
+        [, $error] = $issuerError->getArray();
+        return $response->withBody(page('auth-error', [
+          'title' => 'Auth Error - Micropub Rocks!',
+          'error' => $error['error'] == 'missing_iss' ? 'Missing Issuer' : 'Invalid Issuer',
+          'error_description' => $error['error_description'] . '. The authorization server\'s metadata lists its issuer as ' . $_SESSION['auth']['issuer'] . ', so the redirect must include an "iss" parameter with that value.',
+        ]));
+      }
+    }
+
+    if(!isset($params['code'])) {
+      return $response->withBody(page('auth-error', [
+        'title' => 'Auth Error - Micropub Rocks!',
+        'error' => 'Missing Code',
+        'error_description' => 'The authorization server did not include the "code" parameter in the redirect.',
+      ]));
+    }
+
     $tokenEndpoint = $_SESSION['auth']['token_endpoint'];
     $micropubEndpoint = $_SESSION['auth']['micropub_endpoint'];
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $tokenEndpoint);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($ch, CURLOPT_POST, TRUE);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
-      'grant_type' => 'authorization_code',
-      'me' => $_SESSION['auth']['me'],
+    indieauth_safe_mode();
+    $token = IndieAuth\Client::exchangeAuthorizationCode($tokenEndpoint, [
       'code' => $params['code'],
       'redirect_uri' => self::_redirectURI(),
-      'client_id' => Config::$base
-    )));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-      'Accept: application/json, application/x-www-form-urlencoded;q=0.8'
+      'client_id' => Config::$base,
+      'code_verifier' => $_SESSION['auth']['code_verifier'] ?? null,
     ]);
-    $tokenResponse = curl_exec($ch);
-
-    $data = @json_decode($tokenResponse, true);
-    if(!$data) {
-      $data = [];
-      parse_str($tokenResponse, $data);
-    }
+    $tokenResponse = (string)$token['raw_response'];
+    // When no request was made (e.g. a refused private address) show why
+    if($tokenResponse === '' && !empty($token['response_details']['error']))
+      $tokenResponse = $token['response_details']['error'] . ': ' . ($token['response_details']['error_description'] ?? '');
+    $data = $token['response'];
 
     if(!$data) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Error Requesting Access Token',
         'error_description' => 'The token endpoint sent back an invalid response.',
@@ -308,7 +387,7 @@ class Controller {
     }
 
     if(!isset($data['access_token'])) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Error Requesting Access Token',
         'error_description' => 'The token endpoint response did not include an access token. Below is the response the endpoint returned. Ensure the endpoint returns a property called "access_token".',
@@ -318,7 +397,7 @@ class Controller {
     }
 
     if(!isset($data['me'])) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Error Requesting Access Token',
         'error_description' => 'The token endpoint response did not include the user that authenticated. Below is the response the endpoint returned. Ensure the endpoint returns a property called "me".',
@@ -328,7 +407,7 @@ class Controller {
     }
 
     if(parse_url($data['me'], PHP_URL_HOST) != parse_url($_SESSION['auth']['me'], PHP_URL_HOST)) {
-      $response->getBody()->write(view('auth-error', [
+      $response = $response->withBody(page('auth-error', [
         'title' => 'Auth Error - Micropub Rocks!',
         'error' => 'Error Authenticating',
         'error_description' => 'The token endpoint returned a URL for a user on a different domain. Ensure the domain of the "me" URL returned from the token endpoint matches the domain of the URL you use to sign in.',
@@ -362,14 +441,15 @@ class Controller {
     return $response->withHeader('Location', '/server-tests?endpoint='.$endpoint->id)->withStatus(302);
   }
 
-  public function edit_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function edit_endpoint(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
@@ -381,21 +461,22 @@ class Controller {
     if(!$endpoint)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    $response->getBody()->write(view('edit-endpoint', [
+    $response = $response->withBody(page('edit-endpoint', [
       'title' => 'Edit Micropub Endpoint - Micropub Rocks!',
       'endpoint' => $endpoint,
     ]));
     return $response;
   }
 
-  public function save_endpoint(ServerRequestInterface $request, ResponseInterface $response) {
+  public function save_endpoint(Request $request, $args = []) {
+    $response = Response::make();
     session_setup();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     $user = logged_in_user();
 
@@ -407,8 +488,8 @@ class Controller {
     if(!$endpoint)
       return $response->withHeader('Location', '/dashboard')->withStatus(302);
 
-    $endpoint->micropub_endpoint = $params['micropub_endpoint'];
-    $endpoint->access_token = $params['access_token'];
+    $endpoint->micropub_endpoint = $params['micropub_endpoint'] ?? $endpoint->micropub_endpoint;
+    $endpoint->access_token = $params['access_token'] ?? $endpoint->access_token;
     $endpoint->save();
 
     return $response->withHeader('Location', '/server-tests?endpoint='.$endpoint->id)->withStatus(302);
