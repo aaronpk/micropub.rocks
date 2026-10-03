@@ -30,14 +30,29 @@ class Auth {
       return $response;
     }
 
-    $user = ORM::for_table('users')->where('email', $params['email'])->find_one();
+    // New sign-ups by email are closed while login moves to passkeys. Bots
+    // were entering other people's addresses here, so only accounts that
+    // have signed in before get a link. Everyone sees the same page either
+    // way, so this doesn't reveal which addresses have accounts.
+    $user = ORM::for_table('users')
+      ->where('email', $params['email'])
+      ->where_not_null('last_login')
+      ->find_one();
 
-    if(!$user) {
+    // The development login can still sign in as any address
+    if(!$user && Config::$skipauth) {
       $user = ORM::for_table('users')->create();
       $user->email = $params['email'];
     }
 
-    $user->auth_code = $code = random_string(64);
+    if(!$user) {
+      $response->getBody()->write(view('auth-email', [
+        'title' => 'Sign In - Micropub Rocks!',
+      ]));
+      return $response;
+    }
+
+    $user->auth_code = $code = bin2hex(random_bytes(32));
     $user->auth_code_exp = date('Y-m-d H:i:s', time()+60*30);
     $user->save();
 
@@ -89,6 +104,8 @@ class Auth {
     $user->save();
 
     session_setup(true);
+    // A new session id on login, so one planted before signing in is useless afterwards
+    session_regenerate_id(true);
     $_SESSION['user_id'] = $user->id;
     $_SESSION['email'] = $user->email;
     $_SESSION['login'] = 'success';

@@ -44,7 +44,7 @@
       <input type="hidden" name="galaxy" id="galaxy" value="41">
     </form>
 
-    <p>You will receive an email with a link to sign in.</p>
+    <p>Sign in with the email address you've used here before, and you'll receive an email with a link to sign in. New sign-ups are paused while we move to passkey login.</p>
 
     <div class="small">
       <b>Why email sign-in?</b> Many of the tests here require different levels of authorization against your Micropub endpoint. Rather than complicating the test flow with authenticating against this site as well, authenticating with your email address simplifies the way we are able to handle the various tests against your Micropub endpoint.
