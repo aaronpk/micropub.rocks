@@ -1,7 +1,7 @@
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will check if your endpoint supports the "source" query to retrieve the original content in a post. This test starts by creating a post at your endpoint, then when you click "Continue", it will query your endpoint to ask for the source content.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>

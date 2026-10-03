@@ -22,7 +22,7 @@ class Redis {
     $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':raw';
     $raw = redis()->get($redis_key);
     $redis_key = Config::$base . ':' . $client . ':' . $num . ':' . $key . ':properties';
-    $properties = json_decode(redis()->get($redis_key), true);
+    $properties = json_decode((string)redis()->get($redis_key), true);
     return [$html, $raw, $properties];
   }
 

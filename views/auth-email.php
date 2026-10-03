@@ -1,7 +1,3 @@
-<?php $this->layout('layout', [
-                      'title' => $title,
-                    ]); ?>
-
 <div class="single-column">
   <div id="header-graphic"><img src="/assets/micropub-rocks.png"></div>
 

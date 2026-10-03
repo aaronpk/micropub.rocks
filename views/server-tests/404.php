@@ -1,9 +1,5 @@
 <?php 
-$this->layout('layout', [
-                'title' => $test->name,
-              ]);
-
-$this->insert('partials/update-test-basic', [
+echo $view->partial('partials/update-test-basic', [
   'test' => $test,
   'endpoint' => $endpoint,
   'description' => 'This test will create a post with two categories, then attempt to delete the category property completely.',

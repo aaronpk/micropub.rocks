@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This is a basic test of posting a photo to the Micropub endpoint.</p>
     <p>Clicking "Run" will make a multipart request to your endpoint containing two photos. In this case, the name of the photo parts will be <code>photo[]</code>.</p>

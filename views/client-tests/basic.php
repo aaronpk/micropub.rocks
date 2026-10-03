@@ -1,14 +1,9 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                      'client' => $client,
-                      'test' => $test
-                    ]); ?>
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
     <?php if(!$post_html): ?>
-      <?= $test->description ?>
+      <?= $test_description ?>
     <?php endif ?>
   </section>
 

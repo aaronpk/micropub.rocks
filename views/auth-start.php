@@ -1,17 +1,23 @@
-<?php $this->layout('layout', [
-                      'title' => $title,
-                    ]); ?>
-
 <div class="single-column">
   <div id="header-graphic"><img src="/assets/micropub-rocks.png"></div>
 
-  <? if($authorizationURL): ?>
+  <?php if($authorizationURL): ?>
     <div class="ui success message">
       <div class="header">Ready!</div>
       <p>Clicking the button below will take you to <strong>your</strong> authorization server which is where you will allow this app to be able to post to your site.</p>
       <a href="<?= $authorizationURL ?>" class="ui blue button">Authorize</a>
     </div>
-  <? endif; ?>
+  <?php endif; ?>
+
+  <section class="content">
+    <h3>IndieAuth Server Metadata</h3>
+
+    <?php if($metadataEndpoint): ?>
+      <div class="ui success message">Found your server metadata: <code><?= $metadataEndpoint ?></code>, with issuer <code><?= $issuer ?></code>. The authorization and token endpoints below come from the metadata.</div>
+    <?php else: ?>
+      <div class="ui message">No <code>rel="indieauth-metadata"</code> link was found, so the authorization and token endpoints were discovered from the older <code>rel="authorization_endpoint"</code> and <code>rel="token_endpoint"</code> links.</div>
+    <?php endif; ?>
+  </section>
 
   <section class="content">
     <h3>Authorization Endpoint</h3>

@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test ensures your endpoint rejects requests from access tokens that are not allowed to create posts. You will first need to create an access token that should not be allowed to create posts, but is otherwise a valid access token for a user who would otherwise be allowed to post. This is testing your endpoint's ability to issue limited-scope access tokens to untrusted applications.</p>
   </section>

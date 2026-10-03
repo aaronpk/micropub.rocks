@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will send the access token in the HTTP Authorization header, and the POST body, which is not valid according to <a href="https://tools.ietf.org/html/rfc6750#section-3.1">RFC6750</a>.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>

@@ -1,7 +1,7 @@
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will discover your Media Endpoint, and then upload an image to it, and check that the response from the Media Endpoint is correct.</p>
     <p>Clicking "Run" will make the following request to your Micropub endpoint to discover the Media Endpoint.</p>

@@ -1,7 +1,7 @@
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p><?= htmlspecialchars($description) ?></p>
     <p>Clicking "Run" will first create a post, and after you've confirmed it's been created, you can click "Continue" to delete the post.</p>

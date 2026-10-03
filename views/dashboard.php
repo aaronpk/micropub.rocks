@@ -1,32 +1,35 @@
-<?php $this->layout('layout', [
-                      'title' => $title,
-                    ]); ?>
-
 <div class="single-column">
 
-  <? if(flash('login')): ?>
+  <?php if(flash('login')): ?>
     <div class="ui success message">
       <div class="header">Welcome!</div>
-      <p>You are logged in as <?= $_SESSION['email'] ?>!</p>
+      <p>You are logged in as <?= e($_SESSION['email']) ?>!</p>
     </div>
-  <? endif ?>
+  <?php endif ?>
 
-  <? if(count($endpoints)): ?>
+  <?php if($needs_passkey): ?>
+    <div class="ui warning message">
+      <div class="header">Set up a passkey before <?= date('F j, Y', $email_login_ends) ?></div>
+      <p>Email sign-in will stop working on <?= date('F j, Y', $email_login_ends) ?>. <a href="/account/passkey">Set up a passkey</a> to keep access to your account and test results.</p>
+    </div>
+  <?php endif ?>
+
+  <?php if(count($endpoints)): ?>
     <section class="content">
       <h3>Your Micropub Endpoints</h3>
 
       <p>Select one of your Micropub endpoints to begin the tests</p>
 
       <table class="ui table">
-        <? foreach($endpoints as $endpoint): ?>
+        <?php foreach($endpoints as $endpoint): ?>
         <tr>
           <td><a href="/server-tests?endpoint=<?= $endpoint->id ?>"><?= $endpoint->me ?: $endpoint->micropub_endpoint ?></a></td>
         </tr>
-        <? endforeach ?>
+        <?php endforeach ?>
       </table>
       <a href="" id="add-new-server-btn" class="small">Add New Endpoint</a>
     </section>
-  <? endif ?>
+  <?php endif ?>
 
   <section class="content <?= count($endpoints) ? 'hidden' : '' ?>" id="add-new-endpoint">
     <h3>Add New Endpoint</h3>
@@ -56,22 +59,22 @@
     </div>
   </section>
 
-  <? if(count($clients)): ?>
+  <?php if(count($clients)): ?>
     <section class="content">
       <h3>Your Micropub Clients</h3>
 
       <p>Select one of your Micropub clients to begin the tests</p>
 
       <table class="ui table">
-        <? foreach($clients as $client): ?>
+        <?php foreach($clients as $client): ?>
         <tr>
           <td><a href="/client/<?= $client->token ?>"><?= $client->name ?></a></td>
         </tr>
-        <? endforeach ?>
+        <?php endforeach ?>
       </table>
       <a href="" id="add-new-client-btn" class="small">Add New Client</a>
     </section>
-  <? endif ?>
+  <?php endif ?>
 
   <section class="content <?= count($clients) ? 'hidden' : '' ?>" id="add-new-client">
     <h3>Add New Client</h3>

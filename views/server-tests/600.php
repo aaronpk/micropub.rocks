@@ -1,8 +1,4 @@
-<?php 
-$this->layout('layout', [
-                  'title' => $test->name,
-                ]); 
-
+<?php
 $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
   'q' => 'config',
 ]);
@@ -10,7 +6,7 @@ $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will check if your endpoint supports the "config" query. To pass this test, your endpoint must return HTTP 200 and a JSON object in the response. The JSON object can be an empty object if the endpoint has nothing to report, or can include <code>media-endpoint</code> and/or <code>syndicate-to</code> properties.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>

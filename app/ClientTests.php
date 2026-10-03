@@ -1,14 +1,15 @@
 <?php
 namespace App;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\JsonResponse;
+use Rocks\Http\Request;
+use Rocks\Http\Response;
+use Rocks\View\Raw;
 use ORM;
 use GuzzleHttp;
 use GuzzleHttp\Exception\RequestException;
 use Config;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Rocks\Redis;
 
 class ClientTests {
@@ -24,7 +25,7 @@ class ClientTests {
       ->find_one();
 
     if(!is_logged_in()) {
-      return login_required($response);
+      return login_required();
     }
 
     $this->user = logged_in_user();
@@ -35,7 +36,8 @@ class ClientTests {
     return null;
   }
 
-  public function index(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function index(Request $request, $args = []) {
+    $response = Response::make();
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
       if(!$this->client)
         return $response->withStatus(404);
@@ -44,9 +46,14 @@ class ClientTests {
 
       // Don't actually redirect here, instead return a public page about the client, with
       // the rel tags for discovery
-      $response->getBody()->write(view('client-info', [
+      $base = Config::$base.'client/'.e($this->client->token);
+      $response = $response->withBody(page('client-info', [
         'title' => $this->client->name,
         'client' => $this->client,
+        'link_tag' => new Raw(
+          '<link rel="authorization_endpoint" href="'.$base.'/auth">'."\n"
+          .'  <link rel="token_endpoint" href="'.$base.'/token">'."\n"
+          .'  <link rel="micropub" href="'.$base.'/micropub">'),
       ]));
       return $response->withHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/auth>; rel="authorization_endpoint"')
         ->withAddedHeader('Link', '<'.Config::$base.'client/'.$this->client->token.'/token>; rel="token_endpoint"')
@@ -68,7 +75,7 @@ class ClientTests {
       ];
     }
 
-    $response->getBody()->write(view('client-tests', [
+    $response = $response->withBody(page('client-tests', [
       'title' => 'Micropub Rocks!',
       'client' => $this->client,
       'tests' => $tests
@@ -76,7 +83,8 @@ class ClientTests {
     return $response;
   }
 
-  public function auth(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function auth(Request $request, $args = []) {
+    $response = Response::make();
     // Require the user is already logged in. A real OAuth server would probably not do this, but it makes
     // our lives easier for this code.
     // First check that this client exists and belongs to the logged-in user
@@ -88,7 +96,7 @@ class ClientTests {
       return $check;
 
     // Validate the input parameters, providing documentation on any problems
-    $params = $request->getQueryParams();
+    $params = $request->query;
 
     $errors = [];
     $scope = false;
@@ -186,14 +194,14 @@ class ClientTests {
         'state' => $state,
         'created_at' => time(),
         'exp' => time()+300
-      ], Config::$secret);
+      ], jwt_key(), 'HS256');
     } else {
       $jwt = false;
     }
 
-    $response->getBody()->write(view('client-auth', [
+    $response = $response->withBody(page('client-auth', [
       'title' => 'Authorize Application - Micropub Rocks!',
-      'errors' => $errors,
+      'errors' => raw_list($errors),
       'jwt' => $jwt,
       'client_id' => $client_id,
       'token' => $args['token']
@@ -202,7 +210,8 @@ class ClientTests {
   }
 
   // The "ALLOW" button posts here with a JWT containing all the authorized data
-  public function auth_confirm(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function auth_confirm(Request $request, $args = []) {
+    $response = Response::make();
     // Restrict access to the signed-in user that created this app
     $check = $this->_check_permissions($request, $response, $args['token']);
     if(!$this->client)
@@ -211,13 +220,13 @@ class ClientTests {
     if($check)
       return $check;
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     if(!isset($params['authorization']))
       return $response->withStatus(400);
 
     try {
-      $data = JWT::decode($params['authorization'], Config::$secret, ['HS256']);
+      $data = JWT::decode((string)$params['authorization'], new Key(jwt_key(), 'HS256'));
       if($data->type != 'confirm') {
         throw new \Exception();
       }
@@ -230,7 +239,7 @@ class ClientTests {
     $data->created_at = time();
     $data->exp = time()+60;
     $data->nonce = random_string(10);
-    $code = JWT::encode($data, Config::$secret);
+    $code = JWT::encode((array)$data, jwt_key(), 'HS256');
 
     // Build the redirect URI
     $redirect = add_parameters_to_url($data->redirect_uri, [
@@ -241,14 +250,15 @@ class ClientTests {
     return $response->withHeader('Location', $redirect)->withStatus(302);
   }
 
-  public function token(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function token(Request $request, $args = []) {
+    $response = Response::make();
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
       if(!$this->client)
         return $response->withStatus(404);
     }
 
-    $params = $request->getParsedBody();
+    $params = $request->post;
 
     // Require grant_type=authorization_code
 
@@ -268,7 +278,7 @@ class ClientTests {
 
     // First parse the authorization code and check if it's expired
     try {
-      $data = JWT::decode($params['code'], Config::$secret, ['HS256']);
+      $data = JWT::decode((string)($params['code'] ?? ''), new Key(jwt_key(), 'HS256'));
       if($data->type != 'authorization_code') {
         throw new \Exception();
       }
@@ -340,7 +350,8 @@ class ClientTests {
     ])->withStatus(200);
   }
 
-  public function get_test(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function get_test(Request $request, $args = []) {
+    $response = Response::make();
     // First check that this client exists and belongs to the logged-in user
     $check = $this->_check_permissions($request, $response, $args['token']);
     if(!$this->client)
@@ -438,25 +449,27 @@ class ClientTests {
       $key = random_string(8);
 
       if(!$post_html)
-        $post_html = view('client-tests/entry', $post_properties);
+        $post_html = self::render_entry($post_properties);
       Redis::storePostHTML($this->client->token, $args['num'], $key, $post_html, false, $post_properties);
 
       $post_url = Config::$base.'client/'.$this->client->token.'/'.$args['num'].'/'.$key;
       $template = 'update';
     }
 
-    $response->getBody()->write(view('client-tests/'.$template, [
-      'title' => 'Micropub Rocks!',
+    $response = $response->withBody(page('client-tests/'.$template, [
+      'title' => $template == 'not-found' ? 'Not Found' : $test->name,
       'client' => $this->client,
       'test' => $test,
-      'post_html' => $post_html,
+      'test_description' => new Raw((string)$test->description),
+      'post_html' => new Raw((string)$post_html),
       'post_debug' => $post_debug,
       'post_url' => $post_url
     ]));
     return $response;
   }
 
-  public function micropub(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function micropub(Request $request, $args = []) {
+    $response = Response::make();
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
       if(!$this->client)
@@ -468,11 +481,11 @@ class ClientTests {
     $errors = [];
     $status = 400;
 
-    $content_type = $request->getHeaderLine('Content-Type');
+    $content_type = ($request->header('Content-Type') ?? '');
     $access_token = false;
     $access_token_in_post_body = false;
     if(preg_match('/application\/x-www-form-urlencoded/', $content_type)) {
-      $params = $request->getParsedBody();
+      $params = $request->post;
       if(array_key_exists('access_token', $params)) {
         $access_token = $params['access_token'];
         $access_token_in_post_body = true;
@@ -480,7 +493,7 @@ class ClientTests {
     }
 
     // Check the access token
-    $authorization = $request->getHeaderLine('Authorization');
+    $authorization = ($request->header('Authorization') ?? '');
     if(preg_match('/^Bearer (.+)$/', $authorization, $match) || $access_token) {
       $access_token = $access_token_in_post_body ? $access_token : $match[1];
       $check = ORM::for_table('client_access_tokens')
@@ -506,21 +519,19 @@ class ClientTests {
 
     // Include the original info from the request
     // Method
-    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    $request_method = $request->method . " " . $request->url . " HTTP/" . $request->protocol;
     // Headers
     $request_headers = "";
-    foreach($request->getHeaders() as $k=>$vs) {
-      foreach($vs as $v) {
-        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
-      }
+    foreach($request->headers as $k=>$v) {
+      $request_headers .= http_header_case($k) . ': ' . $v . "\n";
     }
     // Body
-    $request_body = (string)$request->getBody();
+    $request_body = $request->body;
     $debug = $request_method . "\n" . $request_headers . "\n" . str_replace('&', "&\n", $request_body);
 
     // Bail out now if there were any authentication errors
     if(count($errors)) {
-      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $html = view('client-tests/errors', ['errors'=>raw_list($errors)]);
       streaming_publish('client-'.$this->client->token, [
         'action' => 'client-result',
         'html' => $html,
@@ -531,12 +542,14 @@ class ClientTests {
 
     if($content_type == 'application/json') {
       $params = @json_decode($request_body, true);
+      if(!is_array($params))
+        $params = [];
       $format = 'json';
     } elseif(preg_match('/^multipart\/form-data; boundary=.+$/', $content_type)) {
-      $params = $request->getParsedBody();
+      $params = $request->post;
       $format = 'multipart';
     } else {
-      $params = $request->getParsedBody();
+      $params = $request->post;
       $format = 'form';
     }
 
@@ -545,6 +558,8 @@ class ClientTests {
 
     $html = false;
     $features = [];
+    // Set by each test that creates or loads a post
+    $properties = false;
 
     switch($num) {
       case 100:
@@ -633,13 +648,13 @@ class ClientTests {
               }
 
               if(!isset($params[$prop]))
-                $errors[] = 'The request did not include a "'.$prop.'" parameter.';
+                $errors[] = 'The request did not include a "'.e($prop).'" parameter.';
               elseif(!$params[$prop])
-                $errors[] = 'The "'.$prop.'" parameter was empty';
+                $errors[] = 'The "'.e($prop).'" parameter was empty';
               elseif(!is_string($params[$prop]))
-                $errors[] = 'The "'.$prop.'" parameter provided was not a string. Ensure the client is sending only one URL in the parameter';
+                $errors[] = 'The "'.e($prop).'" parameter provided was not a string. Ensure the client is sending only one URL in the parameter';
               elseif(!is_url($params[$prop]))
-                $errors[] = 'The value of the "'.$prop.'" parameter does not appear to be a URL.';
+                $errors[] = 'The value of the "'.e($prop).'" parameter does not appear to be a URL.';
             }
             $properties = $params;
           }
@@ -656,8 +671,9 @@ class ClientTests {
             elseif(!$params['mp-syndicate-to'])
               $errors[] = 'The "mp-syndicate-to" parameter was empty';
             $properties = $params;
-            if(!is_array($properties['mp-syndicate-to']))
+            if(!is_array($properties['mp-syndicate-to'] ?? []))
               $properties['mp-syndicate-to'] = [$properties['mp-syndicate-to']];
+            $properties['mp-syndicate-to'] = $properties['mp-syndicate-to'] ?? [];
             $passed = false;
             foreach($properties['mp-syndicate-to'] as $syn) {
               if($syn == 'https://news.indieweb.org/en')
@@ -675,7 +691,7 @@ class ClientTests {
         $features = [2, 3];
 
         if($this->_requireFormEncoded($format, $errors)) {
-          if(isset($params['access_token']) && isset($authorization)) {
+          if(isset($params['access_token']) && $authorization !== '') {
             $errors[] = 'The request should not contain an access token in both the Authorzation header and the request body';
           }
         }
@@ -716,9 +732,9 @@ class ClientTests {
                 }
 
                 if(!$properties[$prop])
-                  $errors[] = 'The "'.$prop.'" parameter was empty';
+                  $errors[] = 'The "'.e($prop).'" parameter was empty';
                 elseif(!array_key_exists(0, $properties[$prop]))
-                  $errors[] = 'The value of the "'.$prop.'" parameter must be an array containing the file URL.';
+                  $errors[] = 'The value of the "'.e($prop).'" parameter must be an array containing the file URL.';
                 else {
                   if(is_url($properties[$prop][0])) {
                     // okay
@@ -726,7 +742,7 @@ class ClientTests {
                     if(!array_key_exists('value', $properties['photo'][0]) || !is_url($properties['photo'][0]['value']))
                       $errors[] = 'When the "photo" property is not a plain URL, it must be an object with a "value" key containing the photo URL. See the section on posting images with alt text.';
                   } else
-                    $errors[] = 'The value of the "'.$prop.'" parameter was not a URL or image with alt text.';
+                    $errors[] = 'The value of the "'.e($prop).'" parameter was not a URL or image with alt text.';
                 }
               }
             }
@@ -792,26 +808,22 @@ class ClientTests {
         $features = [10];
         if($this->_requireMultipartEncoded($format, $errors)) {
           if($this->_requireFormHEntry($params, $errors)) {
-            $files = $request->getUploadedFiles();
-
-            if(!isset($files['photo']) && !isset($files['video']) && !isset($files['audio'])) {
+            if(!$request->file('photo') && !$request->file('video') && !$request->file('audio')) {
               $errors[] = 'You must upload a file in a part named "photo", "video" or "audio".';
             } else {
-              if(isset($files['photo'])) {
-                $file = $files['photo'];
+              if($file = $request->file('photo')) {
                 $param = 'photo';
                 $name = 'photo.jpg';
-              } elseif(isset($files['video'])) {
-                $file = $files['video'];
+              } elseif($file = $request->file('video')) {
                 $param = 'video';
                 $name = 'video.mp4';
-              } elseif(isset($files['audio'])) {
-                $file = $files['audio'];
+              } else {
+                $file = $request->file('audio');
                 $param = 'audio';
                 $name = 'audio.mp3';
               }
 
-              $file_data = $file->getStream()->__toString();
+              $file_data = file_get_contents($file['tmp_name']);
 
               $key = random_string(8);
               Redis::storePostImage($this->client->token, $num, $key, $file_data);
@@ -829,7 +841,7 @@ class ClientTests {
         $features = [34, 35];
 
         if($this->_requireMultipartEncoded($format, $errors)) {
-          if(isset($params['access_token']) && isset($authorization)) {
+          if(isset($params['access_token']) && $authorization !== '') {
             $errors[] = 'The request should not contain an access token in both the Authorzation header and the request body';
           }
         }
@@ -1056,11 +1068,11 @@ class ClientTests {
 
 
     if(count($errors)) {
-      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $html = view('client-tests/errors', ['errors'=>raw_list($errors)]);
       $status = 400;
     } else {
       if($properties)
-        $html = view('client-tests/entry', $properties);
+        $html = self::render_entry($properties);
       else
         $html = '';
       $html = view('client-tests/success', ['num'=>$num]).$html;
@@ -1087,7 +1099,8 @@ class ClientTests {
     return $response->withStatus($status);
   }
 
-  public function media_endpoint(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function media_endpoint(Request $request, $args = []) {
+    $response = Response::make();
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
       if(!$this->client)
@@ -1104,25 +1117,23 @@ class ClientTests {
 
     // Check what test was last viewed
     $num = $this->client->last_viewed_test;
+    $features = [];
 
-
-    $content_type = $request->getHeaderLine('Content-Type');
+    $content_type = ($request->header('Content-Type') ?? '');
     if(preg_match('/^multipart\/form-data; boundary=.+$/', $content_type))
       $format = 'multipart';
     else
       $format = false;
 
 
-    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    $request_method = $request->method . " " . $request->url . " HTTP/" . $request->protocol;
     // Headers
     $request_headers = "";
-    foreach($request->getHeaders() as $k=>$vs) {
-      foreach($vs as $v) {
-        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
-      }
+    foreach($request->headers as $k=>$v) {
+      $request_headers .= http_header_case($k) . ': ' . $v . "\n";
     }
     // Body
-    $request_body = (string)$request->getBody();
+    $request_body = $request->body;
     $request_body = str_replace('&', "&\n", $request_body);
     $debug = $request_method . "\n" . $request_headers . "\n" . $request_body;
 
@@ -1133,13 +1144,10 @@ class ClientTests {
     $status = 400;
 
     if($this->_requireMultipartEncoded($format, $errors)) {
-      $files = $request->getUploadedFiles();
-
-      if(!isset($files['file'])) {
+      if(!$file = $request->file('file')) {
         $errors[] = 'You must upload a file in a part named "file".';
       } else {
-        $file = $files['file'];
-        $img = $file->getStream()->__toString();
+        $img = file_get_contents($file['tmp_name']);
 
         $key = random_string(8);
         Redis::storePostImage($this->client->token, $num, $key, $img);
@@ -1199,42 +1207,45 @@ class ClientTests {
       return $response->withStatus($status);
   }
 
-  public function get_image(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function get_image(Request $request, $args = []) {
+    $response = Response::make();
     // First check that this client exists and belongs to the logged-in user
     $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
 
     $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
     if($img) {
       $response = $response->withHeader('Content-Type', 'image/jpeg');
-      $response->getBody()->write($img);
+      $response = $response->withBody($img);
       return $response;
     } else {
       return $response->withStatus(404);
     }
   }
 
-  public function get_audio(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function get_audio(Request $request, $args = []) {
+    $response = Response::make();
     // First check that this client exists and belongs to the logged-in user
     $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
 
     $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
     if($img) {
       $response = $response->withHeader('Content-Type', 'audio/mpeg');
-      $response->getBody()->write($img);
+      $response = $response->withBody($img);
       return $response;
     } else {
       return $response->withStatus(404);
     }
   }
 
-  public function get_video(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function get_video(Request $request, $args = []) {
+    $response = Response::make();
     // First check that this client exists and belongs to the logged-in user
     $test = ORM::for_table('tests')->where('group','client')->where('number',$args['num'])->find_one();
 
     $img = Redis::getPostImage($args['token'], $args['num'], $args['key']);
     if($img) {
       $response = $response->withHeader('Content-Type', 'video/mp4');
-      $response->getBody()->write($img);
+      $response = $response->withBody($img);
       return $response;
     } else {
       return $response->withStatus(404);
@@ -1297,7 +1308,7 @@ class ClientTests {
     $has_error = false;
     foreach($properties as $k=>$v) {
       if(!is_array($v) || (count($v) > 0 && !array_key_exists(0, $v))) {
-        $errors[] = 'The "'.$k.'" parameter was not provided as an array. In JSON format, all values are arrays, even if there is only one value.';
+        $errors[] = 'The "'.e($k).'" parameter was not provided as an array. In JSON format, all values are arrays, even if there is only one value.';
         $has_error = true;
       }
     }
@@ -1379,7 +1390,7 @@ class ClientTests {
     $errors = [];
     $status = 400;
 
-    $authorization = $request->getHeaderLine('Authorization');
+    $authorization = ($request->header('Authorization') ?? '');
     if(preg_match('/^Bearer (.+)$/', $authorization, $match)) {
       $access_token = $match[1];
       $check = ORM::for_table('client_access_tokens')
@@ -1400,7 +1411,8 @@ class ClientTests {
     return [$errors, $status];
   }
 
-  public function micropub_get(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function micropub_get(Request $request, $args = []) {
+    $response = Response::make();
     // Allow un-cookied requests, but do check if this token endpoint exists
     if($check = $this->_check_permissions($request, $response, $args['token'])) {
       if(!$this->client)
@@ -1409,25 +1421,23 @@ class ClientTests {
 
     $response = $this->_add_cors_headers($response);
 
-    $params = $request->getQueryParams();
+    $params = $request->query;
 
     list($errors, $status) = $this->_check_access_token_header($request);
 
     // Include the original info from the request
     // Method
-    $request_method = $request->getMethod() . " " . $request->getUri() . " HTTP/" . $request->getProtocolVersion();
+    $request_method = $request->method . " " . $request->url . " HTTP/" . $request->protocol;
     // Headers
     $request_headers = "";
-    foreach($request->getHeaders() as $k=>$vs) {
-      foreach($vs as $v) {
-        $request_headers .= http_header_case($k) . ': ' . $v . "\n";
-      }
+    foreach($request->headers as $k=>$v) {
+      $request_headers .= http_header_case($k) . ': ' . $v . "\n";
     }
     $debug = $request_method . "\n" . $request_headers;
 
     // Bail out now if there were any authentication errors
     if(count($errors)) {
-      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $html = view('client-tests/errors', ['errors'=>raw_list($errors)]);
       streaming_publish('client-'.$this->client->token, [
         'action' => 'client-result',
         'html' => $html,
@@ -1452,6 +1462,7 @@ class ClientTests {
     $html = '';
 
     $features = [];
+    $post_properties = false;
 
     switch($num) {
       case 602:
@@ -1514,7 +1525,7 @@ class ClientTests {
             $url = $params['url'];
             $post_properties = $this->_getPostProperties($url, $params);
             if($post_properties) {
-              $response = (new JsonResponse([
+              $response = ($response->withJson([
                 'properties' => $post_properties
               ]));
               return $response;
@@ -1591,7 +1602,7 @@ class ClientTests {
           ];
 
     if(count($errors)) {
-      $html = view('client-tests/errors', ['errors'=>$errors]);
+      $html = view('client-tests/errors', ['errors'=>raw_list($errors)]);
       $status = 400;
     } else {
       $status = 200;
@@ -1604,15 +1615,15 @@ class ClientTests {
         if($num != 300)
           $config['media-endpoint'] = Config::$base.'client/'.$this->client->token.'/media';
 
-        $response = (new JsonResponse($config));
+        $response = ($response->withJson($config));
         ImplementationReport::store_client_feature($this->client->id, 27, 1, $num ?: 0);
       } elseif(isset($params['q']) && $params['q'] == 'syndicate-to') {
-        $response = (new JsonResponse([
+        $response = ($response->withJson([
           'syndicate-to' => $syndicate_to
         ]));
         ImplementationReport::store_client_feature($this->client->id, 30, 1, $num ?: 0);
       } elseif(isset($params['q']) && $params['q'] == 'source') {
-        $response = (new JsonResponse([
+        $response = ($response->withJson([
           'type' => ['h-entry'],
           'properties' => $post_properties
         ]));
@@ -1631,9 +1642,21 @@ class ClientTests {
     return $response->withStatus($status);
   }
 
-  public function options(ServerRequestInterface $request, ResponseInterface $response, $args) {
+  public function options(Request $request, $args = []) {
+    $response = Response::make();
     $response = $this->_add_cors_headers($response);
     return $response->withStatus(200);
+  }
+
+  // Renders a post the client created. Everything the client sent is escaped
+  // except an explicit {"html": "..."} content value, which test 202 checks
+  // the client can send and is displayed as HTML on purpose.
+  private static function render_entry($properties) {
+    if(!is_array($properties))
+      $properties = [];
+    if(isset($properties['content'][0]['html']) && is_string($properties['content'][0]['html']))
+      $properties['content'][0]['html'] = new Raw($properties['content'][0]['html']);
+    return view('client-tests/entry', $properties);
   }
 
   private function _add_cors_headers($response) {
@@ -1643,12 +1666,12 @@ class ClientTests {
   }
 
   private function _conneg_response($request, $response, $params) {
-    $accept = $request->getHeaderLine('Accept');
+    $accept = ($request->header('Accept') ?? '');
     if(preg_match('/json/', $accept)) {
-      $response = new JsonResponse($params);
+      $response = $response->withJson($params);
     } else {
       $response = $response->withHeader('Content-Type', 'application/x-www-form-urlencoded');
-      $response->getBody()->write(http_build_query($params));
+      $response = $response->withBody(http_build_query($params));
     }
     return $response;
   }

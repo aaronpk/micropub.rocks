@@ -1,8 +1,4 @@
-<?php 
-$this->layout('layout', [
-                  'title' => $test->name,
-                ]); 
-
+<?php
 $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
   'q' => 'syndicate-to',
 ]);
@@ -10,7 +6,7 @@ $query_url = build_micropub_query_url($endpoint->micropub_endpoint, [
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This test will check if your endpoint supports the "syndicate-to" query. To pass this test, your endpoint must return HTTP 200 and a JSON object in the response, with a <code>syndicate-to</code> property. If no syndication targets are specified, the value should be an empty array.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>

@@ -1,11 +1,7 @@
-<?php $this->layout('layout', [
-                      'title' => $test->name,
-                    ]); ?>
-
 <div class="single-column">
 
   <section class="content">
-    <h2><?= e($test->number . ': ' . $test->name) ?></h2>
+    <h2><?= ($test->number . ': ' . $test->name) ?></h2>
 
     <p>This is a test of creating an h-entry post in JSON format including a nested Microformats 2 object. While it is not expected that every endpoint will be able to render the <code>checkin</code> object, it should still store the checkin property and render the rest of the post.</p>
     <p>Clicking "Run" will make the following request to your endpoint.</p>
